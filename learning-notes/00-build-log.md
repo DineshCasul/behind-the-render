@@ -1,5 +1,39 @@
 # Build Log
 
+## Story mode, step F: story bookends on lessons + the map's new heading
+
+**Date:** 2026-09-20
+
+- **Bookends** (`components/story/StoryBookend.tsx`): story steps now link to lessons as `/learn/<id>?story=<step>`. A lesson opened that way shows "Why you are here" at the top (the step's problem, plus a link back) and "Now we have another problem" at the bottom (with the step's next button). Opened any other way, the lesson is exactly as before.
+- **Why `Suspense`:** reading `?story=` needs `useSearchParams`, which in a prebuilt page makes React skip prerendering up to the nearest `<Suspense>`. Wrapping just the two small strips keeps the whole lesson prebuilt (the build still shows the lessons as SSG). The value is untrusted URL input, so it is only used as a key into the story data, never printed (a bogus value renders nothing).
+- **Homepage map heading** ("Or explore every concept", `MapHeading.tsx`) on the phone, the reduced-motion layout, and as an overlay on the desktop scroll scene.
+- **Phone audit** at 390 and 360 wide across all 15 story pages, the lesson bookends and the home page: no horizontal overflow. Fixed the top bookend touching the status pills.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why reading query strings in a statically generated page needs a Suspense boundary, and what it does to prerendering.
+2. Why URL parameters are untrusted input even in a static site.
+3. The difference between a page-level overflow (scrollWidth) and a single element sticking out (clipped or hidden decoration).
+
+## Story mode, step E: more decisions, suggestions, a louder button, a full-screen phone hero
+
+**Date:** 2026-09-19
+
+- **Phone hero fills the screen** (`min-h-svh`, was 78svh, which let the top of the map peek in). `svh` is the *small* viewport height: it doesn't jump when the mobile browser's address bar hides. Verified at 390x844, 360x640 and an 820x1180 tablet: the map starts exactly at the fold.
+- **"Start the story" is now the one filled, glowing button** (`components/ui/StartStoryButton.tsx`, `.cta-story` in globals.css). The pulsing ring is a pseudo-element animated with `transform` and `opacity` only, and is off for reduced motion.
+- **Three more decisions** (the story has 14 steps now): how fresh the seat count must be (browser fetch, per-request server render, short shared cache), where the copies should live (browser, CDN, server) and how to handle the part that is only for one fan (personalization vs shared caches). Each option still has a pitch and a cost, and none is "the answer".
+- **"Try it yourself" suggestions** on 8 steps: small experiments in Firefox DevTools or in this repo (View Source, the Network Timings "Waiting" phase, `npm run build` markers, `curl -I` for Cache-Control, the Performance panel).
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. `100vh` vs `svh`/`dvh`/`lvh` on mobile, and why the small viewport unit is the safe one for "fill the first screen".
+2. Personalization and shared caching pull against each other, because a shared copy must be identical for everyone.
+3. Every cache location trades closeness to the fan against control over what is inside it.
+
 ## Story mode, step D: making the story interactive
 
 **Date:** 2026-09-19

@@ -89,6 +89,28 @@ export function StoryStepView({ step }: { step: StoryStep }) {
         </Link>
       )}
 
+      {step.tryThis && (
+        <section className="mt-10 rounded-lg border border-dashed border-[var(--state-got-it)] p-4" aria-label="Try it yourself">
+          <p className={`${label} text-[var(--state-got-it)]`}>Try it yourself</p>
+          <ul className="mt-2 flex flex-col gap-2">
+            {step.tryThis.map((s) => (
+              <li key={s.text} className="text-sm leading-relaxed text-[var(--color-text-primary)]">
+                <Prose text={s.text} />
+                {s.href && (
+                  <>
+                    {" "}
+                    <a href={s.href} target="_blank" rel="noopener noreferrer" className="text-[var(--state-got-it)] underline underline-offset-4">
+                      Open the guide <span aria-hidden>↗</span>
+                      <span className="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {step.concepts.length > 0 && (
         <section className="mt-14" aria-label="Under the hood">
           <p className={`${label} text-[var(--color-text-muted)]`}>Under the hood: why these came up now</p>
@@ -96,7 +118,7 @@ export function StoryStepView({ step }: { step: StoryStep }) {
             {step.concepts.map((c) => (
               <li key={c.id}>
                 <Link
-                  href={`/learn/${c.id}`}
+                  href={`/learn/${c.id}?story=${step.id}`}
                   className="group block rounded-lg border border-[var(--color-border)] p-3 transition-colors hover:border-[var(--state-got-it)]"
                 >
                   <span className="text-sm font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--state-got-it)]">

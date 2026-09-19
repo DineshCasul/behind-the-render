@@ -53,6 +53,8 @@ export interface StoryStep {
   options?: StoryOption[];
   /** For steps without a decision. */
   next?: { label: string; to: string };
+  /** Small experiments the reader can run themselves, in Firefox or in this repo. */
+  tryThis?: { text: string; href?: string }[];
   /** Concepts the story will need later that aren't lessons yet. Honest placeholders. */
   comingSoon?: { topic: string; why: string }[];
 }
@@ -72,6 +74,7 @@ export const storySteps: StoryStep[] = [
       "Notice that nothing on that list says \"rendering strategy\". You will be choosing one anyway, by accident or on purpose.",
     ],
     problem: "Four requirements that quietly pull in different directions. Where does the HTML for a show page come from?",
+    tryThis: [{"text": "Before you start: open any ticketing or shop site, press Ctrl+U (View Page Source) and search for the event or product name. If it is in the raw HTML, a crawler gets it on the first request. If not, it arrives later, via JavaScript."}],
     concepts: [
       { id: "seo", why: "\"Findable on Google\" is a requirement, so what a crawler receives matters." },
       { id: "web-vitals", why: "\"Instant\" needs a number, or it is just an opinion." },
@@ -113,6 +116,7 @@ export const storySteps: StoryStep[] = [
     ],
     visual: { kind: "phone", strategy: "csr" },
     problem: "The first thing a visitor and a crawler receive is nothing. Can the server send something real?",
+    tryThis: [{"text": "View Page Source (Ctrl+U) on a client-rendered app and compare it with what the Inspector shows. The source is what a crawler fetches first; the Inspector shows the page after JavaScript ran."}],
     concepts: [
       { id: "csr", why: "This is what you just chose." },
       { id: "seo", why: "The empty shell is what a crawler gets first." },
@@ -133,6 +137,7 @@ export const storySteps: StoryStep[] = [
     ],
     visual: { kind: "distance" },
     problem: "Rendering per request is fresh but expensive, and the distance is built in. Do you really need to build this page for every fan?",
+    tryThis: [{"text": "In Firefox DevTools, open the Network tab, reload any page and select the first (document) request. The Timings tab has a \"Waiting\" phase: that is time before the first byte arrived, and distance and server work both live inside it."}],
     concepts: [
       { id: "ssr", why: "This is what you just chose." },
       { id: "seo", why: "The content is in the first response, so a crawler sees it immediately." },
@@ -156,6 +161,7 @@ export const storySteps: StoryStep[] = [
     ],
     visual: { kind: "phone", strategy: "ssg" },
     problem: "Static pages are fast and cheap, but frozen at build time. Tickets sell out in seconds.",
+    tryThis: [{"text": "This site does this: run `npm run build` and look for the ● (SSG) marker next to the /learn and /story routes."}],
     concepts: [
       { id: "ssg", why: "This is what you just chose." },
       { id: "caching", why: "A prebuilt page is a permanently cached render." },
@@ -175,6 +181,7 @@ export const storySteps: StoryStep[] = [
     ],
     visual: { kind: "phone", strategy: "isr" },
     problem: "Different parts of one page need different freshness. And whichever way the HTML arrives, the page still has to *do* something: the seat picker needs JavaScript.",
+    tryThis: [{"text": "Read how the revalidation timing is configured in the Next.js ISR guide.", "href": "https://nextjs.org/docs/app/guides/incremental-static-regeneration"}],
     concepts: [
       { id: "isr", why: "This is what you just chose." },
       { id: "caching", why: "ISR is caching applied to rendered pages." },
@@ -194,6 +201,7 @@ export const storySteps: StoryStep[] = [
     ],
     visual: { kind: "tap" },
     problem: "Hydrating everything makes the browser do a lot of work, much of it for parts of the page that never needed to be interactive.",
+    tryThis: [{"text": "On this site, turn JavaScript off in Firefox (about:config, javascript.enabled set to false) and open a lesson: the text is all there, but the buttons no longer respond. That is exactly this step."}],
     concepts: [
       { id: "hydration", why: "The HTML needs behavior attached before taps do anything." },
       { id: "js-main-thread", why: "Hydration runs on the same thread that handles input." },
@@ -216,9 +224,54 @@ export const storySteps: StoryStep[] = [
       { id: "client-components", why: "The interactive leaves that do need the browser." },
     ],
     options: [
-      { label: "Make the whole page a Client Component", pitch: "Simplest mental model: everything in one place, everything can use state.", cost: "The boundary spreads through imports, so most of the page ships and hydrates whether it needs to or not.", to: "the-slow-part" },
-      { label: "Server by default, client only where needed", pitch: "Only the seat picker and stepper ship as JavaScript. Everything else stays on the server.", cost: "You now decide, per component, which side of the line it lives on, and props crossing it must be serializable.", to: "the-slow-part" },
+      { label: "Make the whole page a Client Component", pitch: "Simplest mental model: everything in one place, everything can use state.", cost: "The boundary spreads through imports, so most of the page ships and hydrates whether it needs to or not.", to: "seat-freshness" },
+      { label: "Server by default, client only where needed", pitch: "Only the seat picker and stepper ship as JavaScript. Everything else stays on the server.", cost: "You now decide, per component, which side of the line it lives on, and props crossing it must be serializable.", to: "seat-freshness" },
     ],
+  },
+  {
+    "id": "seat-freshness",
+    "trail": "Seat count",
+    "title": "Decision 3: how fresh must the seat count be?",
+    "mood": "interesting",
+    "aside": "The most expensive number on the page is a small integer that changes every second.",
+    "scene": [
+      "Everything else on the show page is happy being a bit old. The **seat count** is not. Fans watch it drop, and a stale number means someone clicks, gets excited, and then finds out the seat is gone.",
+      "But \"fresh\" is a spectrum, and every step toward it costs something. You have three honest ways to get that number onto the screen."
+    ],
+    "concepts": [
+      {
+        "id": "csr",
+        "why": "One option fetches the number in the browser after the page loads."
+      },
+      {
+        "id": "ssr",
+        "why": "Another builds it into the HTML on every request."
+      },
+      {
+        "id": "caching",
+        "why": "The third shares one answer between everyone for a few seconds."
+      }
+    ],
+    "options": [
+      {
+        "label": "Fetch it in the browser after the page loads",
+        "pitch": "The page itself can stay a cheap, cacheable file. Only the number is live.",
+        "cost": "It appears late (reserve its space, or the layout jumps when it arrives), and it needs JavaScript to run first.",
+        "to": "the-slow-part"
+      },
+      {
+        "label": "Put it in the HTML on the server, every request",
+        "pitch": "The true number is in the very first response, for browsers, crawlers and no-JavaScript visitors alike.",
+        "cost": "The page can no longer be a plain prebuilt file, and every request costs server work.",
+        "to": "the-slow-part"
+      },
+      {
+        "label": "Cache it for a few seconds and share it",
+        "pitch": "Thousands of fans get the same recent answer, and the database is asked once per window instead of once per fan.",
+        "cost": "The number can be a few seconds old. You have to decide, on purpose, how wrong is acceptable.",
+        "to": "the-slow-part"
+      }
+    ]
   },
   {
     id: "the-slow-part",
@@ -251,6 +304,7 @@ export const storySteps: StoryStep[] = [
     ],
     visual: { kind: "crowd" },
     problem: "You now have a design with several moving parts. How would you know it actually works for real fans?",
+    tryThis: [{"text": "On this site, run `npm run build`, then `npm run start`, then `curl -I localhost:3000/learn/ssr` and read the Cache-Control header. That is a real cache instruction, not a diagram."}],
     concepts: [
       { id: "caching", why: "Do the expensive work once and reuse it, at the layer closest to the fan." },
       { id: "isr", why: "Rebuild popular pages in the background instead of on every request." },
@@ -260,7 +314,99 @@ export const storySteps: StoryStep[] = [
       { topic: "CDN and edge", why: "Serving the cached copy from a location near the fan instead of from Virginia." },
       { topic: "Data fetching and waterfalls", why: "Why a page that fetches things one after another is slower than it needs to be." },
     ],
-    next: { label: "How would you know it worked?", to: "did-it-work" },
+    next: { label: "Decision time: where should the copies live?", to: "where-to-cache" },
+  },
+  {
+    "id": "where-to-cache",
+    "trail": "Where to cache",
+    "title": "Decision 4: where should the copies live?",
+    "mood": "interesting",
+    "aside": "\"Just add a cache\" is a sentence, not a design. The interesting question is: which one?",
+    "scene": [
+      "A cache can live in several places, and a request can be answered by the first one that has a valid copy: **the fan's own browser**, a **CDN** close to the fan, or a cache inside **your server** in front of the database. They are not interchangeable: they differ in how close they are to the fan, and in how much control you have over what is in them.",
+      "The closer to the fan, the faster the answer, and the harder it is to take a bad copy back."
+    ],
+    "concepts": [
+      {
+        "id": "caching",
+        "why": "Every option here is a layer of the same idea."
+      },
+      {
+        "id": "http",
+        "why": "Cache instructions travel as HTTP headers, so the layers speak the protocol you learned first."
+      }
+    ],
+    "options": [
+      {
+        "label": "Let the browser keep it",
+        "pitch": "The fastest possible answer: no network request at all when the copy is still valid.",
+        "cost": "It lives on the fan's device, so you cannot reach in and remove a bad copy. You can only wait for it to expire.",
+        "to": "just-for-you"
+      },
+      {
+        "label": "Put copies at a CDN near the fans",
+        "pitch": "The request only travels to a nearby location, and your Virginia server is not even contacted on a hit.",
+        "cost": "Removing an outdated page has to reach every location, and personal data must never end up in a copy that is shared.",
+        "to": "just-for-you"
+      },
+      {
+        "label": "Cache inside the server",
+        "pitch": "You control it fully, and it spares the database from repeated identical work.",
+        "cost": "Every request still travels all the way to Virginia first, so it fixes load but not distance.",
+        "to": "just-for-you"
+      }
+    ]
+  },
+  {
+    "id": "just-for-you",
+    "trail": "Just for you",
+    "title": "Decision 5: the part that is only for one fan",
+    "mood": "plot-twist",
+    "aside": "Caching's natural enemy has just walked in: \"Welcome back, Yuki. You are number 4,812 in the queue.\"",
+    "scene": [
+      "A shared cache works because everyone gets the **same** answer. But a logged-in fan's name and queue position are different for every visitor. If a personal page ends up in a shared cache, the next fan could be shown someone else's data.",
+      "So the page has two kinds of content: the part everyone shares and the part that is only one person's. How you separate them is one of the most important structural decisions in real applications."
+    ],
+    "concepts": [
+      {
+        "id": "caching",
+        "why": "Shared copies are only safe for content that is the same for everyone."
+      },
+      {
+        "id": "client-components",
+        "why": "Personal bits are often filled in by interactive code in the browser."
+      },
+      {
+        "id": "streaming",
+        "why": "A slow, personal part can arrive after the shared part."
+      }
+    ],
+    "options": [
+      {
+        "label": "Send the shared page, then fill in the personal bits in the browser",
+        "pitch": "The shared page stays cacheable, and the personal part is fetched for that one fan.",
+        "cost": "The personal part appears after load and needs JavaScript and an extra request.",
+        "to": "did-it-work"
+      },
+      {
+        "label": "Render a different page for every fan on the server",
+        "pitch": "Everything is correct from the first byte.",
+        "cost": "Every response is unique, so it cannot be shared from a cache, and the server does work for each fan.",
+        "to": "did-it-work"
+      },
+      {
+        "label": "Split the page: share the common part, fill in the personal part separately",
+        "pitch": "Keeps most of the speed and most of the cache benefit.",
+        "cost": "More moving parts to design, and to debug when something is stale or missing.",
+        "to": "did-it-work"
+      }
+    ],
+    "comingSoon": [
+      {
+        "topic": "Personalization and caching",
+        "why": "A dedicated lesson on how to structure this safely is planned."
+      }
+    ]
   },
   {
     id: "did-it-work",
@@ -272,6 +418,7 @@ export const storySteps: StoryStep[] = [
       "You have made a lot of decisions. The honest way to check them is to measure what real visitors experience, not what your development machine does. That means the three Core Web Vitals (loading, responsiveness, stability), and the difference between **lab data** (a controlled test) and **field data** (real people on real devices).",
       "If the loading number is bad, look at time to first byte and the size of what you send. If responsiveness is bad, look for long tasks and heavy hydration on the main thread. If the layout jumps, look at what arrives late and pushes things around. Each symptom points back to a decision in this story.",
     ],
+    tryThis: [{"text": "In Firefox DevTools, open the Performance panel, record a page load, and look for long tasks on the main thread. That is a lab measurement you can take right now."}],
     concepts: [
       { id: "web-vitals", why: "The numbers that tell you whether the decisions worked, and for whom." },
       { id: "js-main-thread", why: "The place to look when responsiveness is the problem." },

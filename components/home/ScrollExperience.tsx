@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import { Hero } from "@/components/ui/Hero";
 import { HeroPhone } from "@/components/ui/HeroPhone";
+import { MapHeading } from "@/components/home/MapHeading";
 import { LearningMap } from "@/components/learning-map/LearningMap";
 
 // How much scroll distance the whole scene takes to play out, in viewport
@@ -129,6 +130,7 @@ export function ScrollExperience() {
   const phoneLayout = (
     <div className="lg:hidden">
       <HeroPhone />
+      <MapHeading className="px-6 pb-3 pt-10 text-center" />
       <LearningMap layout="tall" />
     </div>
   );
@@ -141,6 +143,7 @@ export function ScrollExperience() {
       <>
         <div className="hidden lg:block">
           <Hero />
+          <MapHeading className="px-8 pb-3 pt-10 text-center" />
           <LearningMap expanded={false} />
         </div>
         {phoneLayout}
@@ -178,6 +181,7 @@ export function ScrollExperience() {
               transition, which read as jitter.
             */}
             <LearningMap expanded />
+            <MapHeading className="pointer-events-none absolute left-6 top-6 z-10" />
           </motion.div>
         </div>
       </div>

@@ -153,3 +153,35 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .reveal-letter, .reveal-fade, .scan-once, .cue-bob { animation: none; }
 }
+
+/* "Start the story": the one filled, glowing button on the home page. The
+   pulsing ring is a pseudo-element animated with transform and opacity only,
+   so it never triggers layout. */
+.cta-story {
+  position: relative;
+  background: var(--state-learning);
+  color: #04141b;
+  box-shadow: 0 0 28px -4px color-mix(in srgb, var(--state-learning) 70%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.cta-story:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px -2px color-mix(in srgb, var(--state-learning) 90%, transparent);
+}
+.cta-story::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--state-learning);
+  pointer-events: none;
+  animation: cta-ring 2.4s ease-out infinite;
+}
+@keyframes cta-ring {
+  from { opacity: 0.7; transform: scale(1); }
+  to   { opacity: 0;   transform: scale(1.22, 1.5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-story::after { animation: none; opacity: 0; }
+  .cta-story:hover { transform: none; }
+}

@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { AmbientParticles } from "@/components/ui/AmbientParticles";
 import { HudCorners } from "@/components/ui/HudCorners";
+import { StartStoryButton } from "@/components/ui/StartStoryButton";
 import { TerminalLine } from "@/components/ui/TerminalLine";
 
 const TITLE = "Behind the Render";
@@ -36,7 +36,7 @@ export function HeroPhone() {
   return (
     <section
       ref={ref}
-      className="relative mx-2 flex min-h-[78svh] flex-col items-center justify-center overflow-hidden rounded-2xl border border-[var(--color-border)] px-6 text-center"
+      className="relative mx-2 flex min-h-svh flex-col items-center justify-center overflow-hidden rounded-2xl border border-[var(--color-border)] px-6 text-center"
     >
       <AmbientParticles />
       <HudCorners />
@@ -76,12 +76,7 @@ export function HeroPhone() {
           <TerminalLine>tracing request → paint, one concept at a time_</TerminalLine>
         </div>
         <div className="reveal-fade relative mt-7" style={{ "--delay": "1.8s" } as React.CSSProperties}>
-          <Link
-            href="/story/the-drop"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--state-learning)] px-6 py-3 font-mono text-xs uppercase tracking-widest text-[var(--state-learning)] transition-colors hover:bg-[var(--state-learning)] hover:text-black"
-        >
-            Start the story <span aria-hidden>→</span>
-        </Link>
+          <StartStoryButton />
         </div>
       </motion.div>
 

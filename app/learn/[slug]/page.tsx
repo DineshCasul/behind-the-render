@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LessonHeader } from "@/components/lesson/LessonHeader";
 import { LessonSection } from "@/components/lesson/LessonSection";
@@ -20,6 +21,7 @@ import { getQuestions } from "@/data/questions";
 import { siteUsage } from "@/data/site-usage";
 import { references } from "@/data/references";
 import { nextUp } from "@/data/next-up";
+import { StoryBookendBottom, StoryBookendTop } from "@/components/story/StoryBookend";
 import { NextUpList } from "@/components/lesson/NextUpList";
 import { examples as allExamples } from "@/data/examples";
 import { ExampleBox } from "@/components/lesson/ExampleBox";
@@ -92,6 +94,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <LessonNav title={concept.title} sections={navSections} />
       <main className="mx-auto w-full max-w-3xl px-6 pb-24 pt-12 sm:px-8">
         <LessonHeader concept={concept} />
+
+        <Suspense fallback={null}>
+          <StoryBookendTop />
+        </Suspense>
 
         <LessonSection id="what-is-this" heading="1. What is this?">
           <p>
@@ -176,6 +182,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
         <LessonSection id="related" heading="Related concepts">
           <RelatedConcepts currentId={concept.id} ids={relatedIds} />
         </LessonSection>
+
+        <Suspense fallback={null}>
+          <StoryBookendBottom />
+        </Suspense>
       </main>
     </div>
   );
