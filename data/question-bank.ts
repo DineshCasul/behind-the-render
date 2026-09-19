@@ -30,10 +30,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What does a browser send and receive when you open a web page?",
     "answer": "It sends an HTTP request (a method such as GET, a path and headers) and receives a response (a status code, headers and usually a body). For a normal page, the body of that response is the HTML.",
     "related": [
-      "HTTP methods",
+      "HTTP methods (GET vs POST, idempotency)",
       "Status codes",
-      "Headers",
-      "Request/response cycle"
+      "HTTP/1.1 vs HTTP/2 vs HTTP/3",
+      "CORS"
     ],
     "learnMore": [
       {
@@ -53,10 +53,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What are the DOM and the CSSOM?",
     "answer": "The DOM is the browser's tree of elements, built from the HTML. The CSSOM is the equivalent tree built from the CSS rules. The browser combines them into a render tree of what will actually be drawn.",
     "related": [
-      "Render tree",
-      "HTML parsing",
-      "CSS cascade",
-      "Critical rendering path"
+      "Critical rendering path",
+      "Reflow vs repaint",
+      "CSS specificity and the cascade",
+      "Render-blocking CSS"
     ],
     "learnMore": [
       {
@@ -72,10 +72,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Roughly what steps happen between receiving HTML and seeing pixels?",
     "answer": "The browser parses the HTML and CSS, works out styles, calculates the layout (size and position of everything), paints the pixels and finally composites the painted layers into the picture on screen.",
     "related": [
-      "Layout (reflow)",
-      "Paint",
-      "Compositing",
-      "Critical rendering path"
+      "Reflow vs repaint",
+      "Compositing and GPU layers",
+      "requestAnimationFrame",
+      "Layout thrashing"
     ],
     "learnMore": [
       {
@@ -95,10 +95,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is client-side rendering, and what does the first HTML response look like?",
     "answer": "In CSR the browser builds the page by running JavaScript. The first HTML response is usually a nearly empty shell (a container element and script tags), and the content only appears after the JavaScript has downloaded and run.",
     "related": [
-      "App shell",
-      "JavaScript bundle",
-      "First contentful paint",
-      "SEO"
+      "Single-page apps and client-side routing",
+      "Code splitting and lazy loading",
+      "Bundle size optimization",
+      "SEO for SPAs"
     ],
     "learnMore": [
       {
@@ -114,10 +114,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is server-side rendering?",
     "answer": "The server runs the code that builds the UI for each request and sends back finished HTML, so the browser can show content before any JavaScript arrives.",
     "related": [
-      "Time to first byte",
+      "CSR vs SSR vs SSG trade-offs",
       "Hydration",
-      "Server load",
-      "Streaming"
+      "Streaming SSR",
+      "Time to first byte (TTFB)"
     ],
     "learnMore": [
       {
@@ -133,10 +133,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is static site generation, and when is the HTML produced?",
     "answer": "The HTML is produced once, at build time, and stored as files. Requests are then answered with those ready-made files, so no page is built per visitor.",
     "related": [
-      "Build time",
-      "CDN",
-      "generateStaticParams",
-      "Incremental regeneration"
+      "Jamstack",
+      "CDN caching",
+      "Incremental Static Regeneration",
+      "Build time vs request time"
     ],
     "learnMore": [
       {
@@ -156,10 +156,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is hydration?",
     "answer": "Hydration is React attaching event handlers and state to HTML that was already rendered on the server, so the page becomes interactive without being rebuilt from scratch.",
     "related": [
-      "Event handlers",
       "Hydration mismatch",
-      "Main thread",
-      "Selective hydration"
+      "Selective hydration",
+      "Islands architecture",
+      "Progressive enhancement"
     ],
     "learnMore": [
       {
@@ -175,10 +175,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Which three metrics make up the Core Web Vitals?",
     "answer": "Largest Contentful Paint (LCP, loading), Interaction to Next Paint (INP, responsiveness) and Cumulative Layout Shift (CLS, visual stability). INP replaced First Input Delay as the responsiveness metric.",
     "related": [
-      "LCP",
-      "INP",
-      "CLS",
-      "75th percentile"
+      "Core Web Vitals (LCP, INP, CLS)",
+      "Lighthouse vs real-user monitoring",
+      "Performance budgets",
+      "Critical rendering path"
     ],
     "learnMore": [
       {
@@ -194,10 +194,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What does the \"use client\" directive do?",
     "answer": "It marks a module, and everything that module imports, as client code that ships to the browser. It is a boundary between server code and client code, not a label on a single component.",
     "related": [
-      "Server/client boundary",
-      "Bundle size",
+      "Server vs Client Components",
+      "Bundle size optimization",
       "Serialization",
-      "Server Components"
+      "Composition pattern (children as props)"
     ],
     "learnMore": [
       {
@@ -213,10 +213,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Where do Server Components run, and is their code sent to the browser?",
     "answer": "They run on the server (at build time or per request). Their source code is not sent to the browser: only their rendered output is.",
     "related": [
-      "RSC payload",
-      "Zero client JavaScript",
-      "Server-only code",
-      "Data fetching"
+      "React Server Components",
+      "Zero-bundle server code",
+      "Data fetching on the server",
+      "Server Actions"
     ],
     "learnMore": [
       {
@@ -232,10 +232,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What do the async and defer attributes on a script tag change?",
     "answer": "A normal script blocks HTML parsing while it downloads and runs. With defer, the script downloads in parallel and runs after the document is parsed, in order. With async, it downloads in parallel and runs as soon as it is ready, in no guaranteed order.",
     "related": [
-      "Parser-blocking scripts",
-      "Preload scanner",
-      "DOMContentLoaded",
-      "Render-blocking resources"
+      "Script loading (async, defer, modules)",
+      "Render-blocking resources",
+      "Preload, prefetch and preconnect",
+      "DOMContentLoaded vs load"
     ],
     "learnMore": [
       {
@@ -251,10 +251,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Why is animating transform and opacity cheaper than animating width or top?",
     "answer": "Changing transform or opacity can be handled by the compositor without redoing layout or paint. Changing width or top forces the browser to recalculate layout, and usually repaint, on the main thread.",
     "related": [
-      "Compositor thread",
-      "Layout thrashing",
+      "Reflow vs repaint",
+      "Compositor and GPU layers",
       "will-change",
-      "60 fps rendering"
+      "requestAnimationFrame"
     ],
     "learnMore": [
       {
@@ -270,10 +270,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is the practical difference between SSR and SSG?",
     "answer": "The moment the HTML is produced. SSG produces it once at build time and reuses it. SSR produces it for every request. So SSG is cheaper and faster to serve, and SSR can show data that is current at the moment of the request.",
     "related": [
-      "Rendering strategies",
-      "Time to first byte",
-      "Build vs request time",
-      "Data freshness"
+      "Rendering strategies compared",
+      "Time to first byte (TTFB)",
+      "Data freshness",
+      "CDN caching"
     ],
     "learnMore": [
       {
@@ -289,10 +289,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What does Incremental Static Regeneration do?",
     "answer": "It serves prebuilt static pages, but rebuilds them in the background after a time you set, or when you trigger it on demand. Visitors keep getting fast pages, and a newer version replaces the old one once it is ready.",
     "related": [
-      "Revalidation",
+      "Stale-while-revalidate",
       "On-demand revalidation",
-      "Stale content",
-      "CDN caching"
+      "CDN caching",
+      "Cache invalidation"
     ],
     "learnMore": [
       {
@@ -308,10 +308,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What does stale-while-revalidate mean?",
     "answer": "A cache may answer immediately with a slightly old (stale) copy while it fetches a fresh one in the background for next time. The visitor gets speed now and freshness a moment later.",
     "related": [
-      "Cache freshness",
-      "Background revalidation",
+      "Cache-Control directives",
       "CDN caching",
-      "Perceived performance"
+      "Cache invalidation",
+      "ETag and conditional requests"
     ],
     "learnMore": [
       {
@@ -328,9 +328,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "The HTML is only a picture of the UI until the JavaScript has downloaded, run and attached the event handlers. Until hydration finishes there is nothing listening for the tap.",
     "related": [
       "Hydration",
-      "Interaction to Next Paint",
-      "Main thread",
-      "JavaScript bundle size"
+      "Main thread and long tasks",
+      "Interaction to Next Paint (INP)",
+      "Code splitting"
     ],
     "learnMore": [
       {
@@ -346,10 +346,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is a long task, and why does it matter?",
     "answer": "A long task is work that keeps the main thread busy for more than 50 milliseconds. While it runs, the browser can't respond to taps, clicks or scrolling, so the page feels frozen.",
     "related": [
-      "Event loop",
-      "INP",
-      "scheduler.yield",
-      "Web Workers"
+      "Event loop and task queue",
+      "Microtasks vs macrotasks",
+      "Web Workers",
+      "Debounce and throttle"
     ],
     "learnMore": [
       {
@@ -366,9 +366,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "Lab data comes from a controlled test on one device and network, which is good for debugging. Field data comes from real visitors on their own devices, which is what tells you what people actually experience. They often disagree.",
     "related": [
       "Lighthouse",
-      "Chrome UX Report",
-      "Real user monitoring",
-      "Percentiles"
+      "Real-user monitoring (RUM)",
+      "Core Web Vitals",
+      "Performance budgets"
     ],
     "learnMore": [
       {
@@ -384,10 +384,10 @@ export const questionBank: BankQuestion[] = [
     "question": "How does Google process a page that needs JavaScript to show its content?",
     "answer": "In three phases: crawling (fetching the HTML), rendering (running the JavaScript in a Chromium-based renderer) and indexing. Pages are queued for rendering, so content that only exists after JavaScript runs is seen later than content already in the HTML.",
     "related": [
-      "Crawling and indexing",
-      "Rendering queue",
+      "SEO for SPAs",
       "Server-side rendering",
-      "Crawl budget"
+      "Crawl budget",
+      "Structured data and sitemaps"
     ],
     "learnMore": [
       {
@@ -403,10 +403,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What must props be when a Server Component passes them to a Client Component?",
     "answer": "Serializable: plain values such as strings, numbers, booleans, arrays and plain objects. Functions and class instances can't cross the boundary because they can't be turned into data for transfer.",
     "related": [
+      "Server vs Client Components",
       "Serialization",
-      "Server/client boundary",
-      "Server Functions",
-      "Composition (children)"
+      "Server Actions",
+      "Composition pattern (children as props)"
     ],
     "learnMore": [
       {
@@ -423,9 +423,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "Streaming sends the parts of a page that are ready right away and the slower parts later, in the same response. A Suspense boundary marks a part that may be pending and shows a fallback until its content arrives.",
     "related": [
       "Suspense",
+      "Streaming SSR",
       "Progressive rendering",
-      "Time to first byte",
-      "loading.js"
+      "Time to first byte (TTFB)"
     ],
     "learnMore": [
       {
@@ -445,10 +445,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is the difference between max-age and s-maxage in Cache-Control?",
     "answer": "max-age sets how long a response counts as fresh for any cache, including the browser. s-maxage applies only to shared caches such as a CDN, and overrides max-age there.",
     "related": [
-      "Cache-Control",
+      "Cache-Control directives",
       "CDN caching",
-      "Shared vs private caches",
-      "Freshness lifetime"
+      "ETag and conditional requests",
+      "Cache invalidation"
     ],
     "learnMore": [
       {
@@ -464,10 +464,10 @@ export const questionBank: BankQuestion[] = [
     "question": "In Next.js 16, is a fetch request cached by default?",
     "answer": "No. Caching is opt-in. Depending on the model you use, you turn it on with the use cache directive (Cache Components) or with options such as force-cache in the previous model.",
     "related": [
-      "use cache directive",
-      "Cache Components",
+      "Next.js caching layers",
+      "Static vs dynamic rendering",
       "Revalidation",
-      "Dynamic vs static rendering"
+      "The use cache directive"
     ],
     "learnMore": [
       {
@@ -485,8 +485,8 @@ export const questionBank: BankQuestion[] = [
     "related": [
       "Hydration mismatch",
       "Deterministic rendering",
-      "useEffect",
-      "Browser-only APIs"
+      "useEffect and client-only code",
+      "Browser-only APIs (window, localStorage)"
     ],
     "learnMore": [
       {
@@ -508,7 +508,7 @@ export const questionBank: BankQuestion[] = [
     "related": [
       "DNS",
       "TCP and TLS handshakes",
-      "HTTP request/response",
+      "HTTP/2 and HTTP/3",
       "Critical rendering path"
     ],
     "learnMore": [
@@ -529,10 +529,10 @@ export const questionBank: BankQuestion[] = [
     "question": "When is client-side rendering still a good choice?",
     "answer": "When the content doesn't need to be found by search engines or shown before JavaScript loads, and the app is highly interactive: dashboards behind a login, editors, internal tools. CSR is simple to host and to reason about. The costs are a slower first content and more JavaScript to download and run before the page is useful.",
     "related": [
-      "SEO",
-      "App shell",
-      "Bundle size",
-      "First contentful paint"
+      "SPA vs MPA",
+      "SEO for SPAs",
+      "Bundle size optimization",
+      "Code splitting"
     ],
     "learnMore": [
       {
@@ -552,9 +552,9 @@ export const questionBank: BankQuestion[] = [
     "question": "A page moved from CSR to SSR. Which metrics would you expect to improve, and which could get worse?",
     "answer": "LCP usually improves because content is in the first response. Time to first byte can get worse because the server now does work before responding. INP can stay the same or get worse until hydration finishes, since the page looks ready before it can respond.",
     "related": [
-      "TTFB",
-      "LCP",
-      "INP",
+      "Time to first byte (TTFB)",
+      "Largest Contentful Paint (LCP)",
+      "Interaction to Next Paint (INP)",
       "Hydration cost"
     ],
     "learnMore": [
@@ -578,7 +578,7 @@ export const questionBank: BankQuestion[] = [
       "Prerendering",
       "Hydration",
       "RSC payload",
-      "Server/client boundary"
+      "Server vs Client Components"
     ],
     "learnMore": [
       {
@@ -594,10 +594,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Why is putting \"use client\" high in the component tree costly?",
     "answer": "The directive applies to the module and everything it imports, so the higher it sits the more code becomes client code. That code has to be downloaded and hydrated, which erases much of the benefit of Server Components. Push the boundary down to the interactive leaf instead.",
     "related": [
-      "Bundle size",
-      "Transitive imports",
-      "Composition (children)",
-      "Code splitting"
+      "Bundle size optimization",
+      "Code splitting",
+      "Tree shaking",
+      "Composition pattern (children as props)"
     ],
     "learnMore": [
       {
@@ -614,9 +614,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "SSG alone means very long builds and hour-old pages until the next one. SSR builds every request, which costs server work at scale. ISR fits: serve prebuilt pages and revalidate them on a schedule (about hourly), or on demand when a product changes. The trade-off is that a visitor can see data up to the revalidation window old.",
     "related": [
       "Incremental Static Regeneration",
-      "Build time",
+      "Build time at scale",
       "On-demand revalidation",
-      "Rendering strategies"
+      "Rendering strategy trade-offs"
     ],
     "learnMore": [
       {
@@ -636,10 +636,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What are React's render and commit phases?",
     "answer": "Render is React calling your components to work out what the UI should look like. Commit is React applying the resulting changes to the DOM. Rendering a component does not by itself mean the DOM changed.",
     "related": [
-      "Reconciliation",
-      "Virtual DOM",
-      "Re-renders",
-      "Strict Mode"
+      "Reconciliation and the virtual DOM",
+      "Avoiding unnecessary re-renders",
+      "React Fiber",
+      "Batching and Strict Mode"
     ],
     "learnMore": [
       {
@@ -656,9 +656,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "Keys tell React which item is which between renders. With stable keys, state and DOM stay attached to the right item when the list is reordered or filtered. With index keys or missing keys, state can end up attached to the wrong item.",
     "related": [
       "Reconciliation",
-      "Component state",
-      "List rendering",
-      "Re-ordering"
+      "Component state and identity",
+      "Index as key pitfalls",
+      "List virtualization"
     ],
     "learnMore": [
       {
@@ -678,10 +678,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Why is useSyncExternalStore a good fit for reading localStorage in a server-rendered app?",
     "answer": "It takes a separate getServerSnapshot, so the server render and the first client render use the same value and hydration matches. React then switches to the real stored value right after hydration, without a mismatch or a manual effect.",
     "related": [
-      "Hydration",
-      "External stores",
-      "getServerSnapshot",
-      "localStorage"
+      "Hydration mismatch",
+      "External state (Redux, Zustand)",
+      "Tearing in concurrent rendering",
+      "localStorage with SSR"
     ],
     "learnMore": [
       {
@@ -697,10 +697,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What does Google say about dynamic rendering (serving crawlers a pre-rendered version)?",
     "answer": "It describes it as a workaround, not a recommended solution, because it adds complexity and resource costs. Server-side rendering or pre-rendering is the better long-term approach.",
     "related": [
+      "SEO for SPAs",
       "Server-side rendering",
       "Prerendering",
-      "Cloaking risk",
-      "Crawl budget"
+      "Cloaking risk"
     ],
     "learnMore": [
       {
@@ -716,10 +716,10 @@ export const questionBank: BankQuestion[] = [
     "question": "How can you give the main thread back in the middle of a long job, and what is the browser-support caveat?",
     "answer": "Break the work into chunks and yield between them with scheduler.yield(), or move it to a Web Worker. scheduler.yield() is not available in every browser (notably Safari), so keep a setTimeout-based fallback.",
     "related": [
-      "scheduler.yield",
       "Web Workers",
-      "Long tasks",
-      "Progressive enhancement"
+      "scheduler.yield",
+      "requestIdleCallback",
+      "Debounce and throttle"
     ],
     "learnMore": [
       {
@@ -739,10 +739,10 @@ export const questionBank: BankQuestion[] = [
     "question": "SSR, Server Components, hydration and streaming are often mixed up. What does each one concern?",
     "answer": "SSR is about generating HTML on the server. Server Components are about where component code runs and how its output is sent. Hydration is about making server HTML interactive in the browser. Streaming is about delivering output progressively. They can be used together, but none implies the others.",
     "related": [
-      "Server Components",
-      "SSR",
+      "SSR vs React Server Components",
       "Hydration",
-      "Streaming"
+      "Streaming SSR",
+      "Suspense"
     ],
     "learnMore": [
       {
@@ -762,10 +762,10 @@ export const questionBank: BankQuestion[] = [
     "question": "Why can't a shared CDN cache safely hold a page that is personalized for one user?",
     "answer": "A shared cache serves the same stored copy to everyone who asks for that URL, so a personalized page could be shown to the wrong person. Personalized responses must be marked private or kept out of shared caches, and the shared part of the page separated from the personal part.",
     "related": [
-      "Cache-Control: private",
-      "Personalization",
-      "Vary header",
-      "Cache keys"
+      "Cache-Control: private vs public",
+      "CDN caching",
+      "The Vary header",
+      "Authentication with cookies"
     ],
     "learnMore": [
       {
@@ -785,9 +785,9 @@ export const questionBank: BankQuestion[] = [
     "question": "How would you improve a poor LCP on a server-rendered page?",
     "answer": "First find which part of LCP dominates: time to first byte, resource load delay, resource load duration or element render delay. Then target it: speed up the first byte (cache the page or serve it closer to the visitor), make sure the LCP resource is discoverable in the initial HTML and starts loading early (for example a preload with high fetch priority), reduce its size, and remove what blocks it from rendering.",
     "related": [
-      "TTFB",
-      "Preload and fetch priority",
-      "Image optimization",
+      "Image optimization (formats, sizing, lazy loading)",
+      "Preload and fetchpriority",
+      "TTFB and CDN",
       "Render-blocking resources"
     ],
     "learnMore": [
@@ -808,10 +808,10 @@ export const questionBank: BankQuestion[] = [
     "question": "What is a request waterfall in data fetching, and how do you avoid it?",
     "answer": "A waterfall is when requests run one after another because each waits for the previous one, so every request adds a full round trip. In a component, two awaits in a row are sequential even if the requests are independent. Start independent requests together (for example with Promise.all), or preload data before blocking work.",
     "related": [
-      "Promise.all",
-      "Parallel data fetching",
-      "Preloading data",
-      "Suspense"
+      "Promise.all and parallel fetching",
+      "Suspense boundaries",
+      "Prefetching and preloading",
+      "Request deduplication and caching"
     ],
     "learnMore": [
       {
@@ -827,10 +827,10 @@ export const questionBank: BankQuestion[] = [
     "question": "LCP is good but INP is poor. What do you suspect and what do you check?",
     "answer": "Content appears fast but interactions are slow, so suspect main-thread work: long tasks from heavy JavaScript, expensive event handlers, hydration still running, or slow rendering after the interaction. INP splits into input delay, processing duration and presentation delay, so record an interaction and see which part is largest.",
     "related": [
-      "Long tasks",
+      "Long tasks and the main thread",
       "Hydration cost",
-      "Event handlers",
-      "Input delay"
+      "Debounce and throttle",
+      "Avoiding unnecessary re-renders"
     ],
     "learnMore": [
       {
@@ -850,9 +850,9 @@ export const questionBank: BankQuestion[] = [
     "question": "True or false: Google can't index JavaScript sites.",
     "answer": "False. Google runs JavaScript with an up-to-date Chromium. But rendering is a separate, queued step after crawling, so content that needs JavaScript is seen later and less reliably than content already in the HTML. Not every crawler runs JavaScript at all.",
     "related": [
-      "Rendering queue",
+      "SEO for SPAs",
       "Server-side rendering",
-      "Crawlers",
+      "Crawl budget",
       "Dynamic rendering"
     ],
     "learnMore": [
@@ -870,9 +870,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "False. It doesn't create threads. await lets other tasks run while a promise is pending, but heavy synchronous work inside an async function still blocks the main thread.",
     "related": [
       "Event loop",
-      "Promises",
-      "Web Workers",
-      "Blocking the main thread"
+      "Promises and async/await",
+      "Microtasks vs macrotasks",
+      "Web Workers"
     ],
     "learnMore": [
       {
@@ -889,9 +889,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "False. Lighthouse is a lab measurement on one simulated device. Real users on real devices and networks can have a very different experience, which only field data shows.",
     "related": [
       "Lab vs field data",
-      "CrUX",
-      "Real user monitoring",
-      "Core Web Vitals"
+      "Real-user monitoring (RUM)",
+      "Core Web Vitals",
+      "Performance budgets"
     ],
     "learnMore": [
       {
@@ -909,8 +909,8 @@ export const questionBank: BankQuestion[] = [
     "related": [
       "Hydration",
       "Progressive enhancement",
-      "Interactivity",
-      "JavaScript bundle"
+      "Islands architecture",
+      "Bundle size optimization"
     ],
     "learnMore": [
       {
@@ -926,10 +926,10 @@ export const questionBank: BankQuestion[] = [
     "question": "True or false: Server Components are just SSR under a new name.",
     "answer": "False. SSR generates HTML on the server, and client components are server-rendered too. Server Components concern where component code runs and that its code never ships to the browser. They are separate ideas.",
     "related": [
-      "SSR",
-      "Server/client boundary",
+      "SSR vs React Server Components",
+      "Server vs Client Components",
       "RSC payload",
-      "Zero client JavaScript"
+      "Streaming"
     ],
     "learnMore": [
       {
@@ -945,10 +945,10 @@ export const questionBank: BankQuestion[] = [
     "question": "True or false: if every page is prebuilt, the site doesn't need a server.",
     "answer": "Partly true. Plain prebuilt files can be served by any static host or CDN. But features such as ISR revalidation, or a route that is not prebuilt, need a runtime that can rebuild or render pages.",
     "related": [
-      "Static hosting",
-      "ISR",
-      "Serverless functions",
-      "CDN"
+      "Static hosting and CDN",
+      "Incremental Static Regeneration",
+      "Serverless vs edge functions",
+      "Cold starts"
     ],
     "learnMore": [
       {
@@ -964,10 +964,10 @@ export const questionBank: BankQuestion[] = [
     "question": "A page is fast on your machine but slow in production. Is caching a likely cause?",
     "answer": "Yes, it is one of the first things to suspect. A local development setup usually has no CDN or shared cache layer at all, so \"fast locally\" says little about how caching behaves in production.",
     "related": [
-      "CDN",
-      "Cache layers",
+      "CDN caching",
+      "Cache layers (browser, CDN, server)",
       "Cache invalidation",
-      "Environment parity"
+      "Production vs local parity"
     ],
     "learnMore": [
       {
@@ -985,8 +985,8 @@ export const questionBank: BankQuestion[] = [
     "related": [
       "Prerendering",
       "Hydration",
-      "Server/client boundary",
-      "RSC payload"
+      "RSC payload",
+      "Server vs Client Components"
     ],
     "learnMore": [
       {
@@ -1002,10 +1002,10 @@ export const questionBank: BankQuestion[] = [
     "question": "True or false: INP is just FID renamed.",
     "answer": "False. INP replaced FID as a Core Web Vital, but it measures more: it observes interactions across the whole visit and includes the time until the next paint, while FID only measured the delay before the first interaction was handled.",
     "related": [
-      "First Input Delay",
-      "Interaction to Next Paint",
-      "Responsiveness",
-      "Core Web Vitals"
+      "Core Web Vitals",
+      "Interaction to Next Paint (INP)",
+      "Long tasks",
+      "Event handler performance"
     ],
     "learnMore": [
       {
@@ -1026,9 +1026,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "A Server Component is passing a function as a prop across the server-client boundary. Props there must be serializable and functions are not. Move the logic into the Client Component, or use a Server Function where appropriate.",
     "related": [
       "Serialization",
-      "Server Functions",
-      "Server/client boundary",
-      "Props"
+      "Server Actions",
+      "Server vs Client Components",
+      "Props and data flow"
     ],
     "learnMore": [
       {
@@ -1045,9 +1045,9 @@ export const questionBank: BankQuestion[] = [
     "answer": "Not necessarily. The slow data still takes as long as it takes. What changes is what the visitor can see meanwhile: the ready parts arrive first and a fallback shows for the slow part, so the page feels faster.",
     "related": [
       "Suspense",
-      "Streaming",
+      "Streaming SSR",
       "Perceived performance",
-      "loading.js"
+      "Skeleton screens"
     ],
     "learnMore": [
       {
@@ -1067,10 +1067,10 @@ export const questionBank: BankQuestion[] = [
     "question": "True or false: Cache-Control: no-cache means the response is never stored.",
     "answer": "False, and it is one of the most common caching mix-ups. no-cache allows a cache to store the response, but requires it to be validated with the origin server before each reuse. no-store is the directive that tells caches not to store the response at all.",
     "related": [
-      "no-store",
-      "Conditional requests (ETag)",
-      "Shared vs private caches",
-      "Revalidation"
+      "Cache-Control directives",
+      "ETag and conditional requests",
+      "Private vs public caches",
+      "Cache invalidation"
     ],
     "learnMore": [
       {

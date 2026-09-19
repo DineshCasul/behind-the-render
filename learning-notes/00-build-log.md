@@ -1,5 +1,12 @@
 # Build Log
 
+## Question bank: related topics reviewed for interview relevance
+
+**Date:** 2026-09-20
+
+- Second pass over the 3 to 4 "related topics" on every question, favouring the topics that come up again and again in senior frontend interviews: reflow vs repaint, CORS, HTTP/2 and HTTP/3, event loop and microtasks vs macrotasks, Web Workers, debounce and throttle, code splitting and tree shaking, SEO for SPAs, Jamstack, islands architecture, ETag and conditional requests, cache invalidation, `Cache-Control: private` vs `public`, the `Vary` header, image optimization, preload and prefetch, RUM vs Lighthouse, performance budgets, and re-render optimization.
+- These are names to search for and be ready to explain, not claims: they carry no facts that could be wrong. Source links stay on the answers only.
+
 ## Glossary tooltips no longer run off the screen on phones
 
 **Date:** 2026-09-20
