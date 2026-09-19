@@ -38,7 +38,13 @@ export function LearningMap({ expanded = false }: LearningMapProps) {
     <section
       aria-label="Interactive rendering concept map"
       className={`relative mx-auto w-full pb-16 transition-[max-width,padding] duration-700 ease-out ${
-        expanded ? "max-w-none px-0" : "max-w-6xl px-2 sm:px-6"
+        // max-w-[100rem] (1600px) matches the SVG's own viewBox width, so
+        // at a wide enough viewport the map renders at roughly 1 SVG unit
+        // = 1px — as crisp as it gets. It also means there's still a lot
+        // of room left over after the concept panel's fixed 20rem takes
+        // its share, so opening the panel doesn't shrink node labels down
+        // to the point of being hard to read.
+        expanded ? "max-w-none px-0" : "max-w-[100rem] px-2 sm:px-6"
       }`}
     >
       {/*

@@ -82,7 +82,24 @@ export function MapNode({
       )}
 
       {emphasized && (
-        <circle r={RADIUS + 5} fill="none" stroke={visual.color} strokeWidth={1.5} strokeOpacity={0.8} />
+        <>
+          {/*
+            A status-colored ring alone was hard to see on a muted
+            "not-started" (gray) node — the ring is the same dull color
+            as the node it's supposedly emphasizing. Using a fixed accent
+            color for "you're looking at this" (independent of the
+            node's own status color) plus a soft translucent halo behind
+            it makes the emphasis legible regardless of the node's state.
+          */}
+          <circle r={RADIUS + 16} fill="var(--state-learning)" fillOpacity={0.1} />
+          <circle
+            r={RADIUS + 6}
+            fill="none"
+            stroke="var(--state-learning)"
+            strokeWidth={2}
+            strokeOpacity={0.9}
+          />
+        </>
       )}
 
       <circle
