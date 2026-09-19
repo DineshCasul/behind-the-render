@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 interface Chunk {
   label: string;
@@ -29,7 +29,7 @@ const fmt = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
  * measurable: total time is identical, time-to-first-content is not.
  */
 export function StreamingChunksExperiment() {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [streaming, setStreaming] = useState(true);
   const [elapsed, setElapsed] = useState<number | null>(null); // null = not started
   const [running, setRunning] = useState(false);

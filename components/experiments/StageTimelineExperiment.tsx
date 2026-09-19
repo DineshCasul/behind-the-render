@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
 import type { RuntimeStep } from "@/lib/types";
 import { MockBrowser } from "@/components/experiments/MockBrowser";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 const ACTOR_COLOR: Record<RuntimeStep["actor"], string> = {
   browser: "var(--state-learning)",
@@ -28,7 +28,7 @@ const STEP_DELAY_MS = 1300;
  * static runtime diagram renders, so the two can never disagree.
  */
 export function StageTimelineExperiment({ steps }: { steps: RuntimeStep[] }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(-1);
   const [playing, setPlaying] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

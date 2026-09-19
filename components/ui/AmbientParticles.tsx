@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useMemo } from "react";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 /**
  * A handful of slow-drifting dots behind the hero/map, for ambient depth.
@@ -30,7 +31,7 @@ function seededParticles(count: number) {
 }
 
 export function AmbientParticles() {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const particles = useMemo(() => seededParticles(PARTICLE_COUNT), []);
 
   return (

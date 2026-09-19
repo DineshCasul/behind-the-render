@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LessonHeader } from "@/components/lesson/LessonHeader";
@@ -182,6 +183,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
         <LessonSection id="related" heading="Related concepts">
           <RelatedConcepts currentId={concept.id} ids={relatedIds} />
         </LessonSection>
+
+        <div className="mt-10">
+          <Link href="/questions" className="btn-ghost">
+            Practice with the question bank
+          </Link>
+        </div>
 
         <Suspense fallback={null}>
           <StoryBookendBottom />

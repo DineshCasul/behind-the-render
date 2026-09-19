@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll } from "framer-motion";
+import { motion, useScroll } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 export interface NavSection {
   id: string;
@@ -24,7 +25,7 @@ export interface NavSection {
  * problem, and the zero height means the bar appearing never shifts layout.
  */
 export function LessonNav({ title, sections }: { title: string; sections: NavSection[] }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [showBar, setShowBar] = useState(false);
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
   const frame = useRef<number | null>(null);
@@ -100,9 +101,9 @@ export function LessonNav({ title, sections }: { title: string; sections: NavSec
           {/* Full width (not the centred text column) so the title can sit at the true right edge. */}
           <div className="flex h-11 items-center gap-3 px-6 sm:px-8">
             <Link
-              href="/?to=map"
+              href="/"
               tabIndex={showBar ? 0 : -1}
-              className="shrink-0 font-mono text-[11px] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+              className="shrink-0 font-mono text-[11px] text-[var(--state-learning)] underline-offset-4 transition-colors hover:text-[var(--color-text-primary)] hover:underline"
             >
               ← Map
             </Link>

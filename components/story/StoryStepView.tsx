@@ -4,6 +4,7 @@ import { JourneyTrail } from "@/components/story/JourneyTrail";
 import { StoryRecap } from "@/components/story/StoryRecap";
 import { StoryVisual } from "@/components/story/StoryVisual";
 import { conceptMap } from "@/data/concepts";
+import { questionBank } from "@/data/question-bank";
 import { MOOD, STORY_START, storySteps, type StoryStep } from "@/data/story";
 
 const LABELS = Object.fromEntries(storySteps.map((s) => [s.id, s.trail]));
@@ -19,7 +20,14 @@ export function StoryStepView({ step }: { step: StoryStep }) {
   const mood = MOOD[step.mood];
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
-      <JourneyTrail currentId={step.id} isStart={step.id === STORY_START} labels={LABELS} />
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <JourneyTrail currentId={step.id} isStart={step.id === STORY_START} labels={LABELS} />
+        </div>
+        <Link href="/" className="btn-ghost shrink-0 !px-3.5 !py-1.5">
+          <span aria-hidden>⌂</span> Home
+        </Link>
+      </div>
 
       <p className={`${label} mt-10`} style={{ color: mood.color }}>
         {mood.label}
@@ -146,11 +154,14 @@ export function StoryStepView({ step }: { step: StoryStep }) {
         </section>
       )}
 
-      <p className="mt-14 text-xs text-[var(--color-text-muted)]">
-        <Link href="/?to=map" className="underline underline-offset-4 hover:text-[var(--color-text-primary)]">
-          Or explore every concept on the map
+      <div className="mt-14 flex flex-wrap gap-3">
+        <Link href="/?to=map" className="btn-ghost">
+          Or explore every concept
         </Link>
-      </p>
+        <Link href="/questions" className="btn-ghost">
+          Take the {questionBank.length}-question challenge
+        </Link>
+      </div>
     </div>
   );
 }

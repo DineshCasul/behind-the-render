@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 /**
  * One slow-drifting soft light source behind the whole page, the single
@@ -10,7 +11,7 @@ import { motion, useReducedMotion } from "framer-motion";
  * properties (see learning-notes/06-animation-and-reduced-motion.md).
  */
 export function AmbientGlow() {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <motion.div

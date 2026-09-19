@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
 import { OnOffControl } from "@/components/experiments/OnOffControl";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 type LayerKey = "browser" | "cdn" | "server";
 
@@ -28,7 +28,7 @@ const STEP_DELAY_MS = 900;
  * pass it on"; layers after it are never touched.
  */
 export function CacheLayersExperiment() {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [saved, setSaved] = useState<Record<LayerKey, boolean>>({ browser: false, cdn: true, server: true });
   // How many stages of the chain have been revealed so far (0 = nothing sent yet).
   const [revealed, setRevealed] = useState(0);

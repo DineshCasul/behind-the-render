@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 /**
  * A single line of "instrument readout" text with a blinking cursor,
@@ -8,7 +9,7 @@ import { motion, useReducedMotion } from "framer-motion";
  * animation library. Cursor opacity is the only animated property.
  */
 export function TerminalLine({ children }: { children: string }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <p className="relative text-balance text-center font-mono text-xs text-[var(--color-text-muted)]">

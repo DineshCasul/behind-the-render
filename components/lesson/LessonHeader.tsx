@@ -7,8 +7,8 @@ export function LessonHeader({ concept }: { concept: Concept }) {
   return (
     <header id="lesson-top">
       <Link
-        href="/?to=map"
-        className="font-mono text-xs text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+        href="/"
+        className="btn-ghost"
       >
         ← Back to map
       </Link>

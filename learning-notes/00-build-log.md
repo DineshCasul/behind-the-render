@@ -1,5 +1,45 @@
 # Build Log
 
+## Polish round: buttons, scroll cue, a real hydration bug, and a sharper question bank
+
+**Date:** 2026-09-20
+
+- **Auto-scroll: removed, then brought back only where asked.** The home page no longer glides on its own. The story's "Or explore every concept" button (`/?to=map`) scrolls to the map, once, and nothing else does. A visible **"Explore the map" button** at the bottom of the hero does the same on demand. Shared logic lives in `lib/scroll-to-map.ts` (three layouts: phone flow, desktop pinned scene, desktop reduced-motion).
+- **Buttons you could miss are now buttons**: a `.btn-ghost` style (visible border and text) for "Back to map" on lessons, the story footer, the map heading and a "Home" button beside the story trail; the hero has "Start the story" (filled, glowing) next to "Take the N-question challenge" (same size, outlined).
+- **Real bug found and fixed: hydration mismatch when the visitor prefers reduced motion.** Framer's `useReducedMotion()` returns the true answer during the *first client render*, but the server (which can't know) rendered the animated tree, so the two trees differed. New hook `lib/use-prefers-reduced-motion.ts` uses `useSyncExternalStore` with a server snapshot of `false`, so React hydrates with the server's answer and then re-renders with the real one. All 11 components that read reduced motion use it now. My earlier tests missed this because they only listened to `console` errors, while React reports this as a `pageerror`.
+- **Question bank revised**: 5 weaker questions replaced with more important ones (URL to pixels, `no-cache` vs `no-store`, improving LCP, request waterfalls, good LCP but poor INP, when CSR is still right). Every question now lists 3 or 4 **related topics** to look up. 52 questions.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why a component whose *markup* depends on a browser-only fact (reduced motion, viewport) must hydrate with the server's assumption first, then update.
+2. The difference between `console.error` and an uncaught `pageerror` in tests: a test that listens to one can hide the other.
+3. Why `no-cache` does not mean "don't cache" (it means "always check before reuse").
+
+## Removed the home page auto-scroll
+
+**Date:** 2026-09-20
+
+- Dropped the `?to=map` effect in `ScrollExperience.tsx` (the 3-second glide from the hero down to the map after "Back to map"), by request. "Back to map" links now go to `/` and the page opens at the top like any other visit. Also removes the code that cancelled the glide on wheel/touch/key input and the StrictMode workaround it needed.
+- Lesson learned: an effect that moves the user's scroll position is a feature you pay for in edge cases (cancelling, StrictMode double runs, phone vs desktop layouts). Deleting it removed all of them.
+
+## Question bank: 51 questions, easy to tricky, each with a source
+
+**Date:** 2026-09-20
+
+- New page `/questions` (`app/questions/page.tsx`, `components/questions/QuestionBank.tsx`, data in `data/question-bank.ts`): 12 easy, 14 medium, 12 hard, 13 tricky. Each has a short answer, one or two **learn-more links to first-party docs** (MDN, web.dev, react.dev, nextjs.org, Google Search Central) and a link to this site's lesson. Filter by difficulty; answers are native `<details>`, so they work with JavaScript off (all 51 are in the HTML).
+- **Accuracy process:** every URL was fetched and confirmed to load; each answer's key claim was checked against the linked page's text with a script. That caught two mistakes in my first draft: the MDN "HTTP caching" guide does not document `s-maxage` (the Cache-Control reference does, so I linked that), and Next.js's hydration-error page lists time-dependent APIs like `Date()` but not "time zone or locale" (I had guessed that), so the answer now says only what the page says.
+- Linked from the end of every story step and from the home page's map heading.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why "tricky" questions are the most useful: each one is a common misconception with a one-line correction.
+2. A source is only worth linking if it actually says the thing: verify the claim against the page, not just that the URL loads.
+3. Native `<details>` gives you an accessible accordion with no state and no JavaScript.
+
 ## Story mode, step F: story bookends on lessons + the map's new heading
 
 **Date:** 2026-09-20

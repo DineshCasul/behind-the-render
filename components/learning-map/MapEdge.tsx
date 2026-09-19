@@ -1,9 +1,9 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
 import type { NodeStatus } from "@/lib/types";
 import { buildEdgePath } from "@/lib/graph";
 import { STATUS_VISUALS } from "@/lib/node-visuals";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 interface MapEdgeProps {
   id: string;
@@ -30,7 +30,7 @@ export function MapEdge({
   emphasized,
   dimmed,
 }: MapEdgeProps) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const path = buildEdgePath(fromPos, toPos, vertical);
   const fromColor = STATUS_VISUALS[fromStatus].color;
   const toColor = STATUS_VISUALS[toStatus].color;

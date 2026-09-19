@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useJourney } from "@/lib/story-journey";
 
 /**
@@ -20,6 +20,7 @@ export function JourneyTrail({
   labels: Record<string, string>;
 }) {
   const { path, visit } = useJourney();
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     visit(currentId, isStart);
@@ -28,8 +29,14 @@ export function JourneyTrail({
   // Before the effect has run (and on the server) the trail is just "here".
   const shown = path.includes(currentId) ? path : [...path, currentId];
 
+  // The trail scrolls sideways on narrow screens; keep the current (last) step visible.
+  useEffect(() => {
+    const el = navRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [shown.length]);
+
   return (
-    <nav aria-label="Your path through the story" className="overflow-x-auto pb-1">
+    <nav ref={navRef} aria-label="Your path through the story" className="overflow-x-auto pb-1">
       <ol className="flex min-w-max items-center gap-2 font-mono text-[11px]">
         {shown.map((id, i) => {
           const here = id === currentId;

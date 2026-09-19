@@ -185,3 +185,33 @@ body {
   .cta-story::after { animation: none; opacity: 0; }
   .cta-story:hover { transform: none; }
 }
+
+/* Secondary button: clearly a button (visible border and text), quieter than
+   the filled "Start the story". Used where a plain text link was easy to miss. */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--state-learning) 55%, transparent);
+  color: var(--state-learning);
+  padding: 0.55rem 1.1rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--state-learning) 16%, transparent);
+  border-color: var(--state-learning);
+  color: var(--color-text-primary);
+}
+
+/* Same size as the "Start the story" button, so two buttons in one row line up. */
+.btn-ghost-lg {
+  padding: 0.875rem 1.75rem;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}

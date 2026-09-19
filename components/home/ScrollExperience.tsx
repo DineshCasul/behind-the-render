@@ -2,12 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import {
-  animate,
   motion,
-  useReducedMotion,
   useScroll,
   useTransform,
 } from "framer-motion";
+import { scrollToMap } from "@/lib/scroll-to-map";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 import { Hero } from "@/components/ui/Hero";
 import { HeroPhone } from "@/components/ui/HeroPhone";
 import { MapHeading } from "@/components/home/MapHeading";
@@ -36,7 +36,7 @@ const SCENE_HEIGHT_VH = 240;
  */
 export function ScrollExperience() {
   const sceneRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: sceneRef,
@@ -66,63 +66,6 @@ export function ScrollExperience() {
   const mapPointerEvents = useTransform(scrollYProgress, (v) => (v < 0.18 ? "none" : "auto"));
   const mapRotateX = useTransform(scrollYProgress, [0, 0.18, 0.75, 1], [14, 14, 0, 0]);
 
-  // Arriving from a lesson's "Back to map" link (`/?to=map`): start at the
-  // very top so the hero is seen, then glide down through the pinned scene
-  // to the map. Driven by Framer's `animate()` calling window.scrollTo each
-  // frame (not native smooth scroll) so the duration is ours to control;
-  // any wheel/touch/key input cancels it so we never fight the user.
-  useEffect(() => {
-    if (reduceMotion === null) return; // media query not resolved yet
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("to") !== "map") return;
-    window.scrollTo(0, 0);
-
-    // On phones there is no pinned scene (the phone layout is hero, then the
-    // portrait map in normal flow), so just scroll the map into view.
-    const isWide = window.matchMedia("(min-width: 1024px)").matches;
-    if (!isWide) {
-      const timer = setTimeout(() => {
-        window.history.replaceState(null, "", "/");
-        document.getElementById("map-mobile")?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-
-    // The param is only stripped once we actually act on it (below), React
-    // StrictMode runs effects twice in dev, and consuming it up front would
-    // leave the second run with nothing to do.
-    if (reduceMotion) {
-      window.history.replaceState(null, "", "/");
-      document.getElementById("map")?.scrollIntoView();
-      return;
-    }
-
-    let controls: ReturnType<typeof animate> | null = null;
-    const cancel = () => controls?.stop();
-    const start = setTimeout(() => {
-      const scene = sceneRef.current;
-      if (!scene) return;
-      window.history.replaceState(null, "", "/");
-      const target = scene.offsetTop + scene.offsetHeight - window.innerHeight;
-      controls = animate(0, target, {
-        duration: 3,
-        ease: [0.45, 0, 0.25, 1],
-        onUpdate: (y) => window.scrollTo(0, y),
-      });
-      window.addEventListener("wheel", cancel, { once: true, passive: true });
-      window.addEventListener("touchstart", cancel, { once: true, passive: true });
-      window.addEventListener("keydown", cancel, { once: true });
-    }, 700);
-
-    return () => {
-      clearTimeout(start);
-      cancel();
-      window.removeEventListener("wheel", cancel);
-      window.removeEventListener("touchstart", cancel);
-      window.removeEventListener("keydown", cancel);
-    };
-  }, [reduceMotion]);
-
   // Phones and tablets (< lg, 1024px): hero, then the portrait map, in normal flow. The pinned
   // scroll scene needs a wide, short viewport; on a phone the map is tall and
   // meant to be scrolled through. Both layouts are in the HTML and CSS picks
@@ -130,10 +73,23 @@ export function ScrollExperience() {
   const phoneLayout = (
     <div className="lg:hidden">
       <HeroPhone />
-      <MapHeading className="px-6 pb-3 pt-10 text-center" />
+      <MapHeading withQuestionsLink className="px-6 pb-3 pt-10 text-center" />
       <LearningMap layout="tall" />
     </div>
   );
+
+  // Arriving from the story's "Or explore every concept" button (`/?to=map`):
+  // scroll down to the map, once. Any other visit stays at the top. The param
+  // is stripped when we act on it (not before: StrictMode runs effects twice
+  // in dev, and the second run must still see it).
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("to") !== "map") return;
+    const timer = setTimeout(() => {
+      window.history.replaceState(null, "", "/");
+      scrollToMap(reduceMotion);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [reduceMotion]);
 
   if (reduceMotion) {
     // No scroll-jacked scene for reduced-motion users: just the hero,
@@ -141,9 +97,13 @@ export function ScrollExperience() {
     // scaled or faded on scroll.
     return (
       <>
+        {/* useScroll above still targets sceneRef; after the switch from the
+            pinned scene to this layout the ref must keep pointing at a real
+            element, or Framer throws "Target ref is defined but not hydrated". */}
+        <div ref={sceneRef} hidden />
         <div className="hidden lg:block">
           <Hero />
-          <MapHeading className="px-8 pb-3 pt-10 text-center" />
+          <MapHeading withQuestionsLink className="px-8 pb-3 pt-10 text-center" />
           <LearningMap expanded={false} />
         </div>
         {phoneLayout}
@@ -153,7 +113,7 @@ export function ScrollExperience() {
 
   return (
     <>
-      <div ref={sceneRef} style={{ height: `${SCENE_HEIGHT_VH}vh` }} className="relative hidden lg:block">
+      <div id="home-scene" ref={sceneRef} style={{ height: `${SCENE_HEIGHT_VH}vh` }} className="relative hidden lg:block">
         <div className="sticky top-0 h-screen w-full overflow-hidden" style={{ perspective: 1200 }}>
           <motion.div
             className="absolute inset-0 flex items-center justify-center"

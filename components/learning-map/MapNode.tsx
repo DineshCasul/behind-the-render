@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import type { Concept, NodeStatus } from "@/lib/types";
 import { STATUS_VISUALS } from "@/lib/node-visuals";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 const RADIUS = 34;
 
@@ -33,7 +34,7 @@ export function MapNode({
   onHover,
   onSelect,
 }: MapNodeProps) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const visual = STATUS_VISUALS[status];
   const { x, y } = position;
 

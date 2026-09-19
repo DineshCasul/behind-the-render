@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { clearNavDirection, peekNavDirection } from "@/lib/nav-direction";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 // Counts page mounts in this browser session. The very first one is the
 // initial page load, which must NOT animate: the server-rendered HTML is
@@ -21,7 +22,7 @@ const SLIDE_PX = 80;
  * learning-notes/12).
  */
 function PageEnter({ children }: { children: React.ReactNode }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   // Read once at mount, without consuming (React StrictMode runs initializers
   // twice in dev; a consuming read would give the second call nothing).
   const [start] = useState(() => ({ first: mountCount === 0, direction: peekNavDirection() }));

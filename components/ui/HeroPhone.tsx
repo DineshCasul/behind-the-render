@@ -1,11 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { AmbientParticles } from "@/components/ui/AmbientParticles";
 import { HudCorners } from "@/components/ui/HudCorners";
+import { ExploreCue } from "@/components/ui/ExploreCue";
+import { QuestionsButton } from "@/components/ui/QuestionsButton";
 import { StartStoryButton } from "@/components/ui/StartStoryButton";
 import { TerminalLine } from "@/components/ui/TerminalLine";
+import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 const TITLE = "Behind the Render";
 
@@ -23,7 +26,7 @@ const TITLE = "Behind the Render";
  */
 export function HeroPhone() {
   const ref = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 70]);
   const opacity = useTransform(scrollYProgress, [0, 0.55, 1], [1, 0.35, 0]);
@@ -75,18 +78,14 @@ export function HeroPhone() {
         <div className="reveal-fade relative mt-9" style={{ "--delay": "1.4s" } as React.CSSProperties}>
           <TerminalLine>tracing request → paint, one concept at a time_</TerminalLine>
         </div>
-        <div className="reveal-fade relative mt-7" style={{ "--delay": "1.8s" } as React.CSSProperties}>
+        <div className="reveal-fade relative mt-7 flex flex-col items-center gap-3" style={{ "--delay": "1.8s" } as React.CSSProperties}>
           <StartStoryButton />
+          <QuestionsButton />
         </div>
       </motion.div>
 
-      <div
-        aria-hidden
-        className="reveal-fade absolute bottom-5 flex flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-text-muted)]"
-        style={{ "--delay": "2s" } as React.CSSProperties}
-      >
-        Scroll to explore
-        <span className="cue-bob text-base leading-none text-[var(--state-learning)]">↓</span>
+      <div className="reveal-fade absolute bottom-5" style={{ "--delay": "2s" } as React.CSSProperties}>
+        <ExploreCue />
       </div>
     </section>
   );
