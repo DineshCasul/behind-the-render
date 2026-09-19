@@ -1,5 +1,45 @@
 # Build Log
 
+## Phase 1.1 — Visual identity pass + hover bug fix
+
+**Date:** 2026-09-19
+
+Feedback after the first pass: hovering a node made it jump to the
+top-left of the map, the name "The Rendering Lab" read as generic, and the
+overall look (Geist font, flat single-vignette background) felt like a
+default Next.js template rather than a distinct product.
+
+- **Fixed the hover bug**: `MapNode.tsx` had both a raw `transform="translate(x,y)"`
+  attribute and Framer Motion's `whileHover={{ scale }}` writing to
+  `transform` on the same `<motion.g>`. Motion's generated transform
+  replaced the translate outright on hover, snapping every node to the
+  SVG origin. Fixed by nesting a plain positioning `<g>` around a
+  `<motion.g>` that owns only the hover scale. Full writeup:
+  [[07-transform-composition-bug]].
+- **Renamed** the site to **Critical Path** (a real term from browser
+  performance work) — updated `<title>`, the hero, and annotated
+  `CLAUDE.md` §1 to record the change without rewriting the original spec.
+- **Replaced Geist Sans/Mono** with **Space Grotesk** (headings/body) and
+  **JetBrains Mono** (labels, node captions, the new terminal-style status
+  line) — both self-hosted via `next/font/google`, chosen to move away
+  from the default look every Next.js starter ships with.
+- **Rebuilt the background system** (`app/globals.css`,
+  `components/ui/GridBackdrop.tsx`, new `AmbientGlow.tsx`): two off-center
+  color blooms instead of one centered vignette, a darkened edge, a faint
+  SVG-noise grain layer, and one slow-drifting animated glow isolated into
+  its own small client component so the rest of the backdrop stays a
+  Server Component.
+- Added `HudCorners.tsx` (static corner brackets) and `TerminalLine.tsx`
+  (blinking-cursor status line) to the hero for an instrument-panel feel.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why writing to the same CSS/SVG `transform` from two different sources doesn't merge — one write wins outright.
+2. Why splitting "position" and "animated transform" onto two nested elements is the general fix for that class of bug, not just a one-off patch.
+3. What `next/font/google`'s `variable` option actually generates, and why giving two different fonts colliding CSS variable names (`--font-mono` used by both Tailwind's theme and JetBrains Mono's injected variable) would have caused a silent bug.
+
 ## Phase 1 — Landing page + interactive knowledge map
 
 **Date:** 2026-09-19

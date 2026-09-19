@@ -18,6 +18,8 @@ The website is called:
 
 The Rendering Lab
 
+> Renamed during Phase 1 (2026-09-19) to **Critical Path** — the original name read as generic; the new one is a real, recognizable term from browser performance work ("critical rendering path") that fits the technical-lab brand. See learning-notes/00-build-log.md. The rest of this spec's product description, concepts, and requirements are unaffected — only the display name changed.
+
 Tagline:
 
 Explore how the modern web turns a request into pixels.

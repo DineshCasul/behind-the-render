@@ -32,21 +32,30 @@ export function MapNode({
   const { x, y } = concept.position;
 
   return (
-    <motion.g
-      transform={`translate(${x}, ${y})`}
-      onMouseEnter={() => onHover(concept.id)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(concept.id)}
-      onBlur={() => onHover(null)}
-      onClick={() => onSelect(concept.id)}
-      tabIndex={0}
-      role="button"
-      aria-label={`${concept.title} — ${status.replace("-", " ")}`}
-      className="cursor-pointer outline-none"
-      animate={{ opacity: dimmed ? 0.3 : 1 }}
-      whileHover={{ scale: 1.06 }}
-      transition={{ duration: 0.25 }}
-    >
+    // Plain, non-animated <g> owns positioning. Framer Motion writes its
+    // own `transform` (scale, etc.) onto whatever element it's attached
+    // to — if that same element also carried `transform="translate(x,y)"`,
+    // Motion's generated transform replaces it outright the moment a
+    // `whileHover`/`animate` transform kicks in, snapping the node to the
+    // SVG's (0,0) origin. Nesting a motion.g *inside* the positioned <g>
+    // keeps "where" and "how it moves" as separate concerns — the inner
+    // group's own local origin is already the node's center, so scaling
+    // around (0,0) there is exactly "scale in place."
+    <g transform={`translate(${x}, ${y})`}>
+      <motion.g
+        onMouseEnter={() => onHover(concept.id)}
+        onMouseLeave={() => onHover(null)}
+        onFocus={() => onHover(concept.id)}
+        onBlur={() => onHover(null)}
+        onClick={() => onSelect(concept.id)}
+        tabIndex={0}
+        role="button"
+        aria-label={`${concept.title} — ${status.replace("-", " ")}`}
+        className="cursor-pointer outline-none"
+        animate={{ opacity: dimmed ? 0.3 : 1 }}
+        whileHover={{ scale: 1.06 }}
+        transition={{ duration: 0.25 }}
+      >
       {visual.glowOpacity > 0 && (
         <motion.circle
           r={RADIUS * 1.8}
@@ -103,6 +112,7 @@ export function MapNode({
       >
         {concept.title}
       </text>
-    </motion.g>
+      </motion.g>
+    </g>
   );
 }

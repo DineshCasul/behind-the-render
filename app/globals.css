@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg: #05070a;
-  --color-bg-elevated: #0b0f16;
-  --color-grid-line: rgba(255, 255, 255, 0.05);
-  --color-text-primary: #e7ecf3;
-  --color-text-muted: #8b95a7;
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-bg: #050608;
+  --color-bg-elevated: #0b0e14;
+  --color-grid-line: rgba(255, 255, 255, 0.06);
+  --color-text-primary: #e9edf4;
+  --color-text-muted: #8891a3;
+  --color-border: rgba(255, 255, 255, 0.09);
 
   /* Node state colors — the only accent hues in the whole UI. */
   --state-not-started: #4b5563;
@@ -19,8 +19,8 @@
 @theme inline {
   --color-background: var(--color-bg);
   --color-foreground: var(--color-text-primary);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
@@ -28,17 +28,39 @@ body {
   color: var(--color-text-primary);
 }
 
+/* Blueprint-style grid, faint measurement ticks along two edges to read
+   as instrumentation rather than decoration. */
 .bg-grid {
   background-image:
     linear-gradient(to right, var(--color-grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--color-grid-line) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background-size: 44px 44px;
 }
 
+.bg-grid-fine {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 11px 11px;
+}
+
+/* Asymmetric lab-lighting blooms instead of one centered vignette —
+   two off-center color pools plus a darkening edge, closer to how a
+   physical instrument panel is lit than a flat SaaS gradient. */
 .bg-vignette {
-  background: radial-gradient(
-    ellipse at 50% 30%,
-    rgba(94, 203, 240, 0.08),
-    transparent 60%
-  );
+  background:
+    radial-gradient(60% 50% at 20% 15%, rgba(94, 203, 240, 0.09), transparent 65%),
+    radial-gradient(55% 45% at 85% 75%, rgba(185, 139, 240, 0.07), transparent 65%),
+    radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* A thin, almost subliminal grain to break up flat gradient banding and
+   read as filmic rather than digitally flat. */
+.bg-grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/></svg>");
+  background-size: 120px 120px;
+}
+
+.text-glow {
+  text-shadow: 0 0 40px rgba(94, 203, 240, 0.25);
 }
