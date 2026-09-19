@@ -11,7 +11,7 @@ export function Hero() {
         01 — A developer laboratory
       </p>
       <h1 className="text-glow relative mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-[var(--color-text-primary)] sm:text-7xl">
-        Critical Path
+        Behind the Render
       </h1>
       <p className="relative mt-5 max-w-xl text-balance text-base text-[var(--color-text-muted)] sm:text-lg">
         Explore how the modern web turns a request into pixels.

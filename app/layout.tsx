@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Critical Path",
+  title: "Behind the Render",
   description: "Explore how the modern web turns a request into pixels.",
 };
 

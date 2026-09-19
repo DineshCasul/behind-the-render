@@ -1,5 +1,51 @@
 # Build Log
 
+## Phase 1.2 — Tooltip clipping, scroll-driven layout, panel-as-layout
+
+**Date:** 2026-09-19
+
+Three more rounds of feedback:
+
+- **Tooltip clipping at edge nodes.** `MapTooltip` centered itself on the
+  hovered node with `-translate-x-1/2`; for nodes near the map's left/right
+  edge (HTTP, Streaming) that pushed roughly half the tooltip past the
+  container, which `overflow-hidden` then clipped. Fixed two ways: moved
+  `overflow-hidden` off the outer wrapper onto an inner one that only
+  clips the SVG (so tooltip/panel are never subject to it), and replaced
+  the transform-based centering with a `clamp()`-based `left`/`top` — the
+  tooltip still centers on the node everywhere in the middle of the map,
+  but slides to stay fully inside a fixed 8px inset near the edges instead
+  of overflowing.
+- **Renamed again**, to **Behind the Render** (the user proposed it
+  directly) — "Critical Path" is still mentioned in `CLAUDE.md`'s history
+  note for continuity.
+- **Scroll-driven layout** (`components/home/ScrollExperience.tsx`, new):
+  the hero fades out (opacity + a small upward drift) as it scrolls past
+  the top of the viewport, using `useScroll` targeted at the hero's own
+  element rather than a raw window-scroll listener — the fade is tied to
+  *that element's* scroll progress, not an arbitrary pixel threshold.
+  Once the hero has mostly scrolled away, the map sheds its "card" look
+  (max width, padding, rounded corners) and expands edge-to-edge. The
+  discrete expand/collapse state is derived from the same continuous
+  scroll value via `useMotionValueEvent`, only calling `setState` when it
+  actually flips — not on every scroll pixel.
+- **Concept panel stopped covering nodes.** It was `absolute right-4
+  top-4`, which sat directly on top of Hydration/Server Components/
+  Streaming (all positioned in the map's top-right). Restructured
+  `LearningMap` as a CSS grid with the panel as a real second column
+  (`grid-template-columns` transitions from `1fr 0rem` to `1fr 20rem`)
+  instead of an overlay — opening the panel now shrinks the map's column
+  and the SVG scales down with it (still `w-full`, same viewBox), so every
+  node stays visible rather than being hidden underneath a floating card.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why `useScroll({ target, offset: ["start start", "end start"] })` produces a 0→1 progress value tied to one element's position, and how that differs from listening to `window.scroll` directly.
+2. Why deriving a boolean from a continuous Framer Motion value with `useMotionValueEvent` (rather than `useTransform` + reading `.get()` in render) avoids unnecessary re-renders.
+3. Why "shrink the layout" (CSS grid columns) is a more robust fix for "panel covers content" than "raise the z-index of the map" would have been.
+
 ## Phase 1.1 — Visual identity pass + hover bug fix
 
 **Date:** 2026-09-19

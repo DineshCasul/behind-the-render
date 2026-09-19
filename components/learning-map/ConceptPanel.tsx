@@ -17,12 +17,16 @@ export function ConceptPanel({ concept, progress, onSetStatus, onClose }: Concep
   return (
     <AnimatePresence>
       {concept && (
+        // No positioning classes here — this fills whatever box its
+        // parent grid column gives it (see LearningMap.tsx). Only opacity
+        // is animated, so there's nothing to collide with that column's
+        // own width transition.
         <motion.aside
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 24 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="absolute right-4 top-4 z-30 w-[min(20rem,calc(100%-2rem))] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/95 p-4 shadow-xl backdrop-blur-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="h-full w-80 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/95 p-4 shadow-xl backdrop-blur-md"
         >
           <div className="flex items-start justify-between gap-2">
             <div>
