@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #05070a;
+  --color-bg-elevated: #0b0f16;
+  --color-grid-line: rgba(255, 255, 255, 0.05);
+  --color-text-primary: #e7ecf3;
+  --color-text-muted: #8b95a7;
+  --color-border: rgba(255, 255, 255, 0.08);
+
+  /* Node state colors — the only accent hues in the whole UI. */
+  --state-not-started: #4b5563;
+  --state-learning: #5ecbf0;
+  --state-got-it: #55e0c9;
+  --state-revisit: #f0b429;
+  --state-mastered: #b98bf0;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--color-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-vignette {
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(94, 203, 240, 0.08),
+    transparent 60%
+  );
 }
