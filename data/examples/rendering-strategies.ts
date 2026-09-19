@@ -97,7 +97,7 @@ export const renderingStrategiesExamples: Record<"csr" | "ssr" | "ssg" | "isr", 
 
   ssg: {
     whatIsThis: {
-      title: "How this site prebuilds its 12 lesson pages",
+      title: "How this site prebuilds its lesson pages",
       snippets: [
         {
           lang: "tsx",

@@ -107,6 +107,17 @@ export function StoryStepView({ step }: { step: StoryStep }) {
             {step.tryThis.map((s) => (
               <li key={s.text} className="text-sm leading-relaxed text-[var(--color-text-primary)]">
                 <Prose text={s.text} />
+                {s.lesson && (
+                  <>
+                    {" "}
+                    <Link
+                      href={`/learn/${s.lesson.id}?story=${step.id}#${s.lesson.section}`}
+                      className="text-[var(--state-got-it)] underline underline-offset-4"
+                    >
+                      {s.lesson.label} <span aria-hidden>→</span>
+                    </Link>
+                  </>
+                )}
                 {s.href && (
                   <>
                     {" "}

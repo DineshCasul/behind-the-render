@@ -45,17 +45,16 @@ export const nextUp: Record<ConceptId, NextUp[]> = {
   ],
   hydration: [
     { topic: "Selective hydration with Suspense", why: "Hydration does not have to be all or nothing: parts of the page can hydrate independently, and the part a visitor interacts with first can jump the queue.", url: "https://react.dev/reference/react/Suspense" },
-    { topic: "hydrateRoot", why: "The API that does the attaching. Reading its notes on mismatches makes hydration errors much easier to debug.", url: "https://react.dev/reference/react-dom/client/hydrateRoot" },
   ],
   "server-components": [
     { topic: "Fetching data in Server Components", why: "The reason Server Components matter in practice: data access next to the component, and how to avoid slow request chains.", url: "https://nextjs.org/docs/app/getting-started/fetching-data" },
     { topic: "The use API", why: "Lets a component read a promise or context, including a promise started on the server.", url: "https://react.dev/reference/react/use" },
   ],
   streaming: [
-    { topic: "Suspense boundaries", why: "Streaming decides where the page can be sent in pieces; Suspense boundaries are where you draw those pieces.", url: "https://react.dev/reference/react/Suspense" },
+    { topic: "The use API with promises", why: "A server component can start a request and pass the promise down; a component reads it with use and Suspense shows a fallback until it resolves. This is streaming applied to data.", url: "https://react.dev/reference/react/use" },
   ],
   caching: [
-    { topic: "HTTP caching (Cache-Control, validation, freshness)", why: "Every framework cache sits on top of these rules. Knowing them lets you reason about CDNs and browsers.", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching" },
+    { topic: "The Vary header and cache keys", why: "A shared cache stores one copy per URL unless told otherwise. Vary decides when two requests for the same URL must get separate copies, which is where a lot of real caching bugs live.", url: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Vary" },
   ],
   seo: [
     { topic: "Structured data", why: "Beyond a good title, markup that describes what a page is (an event, a product) can make search results richer.", url: "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data" },
@@ -69,6 +68,6 @@ export const nextUp: Record<ConceptId, NextUp[]> = {
     { topic: "Long Animation Frames API", why: "Shows which scripts caused a slow frame, so a poor INP can be traced to a cause.", url: "https://developer.chrome.com/docs/web-platform/long-animation-frames", caveat: "Browser support is limited, so check the page before depending on it." },
   ],
   "client-components": [
-    { topic: "Lazy loading Client Components", why: "A boundary keeps server code out of the bundle. Lazy loading also keeps client code you don't need yet out of the first load.", url: "https://nextjs.org/docs/app/guides/lazy-loading" },
+    { topic: "Server Functions (use server)", why: "A small Client Component often needs to call back into the server, for example to hold a seat. Server Functions are how React models that call.", url: "https://react.dev/reference/rsc/use-server" },
   ],
 };

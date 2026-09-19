@@ -103,15 +103,15 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
 
   ssg: {
     status: "used",
-    headline: "All 12 lessons are generated at build time.",
+    headline: "Every lesson page is generated at build time.",
     explanation:
       "The lesson route lists every concept id with `generateStaticParams`, so `next build` renders each lesson once into a static HTML file. The home page is prerendered the same way.",
     evidence: [
-      { path: "app/learn/[slug]/page.tsx", what: "generateStaticParams returns all 12 concept ids" },
+      { path: "app/learn/[slug]/page.tsx", what: "generateStaticParams returns every concept id" },
       { path: "app/page.tsx", what: "prerendered static content" },
     ],
     verify: [
-      "Run `npm run build`: the 12 /learn/* routes show as ● (SSG) and / shows as ○ (Static).",
+      "Run `npm run build`: the /learn/* routes show as ● (SSG) and / shows as ○ (Static).",
       "Then run `npm run start` and `curl -I localhost:3000/learn/ssr`. The header `x-nextjs-cache: HIT` says it came straight from a prebuilt file.",
     ],
     notes: ["08-dynamic-routes-and-static-generation"],
@@ -144,7 +144,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
       "Now watch the Elements panel while hovering: only a couple of ring circles and opacity values change, the rest of the SVG is untouched.",
     ],
     whyNot:
-      "It would be easy to wrap MapNode in `memo` to skip the extra renders, but with 12 nodes the cost is negligible. You'd add it after measuring a real slowdown, not before.",
+      "It would be easy to wrap MapNode in `memo` to skip the extra renders, but with only a handful of nodes the cost is negligible. You'd add it after measuring a real slowdown, not before.",
   },
 
   hydration: {
@@ -167,7 +167,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     status: "used",
     headline: "Lesson pages are Server Components. Only the interactive parts are Client Components.",
     explanation:
-      "The lesson page, its section components, the glossary and the lesson text run only on the server, so that code is never sent to your browser. Only parts that need state ship as JavaScript: the interview accordion, the experiments and the status buttons. Not everything stays server-side, though: the concept data behind the map (including the topic hints) does ship to the home page, because the map panel needs it.",
+      "The lesson page, its section components and the lesson text (including the glossary matching) run only on the server, so that code is not sent to your browser. Only parts that need state or browser measurements ship as JavaScript: the Test yourself accordion, the experiments, the status buttons, the glossary hover cards (they position themselves on screen) and the interactive story demos. Not everything stays server-side, though: the concept data behind the map (including the topic hints) does ship to the home page, because the map panel needs it.",
     evidence: [
       { path: "app/learn/[slug]/page.tsx", what: "a Server Component that renders the whole lesson" },
       { path: "components/lesson/Prose.tsx", what: "glossary matching runs on the server only" },
@@ -175,7 +175,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
       { path: "components/experiments/", what: "'use client': interactive by nature" },
     ],
     verify: [
-      "On the HTTP lesson, open DevTools and search the downloaded .js files for `phone book` (the DNS hover text). It's not in any script, only in the page's HTML.",
+      "On the HTTP lesson, open DevTools and search the downloaded .js files for `phone book` (the DNS hover text). It's not in any downloaded .js file: it comes with the page's HTML.",
       "Search for `Every layer missed`, text from the caching experiment. That one is in a script, because the experiment has to run in the browser.",
     ],
     notes: ["01-nextjs-app-router-boundaries", "09-content-as-data-discriminated-experiments"],
@@ -198,7 +198,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     status: "partly",
     headline: "Caching is happening, but it's the platform doing it, not our code.",
     explanation:
-      "In production, prebuilt pages are sent with `Cache-Control: s-maxage=31536000`, which tells a CDN it may keep them for a year, and Next.js serves them from its own cache (`x-nextjs-cache: HIT`). Hashed JS and CSS files are marked `immutable`, so the browser never re-downloads them. (Measured against `next start`; the dev server behaves differently.)",
+      "In production, prebuilt pages are sent with `Cache-Control: s-maxage=31536000`, which tells a CDN it may keep them for a year, and Next.js serves them from its own cache (`x-nextjs-cache: HIT`). Hashed JS and CSS files are marked `immutable`, so the browser can reuse them without asking the server again. (Measured against `next start`; the dev server behaves differently.)",
     evidence: [
       { path: "lib/storage.ts", what: "localStorage for progress: a browser-side store, not an HTTP cache" },
     ],

@@ -31,7 +31,7 @@ export const webFundamentalsLessons: Lesson[] = [
       withoutJs: "The entire request/response cycle already happens with zero JavaScript, that's exactly why a plain server-rendered HTML page works with JS disabled.",
     },
     reactNextConnection:
-      "React itself has no opinion on HTTP, `fetch` (a browser/Node API) does the talking. Next.js extends `fetch` with automatic request deduplication and caching, and Server Actions are, underneath, just HTTP requests the framework wires up for you.",
+      "React itself has no opinion on HTTP, `fetch` (a browser/Node API) does the talking. Next.js extends `fetch` with automatic deduplication of identical requests during a render, and opt-in caching, and Server Actions are, underneath, just HTTP requests the framework wires up for you.",
     whyUseIt: [
       "A universal protocol every browser and server already implements, no custom transport needed",
       "Statelessness makes servers trivially easy to scale horizontally",

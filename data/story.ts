@@ -25,7 +25,6 @@ export type StoryVisualSpec =
   | { kind: "phone"; strategy: "csr" | "ssr" | "ssg" | "isr" }
   | { kind: "distance" }
   | { kind: "tap" }
-  | { kind: "crowd" }
   | { kind: "crawler" }
   | { kind: "compare" }
   | { kind: "anatomy" }
@@ -65,7 +64,13 @@ export interface StoryStep {
   /** For steps without a decision. */
   next?: { label: string; to: string };
   /** Small experiments the reader can run themselves, in Firefox or in this repo. */
-  tryThis?: { text: string; href?: string }[];
+  tryThis?: {
+    text: string;
+    /** An outside guide. */
+    href?: string;
+    /** The lesson that already holds the step-by-step instructions (one place for them). */
+    lesson?: { id: ConceptId; section: string; label: string };
+  }[];
   /** Concepts the story will need later that aren't lessons yet. Honest placeholders. */
   comingSoon?: { topic: string; why: string }[];
 }
@@ -85,7 +90,7 @@ export const storySteps: StoryStep[] = [
       "Notice that nothing on that list says \"rendering strategy\". You will be choosing one anyway, by accident or on purpose.",
     ],
     problem: "Four requirements that quietly pull in different directions. Where does the HTML for a show page come from?",
-    tryThis: [{"text": "Before you start: open any ticketing or shop site, press Ctrl+U (View Page Source) and search for the event or product name. If it is in the raw HTML, a crawler gets it on the first request. If not, it arrives later, via JavaScript."}],
+    tryThis: [{"text": "Before you start: check whether a real site's content is in its raw HTML, not just on screen. The raw HTML is what a crawler receives first.", "lesson": {"id": "ssr", "section": "what-is-this", "label": "Step by step in the SSR lesson"}}],
     visuals: [{"kind": "crawler"}],
     concepts: [
       { id: "seo", why: "\"Findable on Google\" is a requirement, so what a crawler receives matters." },
@@ -128,7 +133,6 @@ export const storySteps: StoryStep[] = [
       "And Google? It renders JavaScript, but as a **separate, queued step** after it fetches your HTML. For a page that must be found, you have made your most important content wait in a line.",
     ],
     problem: "The first thing a visitor and a crawler receive is nothing. Can the server send something real?",
-    tryThis: [{"text": "View Page Source (Ctrl+U) on a client-rendered app and compare it with what the Inspector shows. The source is what a crawler fetches first; the Inspector shows the page after JavaScript ran."}],
     visuals: [{"kind": "phone", "strategy": "csr"}],
     concepts: [
       { id: "csr", why: "This is what you just chose." },
@@ -149,7 +153,7 @@ export const storySteps: StoryStep[] = [
       "SSR solved \"what does the first response contain\". It also made the server the busiest character in the story.",
     ],
     problem: "Rendering per request is fresh but expensive, and the distance is built in. Do you really need to build this page for every fan?",
-    tryThis: [{"text": "In Firefox DevTools, open the Network tab, reload any page and select the first (document) request. The Timings tab has a \"Waiting\" phase: that is time before the first byte arrived, and distance and server work both live inside it."}],
+    tryThis: [{"text": "See the waiting in a real request: the browser's network timings split a request into phases, including time spent waiting for the first byte.", "lesson": {"id": "http", "section": "how-it-works", "label": "Step by step in the HTTP lesson"}}],
     visuals: [{"kind": "anatomy"}, {"kind": "distance"}],
     concepts: [
       { id: "ssr", why: "This is what you just chose." },
@@ -173,7 +177,7 @@ export const storySteps: StoryStep[] = [
       "So what about the seat count? A build at 8:00 does not know how many seats are left at 9:00:01.",
     ],
     problem: "Static pages are fast and cheap, but frozen at build time. Tickets sell out in seconds.",
-    tryThis: [{"text": "This site does this: run `npm run build` and look for the ● (SSG) marker next to the /learn and /story routes."}],
+    tryThis: [{"text": "This site is built this way: the build output marks each page as prebuilt.", "lesson": {"id": "ssg", "section": "in-this-site", "label": "How to check it in the SSG lesson"}}],
     visuals: [{"kind": "phone", "strategy": "ssg"}],
     concepts: [
       { id: "ssg", why: "This is what you just chose." },
@@ -213,7 +217,7 @@ export const storySteps: StoryStep[] = [
       "This is exactly what the *responsiveness* metric measures, and it is why a page can look fast and feel slow.",
     ],
     problem: "Hydrating everything makes the browser do a lot of work, much of it for parts of the page that never needed to be interactive.",
-    tryThis: [{"text": "On this site, turn JavaScript off in Firefox (about:config, javascript.enabled set to false) and open a lesson: the text is all there, but the buttons no longer respond. That is exactly this step."}],
+    tryThis: [{"text": "Feel the gap between visible and clickable: slow the network down and click before the page is ready.", "lesson": {"id": "hydration", "section": "why-it-exists", "label": "Step by step in the Hydration lesson"}}],
     visuals: [{"kind": "tap"}],
     concepts: [
       { id: "hydration", why: "The HTML needs behavior attached before taps do anything." },
@@ -319,7 +323,7 @@ export const storySteps: StoryStep[] = [
       "That last idea, **personalization**, is the natural enemy of caching, and it is where a lot of real-world architecture gets interesting.",
     ],
     problem: "You now have a design with several moving parts. How would you know it actually works for real fans?",
-    tryThis: [{"text": "On this site, run `npm run build`, then `npm run start`, then `curl -I localhost:3000/learn/ssr` and read the Cache-Control header. That is a real cache instruction, not a diagram."}],
+    tryThis: [{"text": "See a real cache instruction on this site: the Cache-Control header of a prebuilt page.", "lesson": {"id": "caching", "section": "in-this-site", "label": "How to check it in the Caching lesson"}}],
     visuals: [{"kind": "herd"}],
     concepts: [
       { id: "caching", why: "Do the expensive work once and reuse it, at the layer closest to the fan." },
@@ -436,7 +440,7 @@ export const storySteps: StoryStep[] = [
       "You have made a lot of decisions. The honest way to check them is to measure what real visitors experience, not what your development machine does. That means the three Core Web Vitals (loading, responsiveness, stability), and the difference between **lab data** (a controlled test) and **field data** (real people on real devices).",
       "If the loading number is bad, look at time to first byte and the size of what you send. If responsiveness is bad, look for long tasks and heavy hydration on the main thread. If the layout jumps, look at what arrives late and pushes things around. Each symptom points back to a decision in this story.",
     ],
-    tryThis: [{"text": "In Firefox DevTools, open the Performance panel, record a page load, and look for long tasks on the main thread. That is a lab measurement you can take right now."}],
+    tryThis: [{"text": "Take a lab measurement yourself: record a page load in the browser's Performance panel.", "lesson": {"id": "web-vitals", "section": "in-this-site", "label": "How to do it in the Web Vitals lesson"}}],
     visuals: [{"kind": "diagnose"}],
     concepts: [
       { id: "web-vitals", why: "The numbers that tell you whether the decisions worked, and for whom." },

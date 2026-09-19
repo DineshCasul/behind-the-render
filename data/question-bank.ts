@@ -190,25 +190,6 @@ export const questionBank: BankQuestion[] = [
   {
     "id": 9,
     "level": "easy",
-    "concept": "client-components",
-    "question": "What does the \"use client\" directive do?",
-    "answer": "It marks a module, and everything that module imports, as client code that ships to the browser. It is a boundary between server code and client code, not a label on a single component.",
-    "related": [
-      "Server vs Client Components",
-      "Bundle size optimization",
-      "Serialization",
-      "Composition pattern (children as props)"
-    ],
-    "learnMore": [
-      {
-        "title": "'use client' directive (React)",
-        "url": "https://react.dev/reference/rsc/use-client"
-      }
-    ]
-  },
-  {
-    "id": 10,
-    "level": "easy",
     "concept": "server-components",
     "question": "Where do Server Components run, and is their code sent to the browser?",
     "answer": "They run on the server (at build time or per request). Their source code is not sent to the browser: only their rendered output is.",
@@ -226,7 +207,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 11,
+    "id": 10,
     "level": "medium",
     "concept": "html-parsing",
     "question": "What do the async and defer attributes on a script tag change?",
@@ -245,26 +226,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 12,
-    "level": "medium",
-    "concept": "browser-rendering",
-    "question": "Why is animating transform and opacity cheaper than animating width or top?",
-    "answer": "Changing transform or opacity can be handled by the compositor without redoing layout or paint. Changing width or top forces the browser to recalculate layout, and usually repaint, on the main thread.",
-    "related": [
-      "Reflow vs repaint",
-      "Compositor and GPU layers",
-      "will-change",
-      "requestAnimationFrame"
-    ],
-    "learnMore": [
-      {
-        "title": "Stick to compositor-only properties (web.dev)",
-        "url": "https://web.dev/articles/stick-to-compositor-only-properties-and-manage-layer-count"
-      }
-    ]
-  },
-  {
-    "id": 13,
+    "id": 11,
     "level": "medium",
     "concept": "ssr",
     "question": "What is the practical difference between SSR and SSG?",
@@ -283,7 +245,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 14,
+    "id": 12,
     "level": "medium",
     "concept": "isr",
     "question": "What does Incremental Static Regeneration do?",
@@ -302,7 +264,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 15,
+    "id": 13,
     "level": "medium",
     "concept": "isr",
     "question": "What does stale-while-revalidate mean?",
@@ -321,7 +283,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 16,
+    "id": 14,
     "level": "medium",
     "concept": "hydration",
     "question": "Why can a server-rendered page look ready but ignore taps?",
@@ -340,7 +302,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 17,
+    "id": 15,
     "level": "medium",
     "concept": "js-main-thread",
     "question": "What is a long task, and why does it matter?",
@@ -359,7 +321,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 18,
+    "id": 16,
     "level": "medium",
     "concept": "web-vitals",
     "question": "What is the difference between lab data and field data?",
@@ -378,7 +340,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 19,
+    "id": 17,
     "level": "medium",
     "concept": "seo",
     "question": "How does Google process a page that needs JavaScript to show its content?",
@@ -397,7 +359,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 20,
+    "id": 18,
     "level": "medium",
     "concept": "client-components",
     "question": "What must props be when a Server Component passes them to a Client Component?",
@@ -416,7 +378,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 21,
+    "id": 19,
     "level": "medium",
     "concept": "streaming",
     "question": "What is streaming, and how do Suspense boundaries relate to it?",
@@ -439,7 +401,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 22,
+    "id": 20,
     "level": "medium",
     "concept": "caching",
     "question": "What is the difference between max-age and s-maxage in Cache-Control?",
@@ -458,7 +420,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 23,
+    "id": 21,
     "level": "medium",
     "concept": "caching",
     "question": "In Next.js 16, is a fetch request cached by default?",
@@ -477,7 +439,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 24,
+    "id": 22,
     "level": "medium",
     "concept": "hydration",
     "question": "Why must the HTML from the server match what the client renders first?",
@@ -500,7 +462,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 25,
+    "id": 23,
     "level": "medium",
     "concept": "http",
     "question": "What happens between typing a URL and seeing the page?",
@@ -523,7 +485,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 26,
+    "id": 24,
     "level": "medium",
     "concept": "csr",
     "question": "When is client-side rendering still a good choice?",
@@ -546,30 +508,34 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 27,
-    "level": "hard",
-    "concept": "web-vitals",
-    "question": "A page moved from CSR to SSR. Which metrics would you expect to improve, and which could get worse?",
-    "answer": "LCP usually improves because content is in the first response. Time to first byte can get worse because the server now does work before responding. INP can stay the same or get worse until hydration finishes, since the page looks ready before it can respond.",
+    "id": 25,
+    "level": "medium",
+    "concept": "browser-rendering",
+    "question": "What are preload, prefetch and preconnect for, and how do they differ?",
+    "answer": "All three let the browser start work early. preload fetches a resource the current page will need soon, at a higher priority, such as the LCP image or a font. prefetch fetches something a future navigation is likely to need and keeps it in the HTTP cache. preconnect only does the connection setup (DNS, TCP and, for HTTPS, TLS) to an origin you will request from soon, without downloading anything.",
     "related": [
-      "Time to first byte (TTFB)",
-      "Largest Contentful Paint (LCP)",
-      "Interaction to Next Paint (INP)",
-      "Hydration cost"
+      "Resource hints",
+      "Critical rendering path",
+      "Image and font loading",
+      "Speculation Rules"
     ],
     "learnMore": [
       {
-        "title": "Optimize Interaction to Next Paint (web.dev)",
-        "url": "https://web.dev/articles/optimize-inp"
+        "title": "rel=preload (MDN)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preload"
       },
       {
-        "title": "Web Vitals (web.dev)",
-        "url": "https://web.dev/articles/vitals"
+        "title": "rel=prefetch (MDN)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/prefetch"
+      },
+      {
+        "title": "rel=preconnect (MDN)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel/preconnect"
       }
     ]
   },
   {
-    "id": 28,
+    "id": 26,
     "level": "hard",
     "concept": "client-components",
     "question": "Client Components are marked \"client\". Are they rendered on the server at all?",
@@ -588,7 +554,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 29,
+    "id": 27,
     "level": "hard",
     "concept": "client-components",
     "question": "Why is putting \"use client\" high in the component tree costly?",
@@ -607,7 +573,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 30,
+    "id": 28,
     "level": "hard",
     "concept": "isr",
     "question": "You have 50,000 product pages whose data changes about once an hour. Which rendering approach would you weigh, and why?",
@@ -630,7 +596,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 31,
+    "id": 29,
     "level": "hard",
     "concept": "react-rendering",
     "question": "What are React's render and commit phases?",
@@ -649,7 +615,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 32,
+    "id": 30,
     "level": "hard",
     "concept": "react-rendering",
     "question": "Why do keys matter in a list?",
@@ -672,7 +638,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 33,
+    "id": 31,
     "level": "hard",
     "concept": "hydration",
     "question": "Why is useSyncExternalStore a good fit for reading localStorage in a server-rendered app?",
@@ -691,26 +657,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 34,
-    "level": "hard",
-    "concept": "seo",
-    "question": "What does Google say about dynamic rendering (serving crawlers a pre-rendered version)?",
-    "answer": "It describes it as a workaround, not a recommended solution, because it adds complexity and resource costs. Server-side rendering or pre-rendering is the better long-term approach.",
-    "related": [
-      "SEO for SPAs",
-      "Server-side rendering",
-      "Prerendering",
-      "Cloaking risk"
-    ],
-    "learnMore": [
-      {
-        "title": "Dynamic Rendering as a workaround (Google)",
-        "url": "https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering"
-      }
-    ]
-  },
-  {
-    "id": 35,
+    "id": 32,
     "level": "hard",
     "concept": "js-main-thread",
     "question": "How can you give the main thread back in the middle of a long job, and what is the browser-support caveat?",
@@ -733,7 +680,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 36,
+    "id": 33,
     "level": "hard",
     "concept": "server-components",
     "question": "SSR, Server Components, hydration and streaming are often mixed up. What does each one concern?",
@@ -756,7 +703,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 37,
+    "id": 34,
     "level": "hard",
     "concept": "caching",
     "question": "Why can't a shared CDN cache safely hold a page that is personalized for one user?",
@@ -779,7 +726,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 38,
+    "id": 35,
     "level": "hard",
     "concept": "web-vitals",
     "question": "How would you improve a poor LCP on a server-rendered page?",
@@ -802,7 +749,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 39,
+    "id": 36,
     "level": "hard",
     "concept": "server-components",
     "question": "What is a request waterfall in data fetching, and how do you avoid it?",
@@ -821,7 +768,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 40,
+    "id": 37,
     "level": "hard",
     "concept": "web-vitals",
     "question": "LCP is good but INP is poor. What do you suspect and what do you check?",
@@ -844,7 +791,45 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 41,
+    "id": 38,
+    "level": "hard",
+    "concept": "react-rendering",
+    "question": "What does useTransition do, and when would you reach for it?",
+    "answer": "It marks a state update as a transition: non-urgent work that React renders in the background and can interrupt if something more urgent happens, such as the visitor typing. isPending lets you show a pending state. It fits expensive UI updates triggered by input, like filtering a large list. It doesn't make the work cheaper, only lets it yield, and it can't be used to control a text input itself.",
+    "related": [
+      "Concurrent rendering",
+      "useDeferredValue",
+      "Suspense",
+      "Main thread and long tasks"
+    ],
+    "learnMore": [
+      {
+        "title": "useTransition (React)",
+        "url": "https://react.dev/reference/react/useTransition"
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "level": "hard",
+    "concept": "client-components",
+    "question": "A Client Component calls a Server Function to hold a seat. What should the server code assume about its arguments?",
+    "answer": "Nothing: they are fully controlled by the client, so treat them as untrusted input. Validate and escape them, and check on the server that the logged-in user is allowed to perform that action. Calling a Server Function is a network request carrying a serialized copy of the arguments, so it is a public entry point, not an internal function call.",
+    "related": [
+      "Server Actions",
+      "Input validation",
+      "Authorization vs authentication",
+      "CSRF"
+    ],
+    "learnMore": [
+      {
+        "title": "'use server' directive (React)",
+        "url": "https://react.dev/reference/rsc/use-server"
+      }
+    ]
+  },
+  {
+    "id": 40,
     "level": "tricky",
     "concept": "seo",
     "question": "True or false: Google can't index JavaScript sites.",
@@ -863,7 +848,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 42,
+    "id": 41,
     "level": "tricky",
     "concept": "js-main-thread",
     "question": "True or false: async/await runs code in parallel.",
@@ -882,7 +867,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 43,
+    "id": 42,
     "level": "tricky",
     "concept": "web-vitals",
     "question": "True or false: a perfect Lighthouse score means real users have a fast experience.",
@@ -901,7 +886,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 44,
+    "id": 43,
     "level": "tricky",
     "concept": "ssr",
     "question": "True or false: with SSR, the page needs no JavaScript.",
@@ -920,26 +905,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 45,
-    "level": "tricky",
-    "concept": "server-components",
-    "question": "True or false: Server Components are just SSR under a new name.",
-    "answer": "False. SSR generates HTML on the server, and client components are server-rendered too. Server Components concern where component code runs and that its code never ships to the browser. They are separate ideas.",
-    "related": [
-      "SSR vs React Server Components",
-      "Server vs Client Components",
-      "RSC payload",
-      "Streaming"
-    ],
-    "learnMore": [
-      {
-        "title": "Server Components (React)",
-        "url": "https://react.dev/reference/rsc/server-components"
-      }
-    ]
-  },
-  {
-    "id": 46,
+    "id": 44,
     "level": "tricky",
     "concept": "ssg",
     "question": "True or false: if every page is prebuilt, the site doesn't need a server.",
@@ -958,45 +924,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 47,
-    "level": "tricky",
-    "concept": "caching",
-    "question": "A page is fast on your machine but slow in production. Is caching a likely cause?",
-    "answer": "Yes, it is one of the first things to suspect. A local development setup usually has no CDN or shared cache layer at all, so \"fast locally\" says little about how caching behaves in production.",
-    "related": [
-      "CDN caching",
-      "Cache layers (browser, CDN, server)",
-      "Cache invalidation",
-      "Production vs local parity"
-    ],
-    "learnMore": [
-      {
-        "title": "HTTP caching (MDN)",
-        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching"
-      }
-    ]
-  },
-  {
-    "id": 48,
-    "level": "tricky",
-    "concept": "client-components",
-    "question": "True or false: Client Components only run in the browser.",
-    "answer": "False. They are pre-rendered to HTML on the server for the first load and then hydrated. Only after that do they keep running in the browser.",
-    "related": [
-      "Prerendering",
-      "Hydration",
-      "RSC payload",
-      "Server vs Client Components"
-    ],
-    "learnMore": [
-      {
-        "title": "Server and Client Components (Next.js)",
-        "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components"
-      }
-    ]
-  },
-  {
-    "id": 49,
+    "id": 45,
     "level": "tricky",
     "concept": "web-vitals",
     "question": "True or false: INP is just FID renamed.",
@@ -1019,7 +947,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 50,
+    "id": 46,
     "level": "tricky",
     "concept": "client-components",
     "question": "You get \"Functions cannot be passed directly to Client Components\". What is happening?",
@@ -1038,7 +966,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 51,
+    "id": 47,
     "level": "tricky",
     "concept": "streaming",
     "question": "You wrap a slow part of the page in a Suspense boundary. Does the whole page finish loading sooner?",
@@ -1061,7 +989,7 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 52,
+    "id": 48,
     "level": "tricky",
     "concept": "caching",
     "question": "True or false: Cache-Control: no-cache means the response is never stored.",

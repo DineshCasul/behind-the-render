@@ -28,7 +28,7 @@ export const modernDeliveryLessons: Lesson[] = [
       withoutJs: "The streamed HTML still displays progressively and correctly, placeholders get swapped for real content by the server-driven stream regardless of JS. Only client-side interactivity within the streamed content requires JS, same as any other SSR content.",
     },
     reactNextConnection:
-      "React's `renderToPipeableStream` (server) and `<Suspense>` (marking \"this part can stream in later\") are the actual mechanism, a component tree wrapped in `<Suspense fallback={...}>` tells React exactly where a streaming boundary goes. Next.js's App Router wires this up automatically per route: wrapping a slow, data-dependent section in `<Suspense>` is enough to get a streaming boundary, no manual pipe/stream code required.",
+      "React's `renderToPipeableStream` (server) and `<Suspense>` (marking \"this part can stream in later\") are the actual mechanism, a component tree wrapped in `<Suspense fallback={...}>` tells React exactly where a streaming boundary goes. Next.js's App Router wires this up automatically per route: wrapping a slow, data-dependent section of a dynamically rendered route in `<Suspense>` is enough to get a streaming boundary, no manual pipe/stream code required. (A route that is fully prerendered at build time has nothing to stream at request time.)",
     whyUseIt: [
       "Lets fast content appear immediately even when one part of the page is slow, instead of the slowest part gating everything",
       "Improves perceived performance without necessarily reducing total server computation time, the *total* work is the same, but the user sees *something* sooner",

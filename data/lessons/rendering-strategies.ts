@@ -33,7 +33,7 @@ export const renderingStrategiesLessons: Lesson[] = [
       withoutJs: "The page is blank (or shows only whatever static fallback markup exists in the shell), CSR has no meaningful no-JS experience by construction.",
     },
     reactNextConnection:
-      "Classic Create React App-style apps are the canonical CSR example: `ReactDOM.createRoot(...).render(<App />)` runs entirely in the browser. In Next.js, any component marked `\"use client\"` with no server-rendered HTML ancestor for its content (or a page fully opted out of SSR) behaves this way, Next.js doesn't forbid CSR, it just makes it an explicit choice rather than the only option.",
+      "Classic Create React App-style apps are the canonical CSR example: `ReactDOM.createRoot(...).render(<App />)` runs entirely in the browser. In Next.js, `\"use client\"` alone is not CSR: Client Components are still prerendered to HTML on the first load. CSR is an explicit choice, for example a Client Component loaded with `next/dynamic` and `ssr: false`, or data fetched in an effect after the component mounts.",
     whyUseIt: [
       "Simplest server infrastructure: a CDN for static files plus an API is enough",
       "Feels native for highly interactive, state-heavy apps (dashboards, editors) where most content requires a logged-in user anyway (so SEO of that content doesn't matter)",
@@ -75,7 +75,7 @@ export const renderingStrategiesLessons: Lesson[] = [
       withoutJs: "The page displays fully and correctly, links, forms (via native submission), and any server-rendered content work. Anything requiring client-side interactivity (a counter, a modal toggle) simply won't respond to clicks.",
     },
     reactNextConnection:
-      "React's `renderToString`/`renderToPipeableStream` APIs are what actually generate the HTML on the server. Next.js's App Router renders Server Components (and any Client Components in the tree) to HTML on the server by default for every route unless you explicitly opt into static generation or client-only rendering, SSR is Next.js's default posture, not a special mode you turn on.",
+      "React's `renderToString`/`renderToPipeableStream` APIs are what actually generate the HTML on the server. Next.js's App Router renders Server Components (and prerenders any Client Components in the tree) to HTML on the server. Whether that happens once at build time or on every request depends on the route: a route that uses no per-request data is prerendered at build time, and one that reads things like cookies or headers is rendered per request. So server-side rendering is the default way HTML is produced, but per-request SSR is not.",
     whyUseIt: [
       "Fast, meaningful first paint: content is visible before any JS runs",
       "Crawlers see fully-formed HTML, no JS execution required for indexing",
@@ -149,7 +149,7 @@ export const renderingStrategiesLessons: Lesson[] = [
     ],
     serverVsBrowser: {
       server: ["Regenerates individual pages in the background on a schedule or trigger", "Still serves pre-built static files for the actual response"],
-      network: ["Same as SSG for any given request, the visitor is never blocked on regeneration"],
+      network: ["Same as SSG for a page that already exists: the visitor is not blocked while it regenerates. (A page that was never prebuilt is generated on its first request, and that first visitor does wait.)"],
       browser: ["Parses and paints whichever version (possibly momentarily stale) it received, identical to SSG/SSR from the browser's point of view"],
       jsRequired: "No, to see content: same as SSG/SSR, it's fully-formed HTML on arrival.",
       hydrationTiming: "Identical to SSR/SSG: ISR only changes *when a page's HTML gets regenerated on the server*, nothing about what happens in the browser.",
@@ -169,7 +169,7 @@ export const renderingStrategiesLessons: Lesson[] = [
     ],
     misconceptions: [
       { claim: "ISR means the page re-renders on every single request.", reality: "The opposite: it renders as rarely as possible, only when the revalidation window has passed or an on-demand trigger fires, and even then only in the background while stale content keeps serving." },
-      { claim: "ISR is just SSR with caching.", reality: "SSR-with-caching would still risk a slow/failed render blocking a request when the cache misses. ISR's defining trait is that a visitor is *never* blocked waiting for regeneration, they always get an immediate response, stale or fresh." },
+      { claim: "ISR is just SSR with caching.", reality: "SSR-with-caching would still risk a slow/failed render blocking a request when the cache misses. ISR's defining trait is that a visitor is not blocked while an existing page regenerates: they get the current copy immediately, stale or fresh. (The one exception is a page that was never prebuilt: the first request generates it on demand.)" },
     ],
   },
 ];

@@ -117,14 +117,14 @@ export const renderingStrategiesQuestions: Partial<Record<ConceptId, InterviewQu
     {
       category: "fundamentals",
       question: "What does a visitor receive when they request an ISR page whose revalidation window has expired?",
-      answer: "The existing (now stale) static file, immediately, never a wait for regeneration.",
-      reasoning: "This 'stale-while-revalidate' behavior is ISR's defining property: the visitor is never blocked on regeneration.",
+      answer: "The existing (now stale) static file, immediately, with no wait for regeneration. The rebuild happens in the background for the next visitor.",
+      reasoning: "This 'stale-while-revalidate' behavior is ISR's defining property: a visitor is not blocked while an existing page regenerates.",
       followUp: "What do subsequent visitors receive after that background regeneration finishes?",
     },
     {
       category: "tricky",
       question: "Is ISR the same thing as 'SSR with caching'?",
-      answer: "No: SSR-with-caching would still risk a slow or failed render blocking a request on a cache miss. ISR's guarantee is that a request is never blocked on regeneration; it always serves an existing static response immediately, stale or not.",
+      answer: "No: SSR-with-caching would still risk a slow or failed render blocking a request on a cache miss. ISR's guarantee is that a request is not blocked while an existing page regenerates: it serves the existing static response immediately, stale or not. (A page that was never generated is built on its first request, so that visitor does wait.)",
       reasoning: "The distinction is about failure/latency modes: a naive SSR cache can still degrade to an uncached, slow render under a cache miss; ISR structurally avoids that by always having *something* pre-built to serve.",
       followUp: "What happens under ISR if the very first request for a page arrives before it's ever been generated at all?",
     },

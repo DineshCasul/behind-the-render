@@ -236,65 +236,6 @@ function TapDemo() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// 4. 9:00:01: a crowd, with and without a cache
-// ---------------------------------------------------------------------------
-
-const FANS = 24;
-
-function Crowd() {
-  const [cached, setCached] = useState(false);
-  const reaching = cached ? 1 : FANS;
-  return (
-    <div className={box}>
-      <p className={`${tag} text-[var(--state-learning)]`}>Try it: everyone asks for the same page</p>
-      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Caching on or off">
-        {[
-          { v: false, label: "No cache" },
-          { v: true, label: "Cache in front of the server" },
-        ].map((o) => (
-          <button
-            key={o.label}
-            type="button"
-            aria-pressed={cached === o.v}
-            onClick={() => setCached(o.v)}
-            className="rounded-full border px-3 py-1.5 font-mono text-[11px] transition-colors"
-            style={{
-              borderColor: cached === o.v ? "var(--state-learning)" : "var(--color-border)",
-              color: cached === o.v ? "var(--state-learning)" : "var(--color-text-muted)",
-            }}
-          >
-            {o.label}
-          </button>
-        ))}
-      </div>
-      <div className="mt-4 grid grid-cols-12 gap-1.5" aria-hidden>
-        {Array.from({ length: FANS }).map((_, i) => (
-          <span
-            key={i}
-            className="h-3 rounded-full transition-colors duration-300"
-            style={{ background: !cached || i === 0 ? "var(--state-revisit)" : "var(--state-got-it)" }}
-          />
-        ))}
-      </div>
-      <p className="mt-2 font-mono text-[10px] text-[var(--color-text-muted)]">
-        <span style={{ color: "var(--state-revisit)" }}>amber</span> = this request makes the server do the work,{" "}
-        <span style={{ color: "var(--state-got-it)" }}>green</span> = answered from the cache
-      </p>
-      <p className="mt-3 text-sm text-[var(--color-text-primary)]">
-        Requests the server had to work on: <b>{reaching}</b> of {FANS}
-      </p>
-      <p className="mt-1 text-xs leading-snug text-[var(--color-text-muted)]">
-        {cached
-          ? "The first request does the real work and its result is saved. Everyone after it gets the saved copy."
-          : "Every fan triggers the same work again, at the same second."}{" "}
-        (Illustrative: a real cache doesn&apos;t split requests this neatly, and some requests can arrive before the first
-        result is saved.)
-      </p>
-    </div>
-  );
-}
-
 export function StoryVisual({ spec }: { spec: StoryVisualSpec }) {
   switch (spec.kind) {
     case "phone":
@@ -303,8 +244,6 @@ export function StoryVisual({ spec }: { spec: StoryVisualSpec }) {
       return <Distance />;
     case "tap":
       return <TapDemo />;
-    case "crowd":
-      return <Crowd />;
     case "crawler":
       return <CrawlerView />;
     case "compare":

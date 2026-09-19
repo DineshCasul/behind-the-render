@@ -36,11 +36,11 @@ interface LessonPageProps {
 }
 
 /**
- * Every concept id is known ahead of time (a fixed 12-entry list in
+ * Every concept id is known ahead of time (a fixed list in
  * data/concepts.ts), so every `/learn/*` page can be, and is, rendered
  * once at build time instead of per request. This is a live example of
  * Static Site Generation, one of the very concepts this project teaches:
- * `next build` actually produces 12 static HTML files here, not 12
+ * `next build` actually produces one static HTML file per concept here, not one
  * server functions that run on every visit. Verify it yourself with
  * `npm run build` and look for "○ (Static)" next to each /learn/* route.
  */
@@ -80,8 +80,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
     { id: "runtime", label: "Runtime" },
     { id: "server-vs-browser", label: "Server vs. browser" },
     { id: "react-next", label: "React / Next.js" },
-    { id: "why-use-it", label: "Why use it" },
-    { id: "tradeoffs", label: "Tradeoffs" },
+    { id: "why-use-it", label: "Why use it, and the cost" },
     { id: "misconceptions", label: "Misconceptions" },
     ...(lesson.experiment ? [{ id: "experiment", label: "Experiment" }] : []),
     { id: "in-this-site", label: "In this very site" },
@@ -138,7 +137,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {checksFor("react-next").map((c) => <BrowserCheckBox key={c.title} check={c} />)}
         </LessonSection>
 
-        <LessonSection id="why-use-it" heading="7. Why would we use this?">
+        {/* Benefits and costs are one decision, so they are one section. The inner
+            #tradeoffs anchor keeps the map panel's topic links (`#tradeoffs`) working. */}
+        <LessonSection id="why-use-it" heading="7. Why use it, and what it costs">
           <ul className="flex flex-col gap-2">
             {lesson.whyUseIt.map((reason, i) => (
               <li key={i} className="flex gap-2 text-[15px] text-[var(--color-text-primary)]">
@@ -149,13 +150,15 @@ export default async function LessonPage({ params }: LessonPageProps) {
               </li>
             ))}
           </ul>
+          <div id="tradeoffs" className="mt-6 scroll-mt-16">
+            <h3 className="font-mono text-[11px] uppercase tracking-widest text-[var(--state-revisit)]">What it costs</h3>
+            <div className="mt-3">
+              <TradeoffsGrid tradeoffs={lesson.tradeoffs} />
+            </div>
+          </div>
         </LessonSection>
 
-        <LessonSection id="tradeoffs" heading="8. Tradeoffs">
-          <TradeoffsGrid tradeoffs={lesson.tradeoffs} />
-        </LessonSection>
-
-        <LessonSection id="misconceptions" heading="9. Common misconceptions">
+        <LessonSection id="misconceptions" heading="8. Common misconceptions">
           <MisconceptionsList items={lesson.misconceptions} />
         </LessonSection>
 

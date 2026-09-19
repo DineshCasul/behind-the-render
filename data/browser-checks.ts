@@ -146,7 +146,7 @@ export const browserChecks: Partial<Record<ConceptId, BrowserCheck[]>> = {
         "As soon as the text appears, click one of the status buttons (Not started, Learning, ...) under the title. Keep trying every second.",
       ],
       expect: [
-        "The text appears long before the buttons respond. In a test with a slow connection, content was visible at 0.6 seconds and the buttons only worked at 6.6 seconds.",
+        "The text appears well before the buttons respond, and the slower the throttling, the bigger the gap.",
         "That gap is hydration: the HTML is there, but the JavaScript that attaches the click handlers is still arriving.",
       ],
     },

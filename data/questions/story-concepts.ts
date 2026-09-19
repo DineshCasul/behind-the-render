@@ -144,10 +144,10 @@ export const storyConceptQuestions: Partial<Record<ConceptId, InterviewQuestion[
     },
     {
       "category": "debugging",
-      "question": "You get \"Functions cannot be passed directly to Client Components\". What is happening?",
-      "answer": "A Server Component is passing a function as a prop across the server-client boundary. Props there must be serializable, and functions aren't. Move the logic into the Client Component, or use a Server Function where appropriate.",
-      "reasoning": "The props are serialized to travel from server to browser, and a function has no serialized form.",
-      "followUp": "Which prop types are safe to pass across the boundary?"
+      "question": "A Client Component imports a large charting library that is only used behind a tab most visitors never open. What do you do?",
+      "answer": "Load the chart on demand instead of with the page: import it lazily (next/dynamic or React.lazy) so its code is only downloaded when the tab is opened. Also check that the boundary isn't higher than it needs to be, since everything a client module imports ships with it.",
+      "reasoning": "The directive covers a module and its imports, so a heavy import in the client bundle is paid for by every visitor. Lazy loading turns it into a cost paid only by the people who use the feature.",
+      "followUp": "How would you confirm the library really left the initial bundle?"
     }
   ]
 };

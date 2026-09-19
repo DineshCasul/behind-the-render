@@ -1,5 +1,48 @@
 # Build Log
 
+## Tedium cleanup: glossary noise, merged section, duplicate questions, duplicate try-it steps
+
+**Date:** 2026-09-20
+
+1. **Glossary underlines halved (39 to 18 per lesson).** Each term is now underlined at most twice per page (was: once per paragraph, so "Cache" was underlined 22 times on the caching lesson). The count lives in a per-request `cache()` in `Prose.tsx`, shared by every `Prose` on a page and reset for each page render; checked in both dev and the production build.
+2. **"Why use it" and "Tradeoffs" are one section** ("Why use it, and what it costs"): both contents kept, one heading fewer, numbering fixed. The old `#tradeoffs` anchor still exists inside it, so the map panel's topic links land in the right place. **Honest result:** page height barely changed (lessons are still 7 to 10 phone screens), because the length is the content itself. Shortening further means cutting or collapsing content, which needs a decision.
+3. **Question overlap removed.** Comparing the bank with the in-lesson "Test yourself" sets showed 7 bank questions repeating a lesson question (use client, dynamic rendering, fast locally slow in prod, Client Components in the browser, CSR to SSR metrics, Server Components vs SSR, transform vs width). Dropped from the bank; replaced with 3 new important ones, each checked against its source first: preload/prefetch/preconnect, `useTransition`, and what a Server Function must assume about its arguments (untrusted input). Bank: 48 questions. Also replaced the one lesson question that was word for word in the bank.
+4. **"Try it yourself" instructions now live in one place.** Story steps repeated how-to steps that the linked lesson already has (View Source, network timings, `npm run build`, `curl -I`, the Performance panel). Each is now a one-line prompt plus a link to the lesson that holds the steps.
+- Also corrected a claim in "In this very site" (the hover text now also reaches the browser inside the page data, because the hover card became a Client Component; it is still not in any downloaded `.js` file).
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. `React.cache` gives you per-request state in Server Components: a way to share a counter across components during one render without a global that leaks between pages.
+2. Duplication is best fixed by choosing one source of truth and linking to it, not by deleting copies.
+3. Merging headings changes structure, not length: to make something shorter you have to change the content.
+
+## Content review: accuracy fixes, redundancy cleanup, and what is too long
+
+**Date:** 2026-09-20
+
+**Checked:** all 64 external links load with no redirects; every file path claimed in "In this very site" exists; a scan for numbers, versions, browser names and absolutes ("never", "always") across all lessons, questions, examples and site-usage text; every framework-specific paragraph (`reactNextConnection`) read against the Next.js and React docs; all 67 glossary definitions read.
+
+**Accuracy fixes (real errors, now corrected):**
+- **ISR "never blocked":** overstated. The Next.js docs say a page that was not prebuilt is generated on its *first request*, and that visitor does wait. Only regeneration of an existing page is non-blocking. Fixed in the lesson, the misconception and the questions.
+- **"SSR is Next.js's default":** wrong. The App Router prerenders at build time when a route uses no per-request data; per-request rendering is for routes that read things like cookies. Rewritten.
+- **CSR in Next.js:** `"use client"` alone is not CSR (Client Components are still prerendered). Rewritten with the real CSR cases (`ssr: false`, effects).
+- **Hydration misconception contradicted itself** ("hydrated without ever having been server-rendered"). Rewritten.
+- **Streaming:** only meaningful on a dynamically rendered route; noted. **`fetch`:** identical requests are deduplicated during a render, caching is opt-in.
+- **Unverifiable measurement removed** ("visible at 0.6 s, buttons at 6.6 s"). **Stale "this site" claims** updated (Term hover cards and story demos now ship JavaScript; "12 lessons" is now 16, so the numbers were removed).
+- Glossary: percentile direction stated precisely, compositing "usually" on the GPU, CLS "mostly while it loads".
+
+**Redundancy removed:** the unused "crowd" story demo (replaced by the simulation); 3 "learn this next" links that duplicated the same lesson's reference list; one lesson question that was word for word in the question bank.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Absolute words ("never", "always", "every") are where technical claims go wrong; each needs an exception check.
+2. Framework defaults change between versions, so a claim about "the default" needs the docs of the version you name.
+3. A specific measured number in prose is a claim about a machine you no longer have.
+
 ## Question bank: related topics reviewed for interview relevance
 
 **Date:** 2026-09-20

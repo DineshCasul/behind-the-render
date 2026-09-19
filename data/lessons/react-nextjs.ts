@@ -80,7 +80,7 @@ export const reactNextjsLessons: Lesson[] = [
       { label: "Bundle size directly gates interactivity", note: "A larger JS bundle means a longer wait before hydration can even start, this is precisely the problem Server Components target." },
     ],
     misconceptions: [
-      { claim: "Hydration is the same thing as rendering HTML.", reality: "Rendering HTML (SSR) produces markup; hydration is a separate, later step that attaches behavior to markup that already exists, a page can be server-rendered and never hydrated (if no JS ships) or hydrated without ever having been server-rendered (a `createRoot` CSR app has no hydration step at all)." },
+      { claim: "Hydration is the same thing as rendering HTML.", reality: "Rendering HTML (SSR) produces markup; hydration is a separate, later step that attaches behavior to markup that already exists, a page can be server-rendered and never hydrated (if no JS ships), and a client-rendered app built with `createRoot` has no hydration step at all because there is no existing server HTML to attach to." },
       { claim: "A hydration mismatch always means broken markup.", reality: "It often means the server and the client's first render simply disagreed about what to output (a non-deterministic value used during render), the markup itself can be perfectly valid HTML on both sides, just different HTML." },
     ],
     experiment: "hydration-toggle",
