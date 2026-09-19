@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-
+import { GridBackdrop } from "@/components/ui/GridBackdrop";
 // Space Grotesk: a geometric display face with a technical, slightly
-// mechanical character — used for headings so the site doesn't default to
+// mechanical character, used for headings so the site doesn't default to
 // the generic Inter/Geist look every Next.js starter ships with.
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -30,6 +30,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
+        {/*
+          The backdrop lives in the layout, outside the animated template:
+          a transformed ancestor becomes the containing block for
+          `position: fixed`, so inside the page transition it rode along
+          with the rise animation and snapped to the viewport when the
+          transform reset to `none` (visible jitter). Out here it never
+          moves or re-fades between routes.
+        */}
+        <GridBackdrop />
         {children}
       </body>
     </html>

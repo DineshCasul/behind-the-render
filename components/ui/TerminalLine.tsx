@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
- * A single line of "instrument readout" text with a blinking cursor —
+ * A single line of "instrument readout" text with a blinking cursor,
  * cheap way to reinforce the terminal/lab feel without a real typing
  * animation library. Cursor opacity is the only animated property.
  */

@@ -8,7 +8,7 @@ import { useMemo } from "react";
  *
  * Positions are derived from the particle's index with sine/cosine, not
  * `Math.random()`. This component renders on the server first (React
- * always renders once before hydrating), then again in the browser —
+ * always renders once before hydrating), then again in the browser,
  * `Math.random()` would produce different values each time and React
  * would flag a hydration mismatch. A deterministic formula produces the
  * same "random-looking" layout on both.

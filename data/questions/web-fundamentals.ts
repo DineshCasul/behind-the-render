@@ -1,0 +1,117 @@
+import type { ConceptId, InterviewQuestion } from "@/lib/types";
+
+export const webFundamentalsQuestions: Partial<Record<ConceptId, InterviewQuestion[]>> = {
+  http: [
+    {
+      category: "fundamentals",
+      question: "What are the essential parts of an HTTP request and an HTTP response?",
+      answer: "A request has a method, a URL, headers, and an optional body. A response has a status code, headers, and an optional body.",
+      reasoning: "Everything HTTP does: caching, auth, content negotiation, redirects, is expressed through these same few pieces, just different header/status values.",
+      followUp: "Which of these pieces would you inspect first to debug a request returning the wrong content type?",
+    },
+    {
+      category: "tricky",
+      question: "Is HTTP a stateful or stateless protocol, and what does that actually mean in practice?",
+      answer: "Stateless: the server doesn't retain any memory of previous requests from the same client by default.",
+      reasoning: "This is why sessions/auth need an explicit mechanism (cookies, tokens) layered on top, HTTP itself gives you nothing to recognize a returning client.",
+      example: "Without a session cookie, a 'logged in' state would have to be re-proven on every single request.",
+      followUp: "How do cookies restore a sense of 'state' on top of a stateless protocol?",
+    },
+    {
+      category: "scenario",
+      question: "A client reports intermittent failures only under high traffic. What HTTP-layer things would you check first?",
+      answer: "Connection limits/keep-alive exhaustion, timeout settings, and whether HTTP/2 multiplexing is actually in use versus opening many parallel HTTP/1.1 connections.",
+      reasoning: "High traffic often surfaces connection-handling limits that low traffic never exercises, the protocol version and connection reuse strategy matter a lot at scale.",
+      followUp: "How would confirming the HTTP version in use (1.1 vs 2 vs 3) change your investigation?",
+    },
+    {
+      category: "senior",
+      question: "Why might upgrading from HTTP/1.1 to HTTP/2 not improve performance for a given site, even though HTTP/2 is generally faster?",
+      answer: "If the site is already using domain sharding or has few enough requests that HTTP/1.1's connection limits weren't the bottleneck, HTTP/2's multiplexing benefit may be negligible, and sharding actively works against HTTP/2 (it wants one connection, not many).",
+      reasoning: "Protocol-level improvements only help the bottleneck they target, assuming a faster protocol universally helps ignores where the actual latency was coming from.",
+      followUp: "What would you measure to confirm whether connection contention was ever the bottleneck?",
+    },
+    {
+      category: "debugging",
+      question: "A request works fine in Postman but fails with a CORS error in the browser. Why, and where does that distinction live?",
+      answer: "CORS is enforced by the browser, not the server or the protocol itself, Postman doesn't apply the same-origin policy, so it never triggers the check the browser does.",
+      reasoning: "This is a common point of confusion: the request itself 'succeeds' at the network level in both cases; the browser is choosing to block reading the response based on its own security policy.",
+      followUp: "What response header does the server need to send for the browser to allow it?",
+    },
+  ],
+  "browser-rendering": [
+    {
+      category: "fundamentals",
+      question: "List the stages of the browser rendering pipeline in order.",
+      answer: "Parse HTML/CSS → build DOM/CSSOM → combine into a render tree → layout → paint → composite.",
+      reasoning: "Each stage depends on the previous one's output, you can't compute layout without a render tree, can't paint without layout.",
+      followUp: "Which of these stages does animating `opacity` skip entirely?",
+    },
+    {
+      category: "tricky",
+      question: "Why are `transform` and `opacity` considered 'cheap' to animate compared to `width` or `top`?",
+      answer: "They can be handled entirely by the compositor stage, skipping layout and paint recalculation; `width`/`top` changes force layout to re-run for the affected (often larger) subtree.",
+      reasoning: "The cost isn't really about the property itself, it's about which pipeline stages a change forces to redo work.",
+      example: "Animating `left` on a moving element forces layout on every frame; animating `transform: translateX()` for the same visual effect does not.",
+      followUp: "What CSS property would you use instead of `top`/`left` to animate position cheaply?",
+    },
+    {
+      category: "scenario",
+      question: "A page has smooth animations on desktop but visibly janky ones on a low-end mobile device. What would you check?",
+      answer: "Whether the animated properties trigger layout/paint (not just compositing), and whether the DOM subtree being affected is unusually large or deeply nested.",
+      reasoning: "Low-end devices have much less headroom for expensive layout/paint work per frame, the same animation that's imperceptibly costly on a fast desktop CPU can visibly drop frames on a weaker one.",
+      followUp: "How would you use browser devtools to confirm which pipeline stage is the bottleneck?",
+    },
+    {
+      category: "senior",
+      question: "Does React re-rendering a component necessarily trigger this browser rendering pipeline?",
+      answer: "No: only if the reconciliation process actually produces a DOM mutation. A re-render whose output is identical to before results in zero DOM changes and triggers none of the browser's pipeline.",
+      reasoning: "This is the crux of why 'rendering' means two different things in a React/Next.js codebase versus in browser internals, conflating them leads to wrong intuitions about performance.",
+      followUp: "How would you verify, in practice, whether a given re-render actually touched the DOM?",
+    },
+    {
+      category: "debugging",
+      question: "DevTools shows large 'Recalculate Style' and 'Layout' blocks on every scroll. What's a likely cause and fix?",
+      answer: "A scroll handler mutating layout-affecting styles (or reading layout properties like `offsetHeight` then writing styles) on every scroll event, forcing repeated synchronous layout ('layout thrashing').",
+      reasoning: "Reading a layout property right after writing one forces the browser to flush pending layout work immediately instead of batching it, doing this in a loop or on every scroll event compounds the cost.",
+      followUp: "How would batching reads and writes separately (or using `requestAnimationFrame`) fix this?",
+    },
+  ],
+  "html-parsing": [
+    {
+      category: "fundamentals",
+      question: "Does the browser wait for the entire HTML document to arrive before building any DOM?",
+      answer: "No: parsing is incremental; the browser tokenizes and builds DOM nodes as bytes arrive, without waiting for the full response.",
+      reasoning: "This incremental behavior is a built-in property of the HTML parser, not a special 'streaming mode', streaming SSR exploits a capability that was already there.",
+      followUp: "What's one framework feature that specifically relies on this incremental behavior?",
+    },
+    {
+      category: "tricky",
+      question: "Why can a `<script>` tag placed early in the `<head>` slow down perceived page load, even if the script itself is small?",
+      answer: "A plain synchronous `<script>` pauses HTML tree construction until it downloads and executes, everything after it in the document waits, regardless of the script's own size.",
+      reasoning: "The cost is the *blocking*, not necessarily the script's execution time, a tiny script hosted on a slow-to-respond server can block just as badly as a large one.",
+      followUp: "What do `async` and `defer` each change about this behavior, and how do they differ from each other?",
+    },
+    {
+      category: "scenario",
+      question: "A page's HTML looks correct in 'View Source' but the actual rendered DOM has different nesting than expected. Why might that happen?",
+      answer: "The HTML5 parsing algorithm's error-recovery rules can silently restructure invalid nesting (e.g. a block element inside a `<p>`, or a `<div>` inside a `<table>` in the wrong place): the source text and the resulting DOM tree aren't guaranteed to match structurally for invalid markup.",
+      reasoning: "Parsing is spec-defined to be deterministic, not to preserve your exact intended structure when that structure is invalid HTML.",
+      followUp: "How would you use DevTools to compare the parsed DOM against the original HTML source?",
+    },
+    {
+      category: "senior",
+      question: "Why does streaming SSR require the HTML parser's incremental behavior specifically, and not just any parser?",
+      answer: "Streaming sends partial HTML with placeholders, expecting the browser to render what it has so far and later swap in content that arrives afterward, this only works if the browser builds and displays DOM progressively rather than requiring a well-formed, complete document upfront.",
+      reasoning: "If HTML parsing were an all-or-nothing operation, streaming a response in chunks would produce nothing visible until the very last chunk arrived, defeating the purpose entirely.",
+      followUp: "What would happen if a streamed chunk boundary landed in the middle of a tag?",
+    },
+    {
+      category: "debugging",
+      question: "A third-party widget's script throws a parser error and the rest of the page fails to render. What's the likely mechanism?",
+      answer: "A parser-blocking synchronous script that threw during execution can still leave the parser stalled or in a bad state depending on where/how it failed, and if it was expected to `document.write` content inline, its failure can leave a gap in the DOM the rest of parsing depended on.",
+      reasoning: "Synchronous, parser-blocking scripts (especially ones using `document.write`) couple the success of unrelated parts of the page to a single script's correctness, a fragile pattern.",
+      followUp: "How would loading that widget with `async` change the failure's blast radius?",
+    },
+  ],
+};

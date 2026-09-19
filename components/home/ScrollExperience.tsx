@@ -1,55 +1,154 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { useEffect, useRef } from "react";
+import {
+  animate,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { Hero } from "@/components/ui/Hero";
 import { LearningMap } from "@/components/learning-map/LearningMap";
 
+// How much scroll distance the whole scene takes to play out, in viewport
+// heights. Bigger = more room to scrub through before it releases.
+const SCENE_HEIGHT_VH = 240;
+
 /**
- * Coordinates two scroll-driven effects between the hero and the map:
+ * A pinned, scroll-scrubbed scene: the hero recedes and fades like a
+ * camera pulling back, and the map emerges from depth, small, tilted,
+ * faded, and settles flat, filling the entire viewport. Not a simple
+ * fade: the map is genuinely 100vw x 100vh at the end of this, not just
+ * "wide," because the whole scene is pinned (`position: sticky`) while
+ * the user scrolls through it.
  *
- * 1. The hero dissolves (opacity + a small upward drift) as it scrolls
- *    past the top of the viewport, instead of just sliding out abruptly.
- * 2. Once the hero has mostly scrolled away, the map sheds its framed
- *    "card" look (max width, padding, rounded border) and expands to
- *    fill the full viewport width — it becomes the primary view instead
- *    of one section among several.
- *
- * Both need to share one scroll measurement, which is why they're
- * coordinated here rather than each managing its own — otherwise the
- * point at which the hero is "gone enough" for the map to expand would
- * have to be guessed independently in two places.
+ * Why sticky + a tall wrapper, instead of `position: fixed`: a fixed
+ * element ignores scroll entirely, so there'd be no scroll distance to
+ * derive animation progress from without also hand-rolling scroll
+ * capture/prevention (bad for accessibility and trackpad/touch feel).
+ * `position: sticky` on a viewport-height child inside a much taller
+ * (240vh) parent gets the same *visual* pin for free, the browser holds
+ * the child in place for exactly as long as its tall parent is being
+ * scrolled through, while scroll itself stays completely native.
  */
 export function ScrollExperience() {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
-  const [expanded, setExpanded] = useState(false);
 
   const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
+    target: sceneRef,
+    offset: ["start start", "end end"],
   });
 
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  // Hero: recedes toward the viewer and fades out early in the scene,
+  // out of the way well before the map needs the space. Only transform and
+  // opacity: a per-frame `filter: blur()` was tried first and made the
+  // scroll stutter, since every frame re-blurred a large text layer.
+  // Every range below runs the full 0 to 1 (with the value held flat at the ends).
+  // Chrome/Edge run scroll-linked animations natively, and when the last keyframe
+  // isn't at 100% the browser invents one there from the element's original
+  // value: the hero used to fade back IN and the map back OUT at the end of the
+  // scene, a triangle wave. (Firefox takes the JavaScript path, so it never showed.)
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.32, 1], [1, 0, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.32, 1], [1, 1.2, 1.2]);
 
-  // A discrete on/off switch for the map's layout, derived from the same
-  // continuous scroll value — only setState when it actually flips, so
-  // this doesn't re-render on every scroll pixel.
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const shouldExpand = latest > 0.85;
-    setExpanded((current) => (current === shouldExpand ? current : shouldExpand));
-  });
+  // Map: starts small, tilted back in 3D space and transparent, then
+  // scales up and flattens out (rotateX -> 0) as if swinging up into
+  // view, a "camera dolly" effect, all on `transform`/`opacity`/`filter`
+  // so it stays compositor-only (see learning-notes/06).
+  const mapOpacity = useTransform(scrollYProgress, [0, 0.18, 0.5, 1], [0, 0, 1, 1]);
+  const mapScale = useTransform(scrollYProgress, [0, 0.18, 1], [0.78, 0.78, 1]);
+  const mapRotateX = useTransform(scrollYProgress, [0, 0.18, 0.75, 1], [14, 14, 0, 0]);
+
+  // Arriving from a lesson's "Back to map" link (`/?to=map`): start at the
+  // very top so the hero is seen, then glide down through the pinned scene
+  // to the map. Driven by Framer's `animate()` calling window.scrollTo each
+  // frame (not native smooth scroll) so the duration is ours to control;
+  // any wheel/touch/key input cancels it so we never fight the user.
+  useEffect(() => {
+    if (reduceMotion === null) return; // media query not resolved yet
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("to") !== "map") return;
+    window.scrollTo(0, 0);
+
+    // The param is only stripped once we actually act on it (below), React
+    // StrictMode runs effects twice in dev, and consuming it up front would
+    // leave the second run with nothing to do.
+    if (reduceMotion) {
+      window.history.replaceState(null, "", "/");
+      document.getElementById("map")?.scrollIntoView();
+      return;
+    }
+
+    let controls: ReturnType<typeof animate> | null = null;
+    const cancel = () => controls?.stop();
+    const start = setTimeout(() => {
+      const scene = sceneRef.current;
+      if (!scene) return;
+      window.history.replaceState(null, "", "/");
+      const target = scene.offsetTop + scene.offsetHeight - window.innerHeight;
+      controls = animate(0, target, {
+        duration: 3,
+        ease: [0.45, 0, 0.25, 1],
+        onUpdate: (y) => window.scrollTo(0, y),
+      });
+      window.addEventListener("wheel", cancel, { once: true, passive: true });
+      window.addEventListener("touchstart", cancel, { once: true, passive: true });
+      window.addEventListener("keydown", cancel, { once: true });
+    }, 700);
+
+    return () => {
+      clearTimeout(start);
+      cancel();
+      window.removeEventListener("wheel", cancel);
+      window.removeEventListener("touchstart", cancel);
+      window.removeEventListener("keydown", cancel);
+    };
+  }, [reduceMotion]);
+
+  if (reduceMotion) {
+    // No scroll-jacked scene for reduced-motion users: just the hero,
+    // then the map, in normal document flow, nothing pinned, nothing
+    // scaled or faded on scroll.
+    return (
+      <>
+        <Hero />
+        <LearningMap expanded={false} />
+      </>
+    );
+  }
 
   return (
-    <>
-      <motion.div
-        ref={heroRef}
-        style={reduceMotion ? undefined : { opacity: heroOpacity, y: heroY }}
-      >
-        <Hero />
-      </motion.div>
-      <LearningMap expanded={expanded} />
-    </>
+    <div ref={sceneRef} style={{ height: `${SCENE_HEIGHT_VH}vh` }} className="relative">
+      <div className="sticky top-0 h-screen w-full overflow-hidden" style={{ perspective: 1200 }}>
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ opacity: heroOpacity, scale: heroScale, willChange: "transform, opacity" }}
+        >
+          <Hero />
+        </motion.div>
+
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            opacity: mapOpacity,
+            scale: mapScale,
+            rotateX: mapRotateX,
+            transformPerspective: 1200,
+            willChange: "transform, opacity",
+          }}
+        >
+          {/*
+            Full-bleed from the very first frame. This used to flip from a
+            padded "card" to full-bleed at 55% scroll, resizing the map's
+            width, padding and corners (with a CSS transition) *while the
+            user was scrolling*: a layout change on every frame of that
+            transition, which read as jitter.
+          */}
+          <LearningMap expanded />
+        </motion.div>
+      </div>
+    </div>
   );
 }

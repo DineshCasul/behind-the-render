@@ -8,6 +8,10 @@ const RADIUS = 34;
 
 interface MapNodeProps {
   concept: Concept;
+  /** Where to draw this node: the wide layout and the portrait layout use different coordinates. */
+  position: { x: number; y: number };
+  /** id of the blur <filter> for this SVG (unique per SVG, since a phone and a desktop map can coexist in the DOM). */
+  glowId: string;
   status: NodeStatus;
   /** true when this node is hovered directly or is a neighbor of the hovered node */
   emphasized: boolean;
@@ -20,6 +24,8 @@ interface MapNodeProps {
 
 export function MapNode({
   concept,
+  position,
+  glowId,
   status,
   emphasized,
   dimmed,
@@ -29,16 +35,16 @@ export function MapNode({
 }: MapNodeProps) {
   const reduceMotion = useReducedMotion();
   const visual = STATUS_VISUALS[status];
-  const { x, y } = concept.position;
+  const { x, y } = position;
 
   return (
     // Plain, non-animated <g> owns positioning. Framer Motion writes its
     // own `transform` (scale, etc.) onto whatever element it's attached
-    // to — if that same element also carried `transform="translate(x,y)"`,
+    // to, if that same element also carried `transform="translate(x,y)"`,
     // Motion's generated transform replaces it outright the moment a
     // `whileHover`/`animate` transform kicks in, snapping the node to the
     // SVG's (0,0) origin. Nesting a motion.g *inside* the positioned <g>
-    // keeps "where" and "how it moves" as separate concerns — the inner
+    // keeps "where" and "how it moves" as separate concerns, the inner
     // group's own local origin is already the node's center, so scaling
     // around (0,0) there is exactly "scale in place."
     <g transform={`translate(${x}, ${y})`}>
@@ -50,7 +56,7 @@ export function MapNode({
         onClick={() => onSelect(concept.id)}
         tabIndex={0}
         role="button"
-        aria-label={`${concept.title} — ${status.replace("-", " ")}`}
+        aria-label={`${concept.title}, ${status.replace("-", " ")}`}
         className="cursor-pointer outline-none"
         animate={{ opacity: dimmed ? 0.3 : 1 }}
         whileHover={{ scale: 1.06 }}
@@ -60,7 +66,7 @@ export function MapNode({
         <motion.circle
           r={RADIUS * 1.8}
           fill={visual.color}
-          filter="url(#node-glow)"
+          filter={`url(#${glowId})`}
           animate={
             visual.animated && !reduceMotion
               ? { opacity: [visual.glowOpacity * 0.6, visual.glowOpacity, visual.glowOpacity * 0.6] }
@@ -85,7 +91,7 @@ export function MapNode({
         <>
           {/*
             A status-colored ring alone was hard to see on a muted
-            "not-started" (gray) node — the ring is the same dull color
+            "not-started" (gray) node: the ring is the same dull color
             as the node it's supposedly emphasizing. Using a fixed accent
             color for "you're looking at this" (independent of the
             node's own status color) plus a soft translucent halo behind

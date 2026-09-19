@@ -33,21 +33,21 @@ function defaultProgress(): ProgressState {
  * A tiny external store: progress lives in this module (backed by
  * localStorage), not in any single component's React state. Multiple
  * components (the map, the panel) read the same snapshot and re-render
- * together when it changes — the same shape as Redux/Zustand, just small
+ * together when it changes, the same shape as Redux/Zustand, just small
  * enough to write by hand.
  *
  * `useSyncExternalStore` (not `useState` + `useEffect`) is what makes this
  * safe under SSR: `getServerSnapshot` always returns the all-"not-started"
  * default, so the server-rendered HTML and the client's first render agree.
  * The moment React hydrates, `getSnapshot` starts reading the real
- * localStorage value, and the map updates on the next tick — no manual
+ * localStorage value, and the map updates on the next tick, no manual
  * effect, no synchronous setState-during-render.
  */
 let cache: ProgressState | null = null;
 const listeners = new Set<() => void>();
 
 // A single stable reference, computed once. `useSyncExternalStore` compares
-// `getServerSnapshot()` across renders with `Object.is` — returning a fresh
+// `getServerSnapshot()` across renders with `Object.is`, returning a fresh
 // object each call (e.g. `defaultProgress()` inline) makes React think the
 // snapshot changes on every render and re-render forever.
 const SERVER_SNAPSHOT = defaultProgress();

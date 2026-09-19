@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
- * One slow-drifting soft light source behind the whole page — the single
+ * One slow-drifting soft light source behind the whole page, the single
  * piece of "the lab has ambient life to it" motion, isolated in its own
  * client component so the rest of the backdrop can stay a Server Component.
  * Animates only `transform` (translate) and `opacity`, both compositor-only

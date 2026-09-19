@@ -1,9 +1,18 @@
 import { STATUS_VISUALS } from "@/lib/node-visuals";
 import { STATUS_LABEL, STATUS_ORDER } from "@/lib/progress";
 
-export function MapLegend() {
+/**
+ * `inline` puts the legend in normal flow (used under the phone map); the
+ * default floats it over the corner of the wide map. Floating a legend over a
+ * small map covers nodes and collides with the panel, so phones use inline.
+ */
+export function MapLegend({ inline = false }: { inline?: boolean }) {
   return (
-    <div className="pointer-events-none absolute bottom-4 left-4 z-10 flex flex-wrap gap-x-4 gap-y-1 rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/70 px-3 py-2 backdrop-blur-sm">
+    <div
+      className={`flex flex-wrap gap-x-4 gap-y-1 rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/90 px-3 py-2 ${
+        inline ? "mt-3" : "pointer-events-none absolute bottom-8 left-6 z-10"
+      }`}
+    >
       {STATUS_ORDER.map((status) => (
         <div key={status} className="flex items-center gap-1.5">
           <span

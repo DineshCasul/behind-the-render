@@ -8,7 +8,7 @@ export function Hero() {
       <AmbientParticles />
       <HudCorners />
       <p className="relative font-mono text-xs uppercase tracking-[0.35em] text-[var(--state-learning)]">
-        01 — A developer laboratory
+        01 / A developer laboratory
       </p>
       <h1 className="text-glow relative mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-[var(--color-text-primary)] sm:text-7xl">
         Behind the Render

@@ -1,26 +1,40 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
-import type { Concept, NodeStatus } from "@/lib/types";
+import type { NodeStatus } from "@/lib/types";
 import { buildEdgePath } from "@/lib/graph";
 import { STATUS_VISUALS } from "@/lib/node-visuals";
 
 interface MapEdgeProps {
   id: string;
-  from: Concept;
-  to: Concept;
+  fromPos: { x: number; y: number };
+  toPos: { x: number; y: number };
+  /** Curve along the vertical axis (portrait layout) instead of the horizontal one. */
+  vertical?: boolean;
+  /** Keeps gradient ids unique when two maps (wide + portrait) exist in the same page. */
+  idPrefix?: string;
   fromStatus: NodeStatus;
   toStatus: NodeStatus;
   emphasized: boolean;
   dimmed: boolean;
 }
 
-export function MapEdge({ id, from, to, fromStatus, toStatus, emphasized, dimmed }: MapEdgeProps) {
+export function MapEdge({
+  id,
+  fromPos,
+  toPos,
+  vertical = false,
+  idPrefix = "",
+  fromStatus,
+  toStatus,
+  emphasized,
+  dimmed,
+}: MapEdgeProps) {
   const reduceMotion = useReducedMotion();
-  const path = buildEdgePath(from.position, to.position);
+  const path = buildEdgePath(fromPos, toPos, vertical);
   const fromColor = STATUS_VISUALS[fromStatus].color;
   const toColor = STATUS_VISUALS[toStatus].color;
-  const gradientId = `edge-gradient-${id}`;
+  const gradientId = `${idPrefix}edge-gradient-${id}`;
   const isActive = fromStatus !== "not-started" && toStatus !== "not-started";
 
   return (
@@ -29,10 +43,10 @@ export function MapEdge({ id, from, to, fromStatus, toStatus, emphasized, dimmed
         <linearGradient
           id={gradientId}
           gradientUnits="userSpaceOnUse"
-          x1={from.position.x}
-          y1={from.position.y}
-          x2={to.position.x}
-          y2={to.position.y}
+          x1={fromPos.x}
+          y1={fromPos.y}
+          x2={toPos.x}
+          y2={toPos.y}
         >
           <stop offset="0%" stopColor={fromColor} />
           <stop offset="100%" stopColor={toColor} />

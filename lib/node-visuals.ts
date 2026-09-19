@@ -3,7 +3,7 @@ import type { NodeStatus } from "@/lib/types";
 export interface StatusVisual {
   color: string;
   glyph: string;
-  /** Outer glow blur opacity — how "lit up" the node looks. */
+  /** Outer glow blur opacity, how "lit up" the node looks. */
   glowOpacity: number;
   /** Fill opacity of the node disc itself. */
   fillOpacity: number;

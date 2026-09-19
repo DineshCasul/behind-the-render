@@ -8,7 +8,7 @@
   --color-text-muted: #8891a3;
   --color-border: rgba(255, 255, 255, 0.09);
 
-  /* Node state colors — the only accent hues in the whole UI. */
+  /* Node state colors, the only accent hues in the whole UI. */
   --state-not-started: #4b5563;
   --state-learning: #5ecbf0;
   --state-got-it: #55e0c9;
@@ -44,7 +44,7 @@ body {
   background-size: 11px 11px;
 }
 
-/* Asymmetric lab-lighting blooms instead of one centered vignette —
+/* Asymmetric lab-lighting blooms instead of one centered vignette,
    two off-center color pools plus a darkening edge, closer to how a
    physical instrument panel is lit than a flat SaaS gradient. */
 .bg-vignette {
@@ -63,4 +63,46 @@ body {
 
 .text-glow {
   text-shadow: 0 0 40px rgba(94, 203, 240, 0.25);
+}
+
+/* Tailwind v4's preflight resets buttons to the default arrow cursor.
+   Restore the pointer for anything clickable, and a "not allowed" cursor
+   for disabled controls, in one place instead of per component. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="switch"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+  button:disabled,
+  [role="switch"]:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* A quick, small "vibration" when you hover emphasized lesson text.
+   Offsets use position: relative + left/top rather than transform because
+   these are inline elements that can wrap across lines (a transform would
+   need inline-block, which stops long highlights from wrapping). A relative
+   offset moves the text visually without reflowing anything around it.
+   Plays once per hover; skipped entirely for reduced-motion users. */
+@keyframes vibrate {
+  0%, 100% { left: 0; top: 0; }
+  15% { left: -1.5px; top: 0.5px; }
+  30% { left: 1.5px; top: -0.5px; }
+  45% { left: -1px; top: -0.5px; }
+  60% { left: 1px; top: 0.5px; }
+  75% { left: -0.5px; top: 0; }
+}
+.vibrate-on-hover {
+  position: relative;
+}
+.vibrate-on-hover:hover {
+  animation: vibrate 0.4s linear 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vibrate-on-hover:hover {
+    animation: none;
+  }
 }

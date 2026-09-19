@@ -21,6 +21,6 @@ export function writeJSON<T>(key: string, value: T): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Storage full or blocked — progress simply won't persist this session.
+    // Storage full or blocked, progress simply won't persist this session.
   }
 }

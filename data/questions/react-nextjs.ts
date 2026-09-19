@@ -1,0 +1,117 @@
+import type { ConceptId, InterviewQuestion } from "@/lib/types";
+
+export const reactNextjsQuestions: Partial<Record<ConceptId, InterviewQuestion[]>> = {
+  "react-rendering": [
+    {
+      category: "fundamentals",
+      question: "What two distinct steps happen when a component's state changes?",
+      answer: "React calls the component function again ('render') to produce a new element tree, then diffs it against the previous tree (reconciliation) to compute the minimal real DOM changes needed.",
+      reasoning: "Separating these two steps is what lets React skip DOM work entirely when a re-render's output happens to be identical.",
+      followUp: "What would 'skip DOM work' actually look like if you profiled it?",
+    },
+    {
+      category: "tricky",
+      question: "If a parent component rerenders, does every child necessarily produce DOM changes?",
+      answer: "No: a child's function running again ('rendering') and the DOM actually changing are different events. If a child's output is unchanged, reconciliation commits zero DOM mutations for it.",
+      reasoning: "This distinction is the source of a lot of confused performance intuition, 'my component re-rendered' does not mean 'the browser did work.'",
+      followUp: "What tool would you use to actually observe whether a re-render produced a DOM mutation?",
+    },
+    {
+      category: "scenario",
+      question: "A list of 1,000 items re-renders entirely (visibly slow) every time you type one character into an unrelated search box. What's a likely cause?",
+      answer: "The search box's state lives in a component that's a shared ancestor of the list, every keystroke re-renders that ancestor and, by default, every descendant, including the unrelated list.",
+      reasoning: "React's default behavior propagates re-renders down the tree from wherever state changed; unrelated but nested components pay the cost of re-running their function unless something opts them out.",
+      followUp: "What are two different ways you could stop the list from re-rendering on every keystroke?",
+    },
+    {
+      category: "senior",
+      question: "Why can incorrect `key` usage in a list cause a subtle bug rather than just a performance issue?",
+      answer: "Reconciliation uses `key` to match old and new elements at the same position, a wrong or unstable key (like array index when the list reorders) can make React reuse a DOM node (and its internal state, like an input's focus or a component's local state) for what is now conceptually a *different* item.",
+      reasoning: "This isn't just wasted re-render work, it's genuinely incorrect behavior: state leaking onto the wrong logical item.",
+      example: "Reordering a list of controlled text inputs keyed by index can make the wrong input show the wrong typed value after the reorder.",
+      followUp: "What would be a better key to use than array index for a reorderable list?",
+    },
+    {
+      category: "debugging",
+      question: "A component appears to update instantly in React DevTools' profiler but the screen doesn't visibly change for a moment. What layer would you look at next?",
+      answer: "The browser's own rendering pipeline, layout, paint, and compositing happen after React commits DOM mutations, and a large/expensive layout recalculation there can cause a visible delay React's own profiler doesn't capture.",
+      reasoning: "React's render/commit cycle and the browser's paint pipeline are sequential but separate, a fast React commit doesn't guarantee a fast subsequent paint.",
+      followUp: "What browser DevTools panel would show you the layout/paint cost specifically?",
+    },
+  ],
+  hydration: [
+    {
+      category: "fundamentals",
+      question: "What does hydration actually do to already-rendered HTML?",
+      answer: "It attaches React's event listeners and internal state to the existing DOM nodes, without creating new DOM for anything that already matches what React expects.",
+      reasoning: "This reuse is the entire point, recreating the DOM from scratch would waste the server's rendering work and cause a visible flash.",
+      followUp: "What happens if what React expects to render doesn't match the existing DOM?",
+    },
+    {
+      category: "tricky",
+      question: "What can cause a hydration mismatch, and why?",
+      answer: "Anything that renders differently between the server's render and the client's first render, using `Date.now()`, `Math.random()`, or reading `localStorage`/`window` directly during render, since those produce different values (or throw entirely) in each environment.",
+      reasoning: "Hydration's correctness depends on the assumption that a second render of the exact same inputs produces the exact same output, anything non-deterministic or environment-dependent breaks that assumption.",
+      example: "This project hit exactly this bug: `useSyncExternalStore`'s server snapshot allocated a new object on every call, defeating the reference-stability check hydration depends on.",
+      followUp: "What's the standard fix pattern for state that's only available in the browser (like localStorage)?",
+    },
+    {
+      category: "scenario",
+      question: "Users report that clicking a button 'does nothing' immediately after a page loads, but works if they wait a moment and click again. What's happening?",
+      answer: "The page is server-rendered and visible, but hydration (which attaches the click handler) hasn't finished yet, the click during that window has no listener to respond to it.",
+      reasoning: "SSR intentionally decouples 'visible' from 'interactive'; this exact gap is the classic hydration-timing user complaint.",
+      followUp: "What could you do to shrink or better communicate this gap to the user?",
+    },
+    {
+      category: "senior",
+      question: "Why is 'wrap it in `useEffect` and check `typeof window`' often a bandage rather than a real fix for a hydration mismatch?",
+      answer: "It can suppress the warning by ensuring the mismatched content only renders client-side, but that means the server and the client's first paint now show genuinely different content, a visible flash/layout shift as the client-only content pops in after mount, which just traded a console warning for a real UX regression.",
+      reasoning: "The underlying problem: needing environment-specific data during the very first render, isn't solved by hiding it; a proper external-store pattern (like `useSyncExternalStore`) addresses it without a visible flash.",
+      followUp: "How does `useSyncExternalStore`'s `getServerSnapshot` avoid this same problem?",
+    },
+    {
+      category: "debugging",
+      question: "In production you briefly see incorrect content flash to correct content on every page load. Where would you look, based on how hydration works?",
+      answer: "Any place reading `localStorage`, a cookie, or browser-only state directly during the component's render (rather than after mount): the initial render (matching the server) shows a default, then a subsequent update after hydration confirms the real value, causing the visible flash.",
+      reasoning: "This flash pattern is a direct symptom of the 'default on server render, real value after hydration' architecture required to avoid a hard mismatch, the flash is the visible cost of doing it safely instead of getting a console error doing it unsafely.",
+      followUp: "Is this flash avoidable, or is it an inherent tradeoff of this pattern?",
+    },
+  ],
+  "server-components": [
+    {
+      category: "fundamentals",
+      question: "What's the defining difference between a Server Component and a Client Component?",
+      answer: "A Server Component's code never ships to the browser at all, only its rendered output does. A Client Component's code does ship to the browser, because it needs to run there.",
+      reasoning: "This is a code-location decision, not a rendering-timing decision (both kinds of component are typically still server-rendered for first paint).",
+      followUp: "Given that, can a Client Component also benefit from SSR?",
+    },
+    {
+      category: "tricky",
+      question: "Are Server Components the same thing as SSR?",
+      answer: "No. SSR is about *when* HTML is generated (per request) and applies to Client Components too. Server Components are about *where code executes and whether it ships to the client*, a Client Component is typically SSR'd; a Server Component is never sent to the client as code at all.",
+      reasoning: "This project's spec explicitly calls out this exact confusion as one to avoid, they solve related but distinct problems.",
+      followUp: "Could you have SSR without any Server Components in the React sense? What would that look like?",
+    },
+    {
+      category: "scenario",
+      question: "A team wants to use a large date-formatting library only in one small part of the UI, without bloating the client bundle. How do Server Components help here?",
+      answer: "If that part of the UI doesn't need client-side interactivity, make it a Server Component, the library runs entirely on the server, and its code (however large) never gets bundled for the client at all.",
+      reasoning: "This is precisely the cost Server Components are designed to eliminate: libraries used only for server-side computation shouldn't cost anything client-side.",
+      followUp: "What would you do if that same UI needed one small interactive control (like a toggle) inside it?",
+    },
+    {
+      category: "senior",
+      question: "Why does adopting Server Components require an explicit architectural decision about component boundaries, rather than being a drop-in optimization?",
+      answer: "Server Components fundamentally cannot use `useState`, `useEffect`, or event handlers: any interactivity has to be deliberately pushed into a nested Client Component. Retrofitting an existing all-Client-Component app requires identifying which parts of the tree genuinely need interactivity and restructuring around that boundary.",
+      reasoning: "It's a change to the programming model (where code is allowed to run), not just a performance flag you flip, that's why it has real migration cost for existing codebases.",
+      followUp: "What's a reasonable strategy for incrementally introducing Server Components into an existing all-Client app?",
+    },
+    {
+      category: "debugging",
+      question: "You get an error trying to use `useState` inside a component and are told it must be a Client Component. Why does this restriction exist at all?",
+      answer: "`useState` requires the component to actually run in the browser (to hold live, mutable state a user can interact with), a Server Component runs once on the server and produces static output; there is no persistent, running instance of it in the browser for state to live in.",
+      reasoning: "This isn't an arbitrary framework restriction, it follows directly from what a Server Component fundamentally is: a one-time render, not a running client-side instance.",
+      followUp: "What's the minimal change to fix this error while keeping as much of the component tree server-only as possible?",
+    },
+  ],
+};
