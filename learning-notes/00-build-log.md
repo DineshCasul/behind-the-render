@@ -16,6 +16,15 @@
 - **Fix** (`LearningMap.tsx`): the grid row is now `grid-rows-[minmax(0,1fr)]` (capped at the container's height) and the SVG has `max-h-full`, so it shrinks to fit (its `viewBox` letterboxes it, so every node stays visible). The legend moved up (`bottom-8 left-6`) and lost its backdrop blur.
 - Lesson: a percentage height only limits content if the *row* that contains it is also limited. `minmax(0, 1fr)` is the idiom for "this track may not grow past its container", where plain `1fr` (which has a `min-content` floor) or `auto` can.
 
+## Phase 2.10 — Phone hero animation
+
+**Date:** 2026-09-19
+
+- `components/ui/HeroPhone.tsx` (used below 1024px; the desktop hero is unchanged): the title **resolves from a blur letter by letter** (like a request becoming pixels), one **scan line** sweeps down the hero, the rest fades in on a stagger, and a "Scroll to explore" cue nudges a few times. On scroll the content drifts, shrinks slightly and fades as the hero leaves.
+- **CSS animations, not Framer `initial`**, so the server-rendered page is visible before any JavaScript runs (verified with JavaScript disabled: the title ends fully opaque). `backwards` fill (not `both`) so no leftover `filter` layer remains after the animation. Each animation runs once; reduced-motion users get none.
+- **Blur only on load, never per scroll frame** (per-frame blur made the desktop scene stutter). Scroll uses `transform` and `opacity` only, with full 0 to 1 ranges (see 2.9 for why).
+- Verified in headless Edge at 390px: frames at 300/700/1300/3200 ms, end state, scroll parallax values, reduced motion, JavaScript off.
+
 ## Phase 2.9 — Phone layout: a portrait map + a scroll-scene bug found on the way
 
 **Date:** 2026-09-19

@@ -106,3 +106,50 @@ body {
     animation: none;
   }
 }
+
+/* `backwards` (not `both`): hold the FROM state during the delay, then let go, so no
+   leftover filter or transform layer stays behind once the animation has finished. */
+/* ---- Phone hero: the title "resolves" from a blur, like a request becoming pixels ----
+   CSS animations (not Framer Motion's `initial`) on purpose: they start from the
+   server-rendered HTML with no JavaScript, so the page is never rendered invisible
+   waiting for hydration. Each animation runs once. Reduced-motion users get none. */
+@keyframes reveal-letter {
+  from { opacity: 0; filter: blur(14px); transform: translateY(0.35em) scale(1.08); }
+  to   { opacity: 1; filter: none; transform: none; }
+}
+.reveal-letter {
+  animation: reveal-letter 0.95s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms + 150ms);
+}
+
+@keyframes reveal-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.reveal-fade {
+  animation: reveal-fade 0.8s ease-out backwards;
+  animation-delay: var(--delay, 0.9s);
+}
+
+/* One scan line sweeping down the hero, like a screen refreshing. */
+@keyframes scan-down {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(100%); }
+}
+.scan-once {
+  background: linear-gradient(to bottom, transparent 0%, rgba(94, 203, 240, 0.08) 90%, rgba(94, 203, 240, 0.5) 99%, transparent 100%);
+  animation: scan-down 2s ease-in-out 0.3s 1 both;
+}
+
+/* A short-lived nudge toward the map, not an endless bounce. */
+@keyframes cue-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50%      { transform: translateY(7px); opacity: 1; }
+}
+.cue-bob {
+  animation: cue-bob 1.5s ease-in-out 1.6s 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-letter, .reveal-fade, .scan-once, .cue-bob { animation: none; }
+}

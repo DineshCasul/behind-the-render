@@ -9,6 +9,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { Hero } from "@/components/ui/Hero";
+import { HeroPhone } from "@/components/ui/HeroPhone";
 import { LearningMap } from "@/components/learning-map/LearningMap";
 
 // How much scroll distance the whole scene takes to play out, in viewport
@@ -124,7 +125,7 @@ export function ScrollExperience() {
   // one (no JavaScript branch), so there's no hydration mismatch or flash.
   const phoneLayout = (
     <div className="lg:hidden">
-      <Hero />
+      <HeroPhone />
       <LearningMap layout="tall" />
     </div>
   );
