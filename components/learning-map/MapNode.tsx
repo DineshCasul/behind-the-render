@@ -108,6 +108,9 @@ export function MapNode({
         </>
       )}
 
+      {/* Opaque backing: edges run to node centres, and without this the line shows through the disc. */}
+      <circle r={RADIUS} fill="var(--color-bg)" />
+
       <circle
         r={RADIUS}
         fill={visual.color}

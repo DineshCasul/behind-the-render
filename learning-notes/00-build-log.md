@@ -16,6 +16,24 @@
 - **Fix** (`LearningMap.tsx`): the grid row is now `grid-rows-[minmax(0,1fr)]` (capped at the container's height) and the SVG has `max-h-full`, so it shrinks to fit (its `viewBox` letterboxes it, so every node stays visible). The legend moved up (`bottom-8 left-6`) and lost its backdrop blur.
 - Lesson: a percentage height only limits content if the *row* that contains it is also limited. `minmax(0, 1fr)` is the idiom for "this track may not grow past its container", where plain `1fr` (which has a `min-content` floor) or `auto` can.
 
+## Phase 2.9 — Phone layout: a portrait map + a scroll-scene bug found on the way
+
+**Date:** 2026-09-19
+
+- **Audit first**: screenshots at 390px (headless Edge) showed the landscape map shrunk to a quarter of its size (labels ~3px), the detail panel squeezing the map into a sliver, the legend overlapping the panel, and a few polish issues. Lesson pages were mostly fine (no page-level horizontal overflow anywhere).
+- **The graph is now vertical below 1024px** (`layout="tall"`): the same 12 nodes and edges, stacked top-to-bottom in a 360x1010 space (`mobilePosition` on each concept) so labels are full size. `MapNode`/`MapEdge` take explicit positions, edges curve vertically (`buildEdgePath(..., vertical)`), and one shared `MapGraph` renders both layouts. The detail panel becomes a **bottom sheet** (primary actions first via CSS `order`, topic hints always visible since touch has no hover), the legend sits in flow under the map, and there is no hover tooltip on touch.
+- **CSS picks the layout, not JavaScript**: both are in the HTML and `lg:hidden` / `hidden lg:block` chooses one, so there is no hydration mismatch or flash. The pinned cinematic scene stays for desktop; phones and tablets get hero, then map, in normal flow. SVG `id`s (filters, gradients) are prefixed per layout: duplicates would resolve to the first match, and a gradient inside a `display: none` SVG doesn't render at all.
+- Smaller fixes: opaque backing disc behind each node (edge lines showed through the middle), the terminal line wraps balanced, and the lesson stage breadcrumb is one line on phones.
+- **Bug found while auditing (Chrome/Edge only, invisible in Firefox):** at the end of the desktop scroll scene the map faded back out and the hero came back. Cause: Chromium runs scroll-linked animations natively, and when the last keyframe isn't at 100% the browser invents one there from the element's original value, so opacity traced a triangle wave. Fix: give every animated value keyframes across the full 0 to 1 range (held flat at the ends). Measured before/after with stepped scrolling in headless Edge. My first guess (a listener to force the JavaScript path) was wrong and was reverted.
+- Verified in headless Edge at 1400, 1024, 820 and 390px: the right map at each width, the desktop scene ends on the map, tapping a node opens the sheet and X closes it, no horizontal overflow, no console errors.
+
+### 🧠 Learning checkpoint
+
+1. Why a landscape diagram can't just be scaled down for phones, and how a second layout of the *same data* solves it without duplicating logic.
+2. Why choosing a layout with CSS (two subtrees, one hidden) avoids the hydration mismatch that a JavaScript media-query branch would cause, and what it costs (duplicated DOM).
+3. Why duplicate SVG ids are dangerous, and why gradients in `display: none` SVGs don't render.
+4. How a native scroll-linked animation can differ from the JavaScript version at the ends of its range, and why testing in one browser isn't enough.
+
 ## Phase 2.8 — "Try it in your browser" activities
 
 **Date:** 2026-09-19

@@ -72,6 +72,17 @@ export function ScrollExperience() {
     if (params.get("to") !== "map") return;
     window.scrollTo(0, 0);
 
+    // On phones there is no pinned scene (the phone layout is hero, then the
+    // portrait map in normal flow), so just scroll the map into view.
+    const isWide = window.matchMedia("(min-width: 1024px)").matches;
+    if (!isWide) {
+      const timer = setTimeout(() => {
+        window.history.replaceState(null, "", "/");
+        document.getElementById("map-mobile")?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+
     // The param is only stripped once we actually act on it (below), React
     // StrictMode runs effects twice in dev, and consuming it up front would
     // leave the second run with nothing to do.
@@ -107,48 +118,65 @@ export function ScrollExperience() {
     };
   }, [reduceMotion]);
 
+  // Phones and tablets (< lg, 1024px): hero, then the portrait map, in normal flow. The pinned
+  // scroll scene needs a wide, short viewport; on a phone the map is tall and
+  // meant to be scrolled through. Both layouts are in the HTML and CSS picks
+  // one (no JavaScript branch), so there's no hydration mismatch or flash.
+  const phoneLayout = (
+    <div className="lg:hidden">
+      <Hero />
+      <LearningMap layout="tall" />
+    </div>
+  );
+
   if (reduceMotion) {
     // No scroll-jacked scene for reduced-motion users: just the hero,
     // then the map, in normal document flow, nothing pinned, nothing
     // scaled or faded on scroll.
     return (
       <>
-        <Hero />
-        <LearningMap expanded={false} />
+        <div className="hidden lg:block">
+          <Hero />
+          <LearningMap expanded={false} />
+        </div>
+        {phoneLayout}
       </>
     );
   }
 
   return (
-    <div ref={sceneRef} style={{ height: `${SCENE_HEIGHT_VH}vh` }} className="relative">
-      <div className="sticky top-0 h-screen w-full overflow-hidden" style={{ perspective: 1200 }}>
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ opacity: heroOpacity, scale: heroScale, willChange: "transform, opacity" }}
-        >
-          <Hero />
-        </motion.div>
+    <>
+      <div ref={sceneRef} style={{ height: `${SCENE_HEIGHT_VH}vh` }} className="relative hidden lg:block">
+        <div className="sticky top-0 h-screen w-full overflow-hidden" style={{ perspective: 1200 }}>
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ opacity: heroOpacity, scale: heroScale, willChange: "transform, opacity" }}
+          >
+            <Hero />
+          </motion.div>
 
-        <motion.div
-          className="absolute inset-0"
-          style={{
-            opacity: mapOpacity,
-            scale: mapScale,
-            rotateX: mapRotateX,
-            transformPerspective: 1200,
-            willChange: "transform, opacity",
-          }}
-        >
-          {/*
-            Full-bleed from the very first frame. This used to flip from a
-            padded "card" to full-bleed at 55% scroll, resizing the map's
-            width, padding and corners (with a CSS transition) *while the
-            user was scrolling*: a layout change on every frame of that
-            transition, which read as jitter.
-          */}
-          <LearningMap expanded />
-        </motion.div>
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              opacity: mapOpacity,
+              scale: mapScale,
+              rotateX: mapRotateX,
+              transformPerspective: 1200,
+              willChange: "transform, opacity",
+            }}
+          >
+            {/*
+              Full-bleed from the very first frame. This used to flip from a
+              padded "card" to full-bleed at 55% scroll, resizing the map's
+              width, padding and corners (with a CSS transition) *while the
+              user was scrolling*: a layout change on every frame of that
+              transition, which read as jitter.
+            */}
+            <LearningMap expanded />
+          </motion.div>
+        </div>
       </div>
-    </div>
+      {phoneLayout}
+    </>
   );
 }

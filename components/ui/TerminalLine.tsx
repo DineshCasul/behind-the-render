@@ -11,7 +11,7 @@ export function TerminalLine({ children }: { children: string }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <p className="relative font-mono text-xs text-[var(--color-text-muted)]">
+    <p className="relative text-balance text-center font-mono text-xs text-[var(--color-text-muted)]">
       <span className="text-[var(--state-got-it)]">$</span> {children}
       <motion.span
         aria-hidden

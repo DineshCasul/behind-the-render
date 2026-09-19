@@ -36,8 +36,8 @@ export function ConceptPanel({ concept, progress, onSetStatus, onClose, variant 
           transition={{ duration: 0.25, ease: "easeOut" }}
           className={
             sheet
-              ? "fixed inset-x-0 bottom-0 z-40 max-h-[78vh] overflow-y-auto rounded-t-2xl border border-b-0 border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 pb-8 shadow-2xl"
-              : "h-full w-80 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/95 p-4 shadow-xl backdrop-blur-md"
+              ? "fixed inset-x-0 bottom-0 z-40 flex max-h-[78vh] flex-col overflow-y-auto rounded-t-2xl border border-b-0 border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 pb-8 shadow-2xl"
+              : "flex h-full w-80 flex-col overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/95 p-4 shadow-xl backdrop-blur-md"
           }
         >
           <div className="flex items-start justify-between gap-2">
@@ -62,7 +62,8 @@ export function ConceptPanel({ concept, progress, onSetStatus, onClose, variant 
             {concept.blurb}
           </p>
 
-          <div className="mt-4">
+          {/* On the phone sheet the primary actions come first (CSS `order`), the long topic list last. */}
+          <div className={`mt-4 ${sheet ? "order-5" : ""}`}>
             <p className="text-[10px] font-mono uppercase tracking-wide text-[var(--color-text-muted)]">
               What you&apos;ll learn
             </p>
@@ -121,7 +122,7 @@ export function ConceptPanel({ concept, progress, onSetStatus, onClose, variant 
           </div>
 
           {concept.prerequisites.length > 0 && (
-            <div className="mt-4">
+            <div className={`mt-4 ${sheet ? "order-4" : ""}`}>
               <p className="text-[10px] font-mono uppercase tracking-wide text-[var(--color-text-muted)]">
                 Prerequisites
               </p>
@@ -142,7 +143,7 @@ export function ConceptPanel({ concept, progress, onSetStatus, onClose, variant 
             </div>
           )}
 
-          <div className="mt-4">
+          <div className={`mt-4 ${sheet ? "order-3" : ""}`}>
             <p className="text-[10px] font-mono uppercase tracking-wide text-[var(--color-text-muted)]">
               Mark progress
             </p>
@@ -153,7 +154,7 @@ export function ConceptPanel({ concept, progress, onSetStatus, onClose, variant 
 
           <Link
             href={`/learn/${concept.id}`}
-            className="mt-4 flex items-center justify-center gap-1.5 rounded-md border border-[var(--state-learning)] py-2 text-xs font-medium text-[var(--state-learning)] transition-colors hover:bg-[var(--state-learning)] hover:text-[#05070a]"
+            className={`mt-4 flex items-center justify-center gap-1.5 rounded-md border border-[var(--state-learning)] py-2 text-xs font-medium ${sheet ? "order-2" : ""} text-[var(--state-learning)] transition-colors hover:bg-[var(--state-learning)] hover:text-[#05070a]`}
           >
             Open full lesson →
           </Link>

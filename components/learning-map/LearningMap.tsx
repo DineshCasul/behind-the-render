@@ -20,9 +20,9 @@ import { MapLegend } from "@/components/learning-map/MapLegend";
 
 interface LearningMapProps {
   /**
-   * "wide" is the landscape map used from tablet width up (positions in a
+   * "wide" is the landscape map used from 1024px up (positions in a
    * 1600x800 space). "tall" is the same graph redrawn top-to-bottom for
-   * phones (360x1010), so node labels stay readable on a 390px screen
+   * phones and tablets (360x1010), so node labels stay readable on a 390px screen
    * instead of shrinking a landscape diagram to a quarter of its size.
    * Both are rendered from the same data and the same node/edge components.
    */
@@ -137,7 +137,7 @@ export function LearningMap({ layout = "wide", expanded = false, id }: LearningM
       <section
         id={id ?? "map-mobile"}
         aria-label="Interactive rendering concept map"
-        className="relative mx-auto w-full max-w-md px-3 pb-16"
+        className="relative mx-auto w-full max-w-lg px-3 pb-16"
       >
         <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)]/40">
           <MapGraph layout="tall" {...graphProps} />

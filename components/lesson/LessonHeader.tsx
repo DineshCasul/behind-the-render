@@ -13,7 +13,13 @@ export function LessonHeader({ concept }: { concept: Concept }) {
         ← Back to map
       </Link>
 
-      <nav className="mt-4 flex flex-wrap items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
+      {/* Phones: just where this lesson sits, on one line. The full five-stage chain wrapped onto three lines. */}
+      <p className="mt-4 font-mono text-[10px] uppercase tracking-wide text-[var(--color-text-muted)] sm:hidden">
+        Stage {PIPELINE_STAGE_ORDER.indexOf(concept.stage) + 1} of {PIPELINE_STAGE_ORDER.length}:{" "}
+        <span className="text-[var(--state-learning)]">{PIPELINE_STAGE_LABEL[concept.stage]}</span>
+      </p>
+
+      <nav className="mt-4 hidden flex-wrap items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide text-[var(--color-text-muted)] sm:flex">
         {PIPELINE_STAGE_ORDER.map((stage, i) => (
           <span key={stage} className="flex items-center gap-1.5">
             {i > 0 && <span aria-hidden>→</span>}
