@@ -279,4 +279,102 @@ export const references: Record<ConceptId, Reference[]> = {
       why: "The model without Cache Components: opt-in fetch caching and unstable_cache. Next.js changed this in version 16, so both are linked.",
     },
   ],
+  seo: [
+    {
+      title: "Understand JavaScript SEO Basics",
+      url: "https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics",
+      kind: "docs",
+      why: "Google's own description of crawling, rendering and indexing, including why pre-rendering is still recommended.",
+    },
+    {
+      title: "Dynamic Rendering as a workaround",
+      url: "https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering",
+      kind: "docs",
+      why: "Why serving crawlers a separate version is described as a workaround, not a recommendation.",
+    },
+    {
+      title: "Functions: generateMetadata",
+      url: "https://nextjs.org/docs/app/api-reference/functions/generate-metadata",
+      kind: "docs",
+      why: "How Next.js sets titles, descriptions and canonical URLs per page.",
+    },
+    {
+      title: "Metadata Files: sitemap.xml",
+      url: "https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap",
+      kind: "docs",
+      why: "Generating a sitemap so crawlers can discover every page.",
+    },
+  ],
+  "js-main-thread": [
+    {
+      title: "JavaScript execution model",
+      url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Execution_model",
+      kind: "docs",
+      why: "MDN's explanation of the event loop and run-to-completion.",
+    },
+    {
+      title: "Optimize long tasks",
+      url: "https://web.dev/articles/optimize-long-tasks",
+      kind: "docs",
+      why: "Practical ways to break up long tasks, including yielding.",
+    },
+    {
+      title: "Web Workers API",
+      url: "https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API",
+      kind: "docs",
+      why: "Running code on another thread, and what workers can't do.",
+    },
+    {
+      title: "Long Animation Frames API",
+      url: "https://developer.chrome.com/docs/web-platform/long-animation-frames",
+      kind: "docs",
+      why: "Attributing slow frames to the scripts that caused them.",
+    },
+  ],
+  "web-vitals": [
+    {
+      title: "Web Vitals",
+      url: "https://web.dev/articles/vitals",
+      kind: "docs",
+      why: "The definitions and recommended thresholds of Core Web Vitals.",
+    },
+    {
+      title: "Optimize Interaction to Next Paint",
+      url: "https://web.dev/articles/optimize-inp",
+      kind: "docs",
+      why: "How to find and fix slow interactions.",
+    },
+    {
+      title: "Why lab and field data can be different",
+      url: "https://web.dev/articles/lab-and-field-data-differences",
+      kind: "docs",
+      why: "Why a good lab score can sit next to poor real-user data.",
+    },
+    {
+      title: "Functions: useReportWebVitals",
+      url: "https://nextjs.org/docs/app/api-reference/functions/use-report-web-vitals",
+      kind: "docs",
+      why: "Reporting real-visitor metrics from a Next.js app.",
+    },
+  ],
+  "client-components": [
+    {
+      title: "'use client' directive",
+      url: "https://react.dev/reference/rsc/use-client",
+      kind: "docs",
+      why: "The official definition of the boundary and its serialization rules.",
+    },
+    {
+      title: "Server and Client Components",
+      url: "https://nextjs.org/docs/app/getting-started/server-and-client-components",
+      kind: "docs",
+      why: "How Next.js splits work between server and client, and how first load and hydration fit in.",
+    },
+    {
+      title: "Lazy Loading",
+      url: "https://nextjs.org/docs/app/guides/lazy-loading",
+      kind: "docs",
+      why: "Loading a Client Component only when it's needed.",
+    },
+  ],
 };

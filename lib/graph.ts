@@ -7,7 +7,7 @@ export const VIEW_HEIGHT = 800;
 // The portrait (phone) layout of the same graph: same nodes and edges, stacked
 // top-to-bottom at a size where labels are readable on a 390px screen.
 export const MOBILE_VIEW_WIDTH = 360;
-export const MOBILE_VIEW_HEIGHT = 1010;
+export const MOBILE_VIEW_HEIGHT = 1130;
 
 export interface Edge {
   id: string;

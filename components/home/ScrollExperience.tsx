@@ -60,6 +60,9 @@ export function ScrollExperience() {
   // so it stays compositor-only (see learning-notes/06).
   const mapOpacity = useTransform(scrollYProgress, [0, 0.18, 0.5, 1], [0, 0, 1, 1]);
   const mapScale = useTransform(scrollYProgress, [0, 0.18, 1], [0.78, 0.78, 1]);
+  // The map layer sits on top of the hero in the DOM, so while it is still
+  // invisible it must not swallow clicks meant for the hero's buttons.
+  const mapPointerEvents = useTransform(scrollYProgress, (v) => (v < 0.18 ? "none" : "auto"));
   const mapRotateX = useTransform(scrollYProgress, [0, 0.18, 0.75, 1], [14, 14, 0, 0]);
 
   // Arriving from a lesson's "Back to map" link (`/?to=map`): start at the
@@ -160,6 +163,7 @@ export function ScrollExperience() {
             className="absolute inset-0"
             style={{
               opacity: mapOpacity,
+              pointerEvents: mapPointerEvents,
               scale: mapScale,
               rotateX: mapRotateX,
               transformPerspective: 1200,

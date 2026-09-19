@@ -1,5 +1,69 @@
 # Build Log
 
+## Story mode, step D: making the story interactive
+
+**Date:** 2026-09-19
+
+- Four small demos inside story steps (`components/story/StoryVisual.tsx`, chosen by a `visual` field on the step data): **scrub a fan's phone through time** for CSR, SSG and ISR (what can they see, does the button work); **distance** (a server in Virginia versus a copy near the fan); **tap before and after hydration** (the button really does nothing until you let "JavaScript finish loading"); **a crowd with and without a cache**. They show the *order* of events and what the fan can do, and use no invented timings.
+- Scene paragraphs fade in one after another with a CSS animation (server-rendered, no JavaScript needed). The last step ends with a **recap** (`StoryRecap.tsx`): your path, and the branches not on it, each a link.
+- Design rule kept: a demo has to teach something the text does not, or it does not ship.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why hydration is felt as "the button does nothing": the HTML is a picture until handlers are attached.
+2. Why a cache changes the *number of requests that do real work*, not just how fast each is.
+3. Why demos use no invented numbers when the scenario is fictional.
+
+## Story mode, step C: the ticket-drop story (first version) + a saved-progress crash
+
+**Date:** 2026-09-19
+
+- **The story:** `data/story.ts` holds 11 steps (Aurora Tour, servers in Virginia, fans everywhere). Each step ends on a *problem* that the next concept solves; the decisions (where the HTML is built, how much runs in the browser) are options with a **pitch and a cost**, never a "best" answer. Pages are `/story/[step]`, prebuilt with `generateStaticParams`. `components/story/StoryStepView.tsx` (Server Component) renders the narrative and "under the hood" links into the existing lessons; `JourneyTrail.tsx` (Client Component) shows the path you walked, stored by `lib/story-journey.ts` with the same `useSyncExternalStore` pattern as progress. The hero has a "Start the story" button (desktop and phone).
+- **Bug 1, the map layer swallowed clicks:** on desktop the invisible map layer sits above the hero in the DOM, so the new button could not be clicked. Fix: `pointer-events` follows scroll progress (`none` until the map starts appearing).
+- **Bug 2, the "error on the top page" (reproduced, then fixed):** progress saved in your browser before the 4 new concepts existed had no entry for them, so the map read `undefined` and threw `Cannot read properties of undefined (reading 'color')`. A fresh browser never hit it, which is why my tests missed it. `lib/progress.ts` now merges saved progress over the defaults and drops unknown or invalid values. Rule: **stored data outlives your code, so never trust it to be complete.**
+- Story copy is intentionally light and jokey ("the boring part", "the panic part"); numbers are avoided because the scenario is fictional.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Persisted state (localStorage) is a *schema you don't control*: adding a field to your model is a migration problem for every returning user.
+2. A later element in the DOM covers earlier ones for pointer events even when it is fully transparent, unless `pointer-events` says otherwise.
+3. Why the story is data (steps, options, trade-offs) rendered by one component, rather than eleven hand-built pages.
+
+## Story mode, step B: "Learn this next" hints
+
+**Date:** 2026-09-19
+
+- `data/next-up.ts` gives every one of the 16 concepts one or two harder follow-on topics, each with a link, a one-sentence reason and (where support is limited) a caveat. Shown at the top of each lesson's "Go deeper" section by the new `components/lesson/NextUpList.tsx` (a Server Component: plain links, no JavaScript).
+- All URLs were fetched and load. Speculation Rules, `scheduler.yield()`, `content-visibility` and the Long Animation Frames API carry a support caveat rather than being presented as universally safe. A Partial Prerendering link was dropped because it just redirected to the general caching page.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Every concept leads somewhere harder (HTTP to HTTP/3, hydration to selective hydration), and knowing that "next" topic is what separates using a tool from understanding it.
+2. Why an API with limited browser support is a progressive enhancement, not a foundation.
+
+## Story mode, step A — four new concepts (SEO, JS & Main Thread, Web Vitals, Client Components)
+
+**Date:** 2026-09-19
+
+- The site is becoming a **story-driven decision graph** (a concert ticket drop that keeps creating new problems). Before the story can exist, the concepts it needs must exist, so this step adds the four "Must" concepts as full lessons: 5 questions each, worked examples, verified references, honest "in this site" entries and 12 new glossary terms. The map now has 16 nodes (wide and portrait layouts re-laid out, checked in headless Edge).
+- Facts were verified against primary docs first (web.dev Core Web Vitals thresholds, Google's JavaScript SEO docs, MDN, react.dev, nextjs.org). Anything I could not verify (for example a TTFB threshold) was left out rather than guessed.
+- New files: `data/lessons/story-concepts.ts`, `data/questions/story-concepts.ts`, `data/examples/story-concepts.ts` (the stage files were left alone). `server-components` now has `client-components` as a prerequisite.
+- **Gotcha worth knowing:** `examples`, `references` and `siteUsage` are `Record<ConceptId, ...>`, so TypeScript failed the build until every new id had an entry. `lessonMap` and `questionMap` are built with a cast, so a missing lesson would only crash at runtime. See note 15.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. A crawler gets the **response HTML** first and the JavaScript-rendered page later (a separate queue), which is why the rendering strategy affects search.
+2. The main thread does scripts, layout and paint one task at a time, so any task over 50 ms delays input: that is what INP measures.
+3. `"use client"` marks a module *and its imports* as browser code, but Client Components are still pre-rendered to HTML and then hydrated.
+
 ## Phase 2.5c — Section map died after reload/navigation
 
 **Date:** 2026-09-19

@@ -4,6 +4,7 @@ import { renderingStrategiesExamples } from "@/data/examples/rendering-strategie
 import { reactNextjsExamples } from "@/data/examples/react-nextjs";
 import { modernDeliveryExamples } from "@/data/examples/modern-delivery";
 import { productionConcernsExamples } from "@/data/examples/production-concerns";
+import { storyConceptExamples } from "@/data/examples/story-concepts";
 
 /**
  * Worked examples, authored per pipeline stage like the lessons. The
@@ -16,4 +17,5 @@ export const examples: Record<ConceptId, ConceptExamples> = {
   ...reactNextjsExamples,
   ...modernDeliveryExamples,
   ...productionConcernsExamples,
+  ...storyConceptExamples,
 };

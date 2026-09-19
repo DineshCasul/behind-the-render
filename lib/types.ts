@@ -10,7 +10,11 @@ export type ConceptId =
   | "hydration"
   | "server-components"
   | "streaming"
-  | "caching";
+  | "caching"
+  | "seo"
+  | "js-main-thread"
+  | "web-vitals"
+  | "client-components";
 
 export type NodeStatus =
   | "not-started"
@@ -78,7 +82,7 @@ export interface Concept {
   prerequisites: ConceptId[];
   /** Position in the map's SVG coordinate space (1600x800 viewBox). */
   position: { x: number; y: number };
-  /** Position in the portrait (phone) layout of the same graph (360x1010 viewBox). */
+  /** Position in the portrait (phone) layout of the same graph (360x1130 viewBox). */
   mobilePosition: { x: number; y: number };
 }
 

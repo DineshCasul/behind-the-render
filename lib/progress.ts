@@ -54,7 +54,20 @@ const SERVER_SNAPSHOT = defaultProgress();
 
 function getSnapshot(): ProgressState {
   if (cache === null) {
-    cache = readJSON(STORAGE_KEY, defaultProgress());
+    // Merge over the defaults, never trust the stored object to be complete:
+    // progress saved before a concept was added has no key for it, and a
+    // missing status would crash anything that looks its visuals up.
+    // Unknown or invalid values (an id that was removed, a hand-edited
+    // status) are dropped for the same reason.
+    const stored = readJSON<Record<string, unknown>>(STORAGE_KEY, {});
+    const merged = defaultProgress();
+    for (const id of Object.keys(merged) as ConceptId[]) {
+      const value = stored[id];
+      if (typeof value === "string" && (STATUS_ORDER as string[]).includes(value)) {
+        merged[id] = value as NodeStatus;
+      }
+    }
+    cache = merged;
   }
   return cache;
 }

@@ -4,6 +4,7 @@ import { renderingStrategiesLessons } from "@/data/lessons/rendering-strategies"
 import { reactNextjsLessons } from "@/data/lessons/react-nextjs";
 import { modernDeliveryLessons } from "@/data/lessons/modern-delivery";
 import { productionConcernsLessons } from "@/data/lessons/production-concerns";
+import { storyConceptLessons } from "@/data/lessons/story-concepts";
 
 /**
  * Lesson content is authored grouped by pipeline stage (one file per
@@ -19,6 +20,7 @@ export const lessonMap: Record<ConceptId, Lesson> = Object.fromEntries(
     ...reactNextjsLessons,
     ...modernDeliveryLessons,
     ...productionConcernsLessons,
+    ...storyConceptLessons,
   ].map((lesson) => [lesson.id, lesson]),
 ) as Record<ConceptId, Lesson>;
 

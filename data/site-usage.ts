@@ -209,4 +209,65 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     whyNot:
       "We don't use Next.js's own caching (`fetch` with `force-cache`, `unstable_cache`, or the newer `use cache` directive) because there are no `fetch` calls: all data is imported from local files. It matters as soon as content comes from an API or a database.",
   },
+  seo: {
+    status: "partly",
+    headline: "Every page's content is in the HTML, and each lesson has its own title. There is no sitemap or robots file yet.",
+    explanation:
+      "Lessons are prebuilt, so a crawler receives the full content in the first response. The site sets a title and description per lesson with `generateMetadata`. It doesn't ship a sitemap, a robots file or canonical URLs.",
+    evidence: [
+      { path: "app/learn/[slug]/page.tsx", what: "generateMetadata gives each lesson its own title and description" },
+      { path: "app/layout.tsx", what: "The site-wide default metadata" },
+    ],
+    verify: [
+      "Open any lesson, press Ctrl+U for View Page Source, and search for the `<title>` and for a sentence from the lesson body: both are in the raw HTML.",
+      "Visit /sitemap.xml: it returns 404, which is the missing piece.",
+    ],
+    whyNot:
+      "A sitemap and canonical URLs matter once there are many pages and several ways to reach them. With a handful of lessons and one URL each, crawlers find everything through links, but a sitemap would still be a cheap, sensible addition.",
+  },
+  "js-main-thread": {
+    status: "partly",
+    headline: "The site is careful not to block the main thread, but it has no long task to yield from.",
+    explanation:
+      "Animations use `transform` and `opacity`, which don't need layout work on every frame, and the scroll scene reads scroll position through Framer Motion. There is no Web Worker and no explicit yielding, because no single task in the site is long enough to need it.",
+    evidence: [
+      { path: "components/home/ScrollExperience.tsx", what: "Scroll-linked animation built from transform and opacity" },
+      { path: "components/ui/AmbientParticles.tsx", what: "Ambient motion kept small and disabled for reduced motion" },
+    ],
+    verify: [
+      "Open the Performance panel in Firefox DevTools, record while scrolling the home page, and look at the longest tasks in the main-thread flame chart.",
+    ],
+    whyNot:
+      "Yielding and workers pay off when one task runs for tens of milliseconds or more, such as filtering a big list. This site has no such task, so adding them would be complexity without a benefit.",
+  },
+  "web-vitals": {
+    status: "not-used",
+    headline: "The site doesn't measure Web Vitals from real visitors.",
+    explanation:
+      "There is no `useReportWebVitals` call, no analytics endpoint and no field data. You can still measure a page in a lab run yourself, but that is not the same as knowing how visitors experience it.",
+    evidence: [
+      { path: "app/layout.tsx", what: "Where a small WebVitals Client Component would be mounted" },
+    ],
+    verify: [
+      "Search the codebase for `useReportWebVitals`: there are no matches.",
+      "Open the Performance panel in Firefox DevTools and record a page load to see the loading timeline (a lab measurement).",
+    ],
+    whyNot:
+      "Collecting field data needs somewhere to send it and someone to read it. For a personal learning project without real traffic, a lab run is enough; a real product would want the field data.",
+  },
+  "client-components": {
+    status: "used",
+    headline: "Most of the site is Server Components, and `use client` marks only the interactive parts.",
+    explanation:
+      "The lesson pages themselves are Server Components. The map, the panel, the tooltip, the experiments and the progress controls are Client Components because they use state, effects or browser APIs such as localStorage.",
+    evidence: [
+      { path: "components/learning-map/LearningMap.tsx", what: "A Client Component: hover and selection state" },
+      { path: "components/lesson/StatusPicker.tsx", what: "A small Client Component that saves progress to localStorage" },
+      { path: "app/learn/[slug]/page.tsx", what: "A Server Component that composes both kinds" },
+    ],
+    verify: [
+      "Run `npm run build` and look at the routes in the output; each lesson is prebuilt (SSG).",
+      "Open a lesson with JavaScript disabled in Firefox (about:config, javascript.enabled set to false): the text is there, but the status buttons no longer respond.",
+    ],
+  },
 };

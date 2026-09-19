@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AmbientParticles } from "@/components/ui/AmbientParticles";
 import { HudCorners } from "@/components/ui/HudCorners";
 import { TerminalLine } from "@/components/ui/TerminalLine";
@@ -18,6 +19,14 @@ export function Hero() {
       </p>
       <div className="relative mt-9">
         <TerminalLine>tracing request → paint, one concept at a time_</TerminalLine>
+      </div>
+      <div className="relative mt-8">
+        <Link
+          href="/story/the-drop"
+          className="inline-flex items-center gap-2 rounded-full border border-[var(--state-learning)] px-6 py-3 font-mono text-xs uppercase tracking-widest text-[var(--state-learning)] transition-colors hover:bg-[var(--state-learning)] hover:text-black"
+        >
+          Start the story <span aria-hidden>→</span>
+        </Link>
       </div>
     </section>
   );

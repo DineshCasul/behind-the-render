@@ -19,6 +19,8 @@ import { getLesson } from "@/data/lessons";
 import { getQuestions } from "@/data/questions";
 import { siteUsage } from "@/data/site-usage";
 import { references } from "@/data/references";
+import { nextUp } from "@/data/next-up";
+import { NextUpList } from "@/components/lesson/NextUpList";
 import { examples as allExamples } from "@/data/examples";
 import { ExampleBox } from "@/components/lesson/ExampleBox";
 import { BrowserCheckBox } from "@/components/lesson/BrowserCheckBox";
@@ -167,6 +169,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
         )}
 
         <LessonSection id="go-deeper" heading="Go deeper">
+          <NextUpList items={nextUp[concept.id]} />
           <ReferencesList items={references[concept.id]} />
         </LessonSection>
 
