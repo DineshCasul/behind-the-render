@@ -1,5 +1,30 @@
 # Build Log
 
+## Glossary tooltips no longer run off the screen on phones
+
+**Date:** 2026-09-20
+
+- **Bug:** the hover/tap card for a hard word was centred on the word with a fixed 240px width, so a word near the left or right edge pushed the card off-screen. Measured on 1,041 tooltips across 8 lessons at 390, 360 and 320px wide: **559 were partly off-screen**.
+- **Fix** (`components/lesson/Term.tsx`, now a Client Component): when the word gets hover or focus, measure the still-invisible card and shift it back inside the viewport (a CSS variable feeds the `transform`), and flip it below the word if there is no room above. Written straight to the element, not through React state, so there is no extra render and the correction lands before the card fades in. After: **0 of 1,041** off-screen (6 flipped below).
+- Lesson: `visibility: hidden` elements still have layout, so you can measure them before showing them. And test a fix against the *old* code too: the same script found 559 problems before, which is what proves the test can see the bug.
+
+## Story mode: an interactive demo in every step, and a design summary that uses your choices
+
+**Date:** 2026-09-20
+
+- **Every story step now has something to play with** (`StoryVisualsMore.tsx`, plus the earlier ones): what a crawler receives first; the four strategies checked against the story's requirements; **anatomy of one request** (distance and server work, separately); **many requests at once** (a small simulation: arrivals per tick against a server that can finish a fixed number, with and without a cache); **how wrong is each way of showing the seat count**; streaming vs waiting for everything; where `use client` goes and what ships; the cache layers (reusing the lesson experiment); **a shared cache leaking one fan's page to another**; and symptom to metric ("taps feel laggy" leads to INP).
+- All numbers in the demos are invented units ("ticks", "fans", "units") and are labelled that way. They show order and shape, not measurements.
+- **"Your run" replaced by "The design you built".** Options now remember what you picked (`OptionLink.tsx`, `useChoices` in `lib/story-journey.ts`). The last step lists each decision with the cost you accepted, adds "things to watch" that only appear when your combination of choices creates them (for example, a prebuilt page plus a per-request seat count), and has a **Copy as notes** button: the outline of an interview answer to "how would you render this page?".
+- Stored choices are validated on read (stored data outlives the code that wrote it), and starting the story again clears them.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why a queue grows without limit when arrivals exceed capacity, and why a cache changes the number of requests that reach the server rather than the speed of each.
+2. Why personal data must never be in a shared cache entry (and that the fix is separating shared from personal, not turning caching off).
+3. How choices in one part of a design (prebuilt pages) constrain another (per-request data).
+
 ## Polish round: buttons, scroll cue, a real hydration bug, and a sharper question bank
 
 **Date:** 2026-09-20

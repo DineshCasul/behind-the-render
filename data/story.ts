@@ -25,7 +25,17 @@ export type StoryVisualSpec =
   | { kind: "phone"; strategy: "csr" | "ssr" | "ssg" | "isr" }
   | { kind: "distance" }
   | { kind: "tap" }
-  | { kind: "crowd" };
+  | { kind: "crowd" }
+  | { kind: "crawler" }
+  | { kind: "compare" }
+  | { kind: "anatomy" }
+  | { kind: "herd" }
+  | { kind: "freshness" }
+  | { kind: "streaming" }
+  | { kind: "jssplit" }
+  | { kind: "layers" }
+  | { kind: "leak" }
+  | { kind: "diagnose" };
 
 export interface StoryOption {
   label: string;
@@ -45,7 +55,8 @@ export interface StoryStep {
   /** A one-line aside in the voice of the narrator. */
   aside: string;
   scene: string[];
-  visual?: StoryVisualSpec;
+  /** Interactive demos, shown in order after the scene. */
+  visuals?: StoryVisualSpec[];
   /** The problem this step ends on: why the next concept has to exist. */
   problem?: string;
   /** Concepts that become relevant here, each with the reason they showed up now. */
@@ -75,6 +86,7 @@ export const storySteps: StoryStep[] = [
     ],
     problem: "Four requirements that quietly pull in different directions. Where does the HTML for a show page come from?",
     tryThis: [{"text": "Before you start: open any ticketing or shop site, press Ctrl+U (View Page Source) and search for the event or product name. If it is in the raw HTML, a crawler gets it on the first request. If not, it arrives later, via JavaScript."}],
+    visuals: [{"kind": "crawler"}],
     concepts: [
       { id: "seo", why: "\"Findable on Google\" is a requirement, so what a crawler receives matters." },
       { id: "web-vitals", why: "\"Instant\" needs a number, or it is just an opinion." },
@@ -91,6 +103,7 @@ export const storySteps: StoryStep[] = [
       "A fan asks for `/events/tokyo`. Something has to produce the HTML that comes back. There are four honest candidates, and **none of them is \"best\"**: each one moves the work to a different place and a different moment.",
       "Pick one. You can come back and try the others: the story will not judge you (the traffic on sale day will, but that is later).",
     ],
+    visuals: [{"kind": "compare"}],
     concepts: [
       { id: "csr", why: "The browser builds the page from JavaScript." },
       { id: "ssr", why: "The server builds the page for every request." },
@@ -114,9 +127,9 @@ export const storySteps: StoryStep[] = [
       "The response for `/events/tokyo` is nearly empty: a `<div id=\"root\"></div>` and a script tag. The fan's browser downloads the JavaScript, runs it, asks for the show data, and only then draws anything. On a fast laptop that feels fine. On a mid-range phone in a crowd at 9:00, it is a blank screen and a spinner.",
       "And Google? It renders JavaScript, but as a **separate, queued step** after it fetches your HTML. For a page that must be found, you have made your most important content wait in a line.",
     ],
-    visual: { kind: "phone", strategy: "csr" },
     problem: "The first thing a visitor and a crawler receive is nothing. Can the server send something real?",
     tryThis: [{"text": "View Page Source (Ctrl+U) on a client-rendered app and compare it with what the Inspector shows. The source is what a crawler fetches first; the Inspector shows the page after JavaScript ran."}],
+    visuals: [{"kind": "phone", "strategy": "csr"}],
     concepts: [
       { id: "csr", why: "This is what you just chose." },
       { id: "seo", why: "The empty shell is what a crawler gets first." },
@@ -135,9 +148,9 @@ export const storySteps: StoryStep[] = [
       "Then you remember where the server lives. Every request from Tokyo has to cross an ocean to Virginia and back **before the first byte of HTML**. And on sale day, every one of those requests also makes the server *work*, at the same second, for everyone.",
       "SSR solved \"what does the first response contain\". It also made the server the busiest character in the story.",
     ],
-    visual: { kind: "distance" },
     problem: "Rendering per request is fresh but expensive, and the distance is built in. Do you really need to build this page for every fan?",
     tryThis: [{"text": "In Firefox DevTools, open the Network tab, reload any page and select the first (document) request. The Timings tab has a \"Waiting\" phase: that is time before the first byte arrived, and distance and server work both live inside it."}],
+    visuals: [{"kind": "anatomy"}, {"kind": "distance"}],
     concepts: [
       { id: "ssr", why: "This is what you just chose." },
       { id: "seo", why: "The content is in the first response, so a crawler sees it immediately." },
@@ -159,9 +172,9 @@ export const storySteps: StoryStep[] = [
       "The catch is the word *build*. With thousands of show pages, a full build takes a while, and **deploy time** becomes a real event: you cannot ship a fix at 8:59 without rebuilding, and the page only knows what the data looked like when it was built.",
       "So what about the seat count? A build at 8:00 does not know how many seats are left at 9:00:01.",
     ],
-    visual: { kind: "phone", strategy: "ssg" },
     problem: "Static pages are fast and cheap, but frozen at build time. Tickets sell out in seconds.",
     tryThis: [{"text": "This site does this: run `npm run build` and look for the ● (SSG) marker next to the /learn and /story routes."}],
+    visuals: [{"kind": "phone", "strategy": "ssg"}],
     concepts: [
       { id: "ssg", why: "This is what you just chose." },
       { id: "caching", why: "A prebuilt page is a permanently cached render." },
@@ -179,9 +192,9 @@ export const storySteps: StoryStep[] = [
       "It is a great fit for content that changes now and then: venue details, descriptions, the schedule. It is a poor fit for a number that changes every second.",
       "Which brings a useful insight: not every part of this page has the same freshness needs. The show description can be a day old. The seat count cannot.",
     ],
-    visual: { kind: "phone", strategy: "isr" },
     problem: "Different parts of one page need different freshness. And whichever way the HTML arrives, the page still has to *do* something: the seat picker needs JavaScript.",
     tryThis: [{"text": "Read how the revalidation timing is configured in the Next.js ISR guide.", "href": "https://nextjs.org/docs/app/guides/incremental-static-regeneration"}],
+    visuals: [{"kind": "phone", "strategy": "isr"}],
     concepts: [
       { id: "isr", why: "This is what you just chose." },
       { id: "caching", why: "ISR is caching applied to rendered pages." },
@@ -199,9 +212,9 @@ export const storySteps: StoryStep[] = [
       "And hydration is not free. React has to run your components in the browser to work out what the page is supposed to be, which happens on the **main thread**, the one thread that also handles taps and scrolling. If it is busy hydrating a huge page, the tap waits.",
       "This is exactly what the *responsiveness* metric measures, and it is why a page can look fast and feel slow.",
     ],
-    visual: { kind: "tap" },
     problem: "Hydrating everything makes the browser do a lot of work, much of it for parts of the page that never needed to be interactive.",
     tryThis: [{"text": "On this site, turn JavaScript off in Firefox (about:config, javascript.enabled set to false) and open a lesson: the text is all there, but the buttons no longer respond. That is exactly this step."}],
+    visuals: [{"kind": "tap"}],
     concepts: [
       { id: "hydration", why: "The HTML needs behavior attached before taps do anything." },
       { id: "js-main-thread", why: "Hydration runs on the same thread that handles input." },
@@ -219,6 +232,7 @@ export const storySteps: StoryStep[] = [
       "Look at a show page honestly. The description, the venue, the date and the photos never change while you look at them. The **seat picker** and the **quantity stepper** do. If the whole page is one big client-side bundle, you pay to download and hydrate the parts that were never interactive.",
       "React's Server Components model answers this: components are server-only by default, and you mark only the interactive leaves with `\"use client\"`. The server components' code never ships to the browser at all.",
     ],
+    visuals: [{"kind": "jssplit"}],
     concepts: [
       { id: "server-components", why: "Code that runs only on the server and never ships to the browser." },
       { id: "client-components", why: "The interactive leaves that do need the browser." },
@@ -238,6 +252,7 @@ export const storySteps: StoryStep[] = [
       "Everything else on the show page is happy being a bit old. The **seat count** is not. Fans watch it drop, and a stale number means someone clicks, gets excited, and then finds out the seat is gone.",
       "But \"fresh\" is a spectrum, and every step toward it costs something. You have three honest ways to get that number onto the screen."
     ],
+    "visuals": [{"kind": "freshness"}],
     "concepts": [
       {
         "id": "csr",
@@ -285,6 +300,7 @@ export const storySteps: StoryStep[] = [
       "Streaming, hydration and Server Components are three different ideas that people constantly blur together. Streaming is only about *when* pieces of output are delivered.",
     ],
     problem: "The page now arrives in pieces, but the server still does real work every time. On sale day, that work is multiplied by everyone.",
+    visuals: [{"kind": "streaming"}],
     concepts: [
       { id: "streaming", why: "Send what's ready, fill in what's slow." },
       { id: "server-components", why: "Where the slow data is fetched, right next to the component that needs it." },
@@ -302,9 +318,9 @@ export const storySteps: StoryStep[] = [
       "That is why the answer to \"which rendering strategy?\" is almost never one. The show description can be cached hard. The seat count needs to be fresh or nearly fresh. And the fan's own place in the queue is different for everyone, so it cannot be shared at all.",
       "That last idea, **personalization**, is the natural enemy of caching, and it is where a lot of real-world architecture gets interesting.",
     ],
-    visual: { kind: "crowd" },
     problem: "You now have a design with several moving parts. How would you know it actually works for real fans?",
     tryThis: [{"text": "On this site, run `npm run build`, then `npm run start`, then `curl -I localhost:3000/learn/ssr` and read the Cache-Control header. That is a real cache instruction, not a diagram."}],
+    visuals: [{"kind": "herd"}],
     concepts: [
       { id: "caching", why: "Do the expensive work once and reuse it, at the layer closest to the fan." },
       { id: "isr", why: "Rebuild popular pages in the background instead of on every request." },
@@ -326,6 +342,7 @@ export const storySteps: StoryStep[] = [
       "A cache can live in several places, and a request can be answered by the first one that has a valid copy: **the fan's own browser**, a **CDN** close to the fan, or a cache inside **your server** in front of the database. They are not interchangeable: they differ in how close they are to the fan, and in how much control you have over what is in them.",
       "The closer to the fan, the faster the answer, and the harder it is to take a bad copy back."
     ],
+    "visuals": [{"kind": "layers"}],
     "concepts": [
       {
         "id": "caching",
@@ -367,6 +384,7 @@ export const storySteps: StoryStep[] = [
       "A shared cache works because everyone gets the **same** answer. But a logged-in fan's name and queue position are different for every visitor. If a personal page ends up in a shared cache, the next fan could be shown someone else's data.",
       "So the page has two kinds of content: the part everyone shares and the part that is only one person's. How you separate them is one of the most important structural decisions in real applications."
     ],
+    "visuals": [{"kind": "leak"}],
     "concepts": [
       {
         "id": "caching",
@@ -419,6 +437,7 @@ export const storySteps: StoryStep[] = [
       "If the loading number is bad, look at time to first byte and the size of what you send. If responsiveness is bad, look for long tasks and heavy hydration on the main thread. If the layout jumps, look at what arrives late and pushes things around. Each symptom points back to a decision in this story.",
     ],
     tryThis: [{"text": "In Firefox DevTools, open the Performance panel, record a page load, and look for long tasks on the main thread. That is a lab measurement you can take right now."}],
+    visuals: [{"kind": "diagnose"}],
     concepts: [
       { id: "web-vitals", why: "The numbers that tell you whether the decisions worked, and for whom." },
       { id: "js-main-thread", why: "The place to look when responsiveness is the problem." },

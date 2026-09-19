@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Prose } from "@/components/lesson/Prose";
 import { JourneyTrail } from "@/components/story/JourneyTrail";
+import { OptionLink } from "@/components/story/OptionLink";
 import { StoryRecap } from "@/components/story/StoryRecap";
 import { StoryVisual } from "@/components/story/StoryVisual";
 import { conceptMap } from "@/data/concepts";
@@ -45,11 +46,11 @@ export function StoryStepView({ step }: { step: StoryStep }) {
         ))}
       </div>
 
-      {step.visual && (
-        <div className="mt-8">
-          <StoryVisual spec={step.visual} />
+      {step.visuals?.map((v, i) => (
+        <div key={i} className="mt-8">
+          <StoryVisual spec={v} />
         </div>
-      )}
+      ))}
 
       {step.id === "the-end" && <StoryRecap />}
 
@@ -64,10 +65,12 @@ export function StoryStepView({ step }: { step: StoryStep }) {
         <section className="mt-10" aria-label="Your options">
           <p className={`${label} text-[var(--state-learning)]`}>Your options</p>
           <ul className="mt-3 flex flex-col gap-3">
-            {step.options.map((o) => (
+            {step.options.map((o, i) => (
               <li key={o.label}>
-                <Link
+                <OptionLink
                   href={`/story/${o.to}`}
+                  stepId={step.id}
+                  optionIndex={i}
                   className="group block rounded-lg border border-[var(--color-border)] p-4 transition-colors hover:border-[var(--state-learning)]"
                 >
                   <span className="text-base font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--state-learning)]">
@@ -81,7 +84,7 @@ export function StoryStepView({ step }: { step: StoryStep }) {
                     <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--state-revisit)]">Cost </span>
                     {o.cost}
                   </span>
-                </Link>
+                </OptionLink>
               </li>
             ))}
           </ul>

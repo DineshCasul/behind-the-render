@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 import type { StoryVisualSpec } from "@/data/story";
+import {
+  CacheLayersDemo,
+  CrawlerView,
+  Diagnose,
+  Freshness,
+  Herd,
+  JsSplit,
+  PersonalLeak,
+  RequestAnatomy,
+  StrategyCompare,
+  StreamingCompare,
+} from "@/components/story/StoryVisualsMore";
 
 /**
  * Small interactive demos that sit inside story steps. They are
@@ -293,5 +305,25 @@ export function StoryVisual({ spec }: { spec: StoryVisualSpec }) {
       return <TapDemo />;
     case "crowd":
       return <Crowd />;
+    case "crawler":
+      return <CrawlerView />;
+    case "compare":
+      return <StrategyCompare />;
+    case "anatomy":
+      return <RequestAnatomy />;
+    case "herd":
+      return <Herd />;
+    case "freshness":
+      return <Freshness />;
+    case "streaming":
+      return <StreamingCompare />;
+    case "jssplit":
+      return <JsSplit />;
+    case "layers":
+      return <CacheLayersDemo />;
+    case "leak":
+      return <PersonalLeak />;
+    case "diagnose":
+      return <Diagnose />;
   }
 }
