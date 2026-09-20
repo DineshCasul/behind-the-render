@@ -11,7 +11,7 @@ export const renderingStrategiesLessons: Lesson[] = [
   {
     id: "csr",
     whatIsThis:
-      "**Client-Side Rendering**: the server sends a ==mostly-empty HTML shell==, and ==JavaScript running in the browser builds the actual UI== by writing to the DOM after the page loads.",
+      "**Client-Side Rendering**: the server sends a ==mostly-empty HTML shell==, and ==JavaScript running in the browser builds the actual UI== by writing to the DOM after the page loads. It is one of two answers to the question the HTML Parsing lesson leaves open: who produces the HTML the parser reads? With CSR, the browser does, using JavaScript.",
     whyItExists:
       "Once JavaScript could manipulate the DOM richly (and frameworks made that tractable), building highly interactive, app-like UIs entirely in the browser became attractive, the server just needed to hand out static assets and a data API, which simplified the server side enormously and made client apps feel more like native apps (no full page reloads between views).",
     howItWorks:
@@ -53,7 +53,7 @@ export const renderingStrategiesLessons: Lesson[] = [
   {
     id: "ssr",
     whatIsThis:
-      "**Server-Side Rendering**: the server runs the UI-generating code for *this specific request* and ==sends back a complete HTML document==, rather than a shell for the browser to fill in.",
+      "**Server-Side Rendering**: the server runs the UI-generating code for *this specific request* and ==sends back a complete HTML document==, rather than a shell for the browser to fill in. It is the other answer to the question the HTML Parsing lesson leaves open: who produces the HTML the parser reads? With SSR, the server does, for each request.",
     whyItExists:
       "CSR's biggest weaknesses: slow time-to-first-content and poor crawler visibility, motivated generating real markup on the server, per request, so the browser has something meaningful to paint immediately, before any JavaScript has even downloaded.",
     howItWorks:

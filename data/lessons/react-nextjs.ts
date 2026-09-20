@@ -10,7 +10,7 @@ export const reactNextjsLessons: Lesson[] = [
   {
     id: "react-rendering",
     whatIsThis:
-      "**React rendering** is the process of ==calling your component functions to produce a description of UI== (a tree of React elements), then figuring out the minimal set of real DOM changes needed to match that description, a process called reconciliation, using a diffing algorithm sometimes called \"the virtual DOM.\"",
+      "**React rendering** is the process of ==calling your component functions to produce a description of UI== (a tree of React elements), then figuring out the minimal set of real DOM changes needed to match that description, a process called reconciliation, using a diffing algorithm sometimes called \"the virtual DOM.\" Both CSR (in the browser) and SSR (on the server) rely on this step to turn components into UI, so it is the shared engine behind the CSR and SSR lessons.",
     whyItExists:
       "Directly mutating the DOM by hand to keep it in sync with changing application state gets unmanageable fast, you end up hand-writing \"if this changed, update that specific element\" logic everywhere. React lets you instead describe *what the UI should look like right now* as a function of state, and handles figuring out the actual DOM edits for you.",
     howItWorks:
@@ -48,7 +48,7 @@ export const reactNextjsLessons: Lesson[] = [
   {
     id: "hydration",
     whatIsThis:
-      "**Hydration** is ==React attaching its event listeners and internal state to HTML that already exists in the DOM==, rather than creating that DOM from scratch, so a server-rendered (or statically generated) page becomes interactive.",
+      "**Hydration** is ==React attaching its event listeners and internal state to HTML that already exists in the DOM==, rather than creating that DOM from scratch, so a server-rendered (or statically generated) page becomes interactive. It is what the HTML from SSR needs next: until hydration runs, that HTML is only a picture of the page.",
     whyItExists:
       "SSR/SSG solve \"get meaningful content on screen fast,\" but that HTML on its own has no click handlers, no state, nothing, it's **inert**. Hydration exists to ==bridge that gap==: reuse the DOM that's already there (don't throw it away and rebuild it, that would be wasteful and cause a visible flash) while wiring up the interactivity a full React app needs.",
     howItWorks:

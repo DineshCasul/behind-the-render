@@ -49,7 +49,7 @@ export const webFundamentalsLessons: Lesson[] = [
   {
     id: "browser-rendering",
     whatIsThis:
-      "**Browser rendering** is the ==pipeline that turns received bytes into pixels on screen==: parse HTML into a DOM, parse CSS into a CSSOM, combine them into a render tree, compute layout (geometry), then paint and composite layers to the screen.",
+      "**Browser rendering** is the ==pipeline that turns received bytes into pixels on screen==: parse HTML into a DOM, parse CSS into a CSSOM, combine them into a render tree, compute layout (geometry), then paint and composite layers to the screen. Where do those bytes come from? They are the body of the HTTP response (see the HTTP lesson): the server's answer is what this pipeline starts from.",
     whyItExists:
       "A browser has to go from \"here are some bytes\" to \"here's a picture\" for arbitrary, malformed-tolerant documents, incrementally, and fast enough to feel responsive. That requirement, incremental, fault-tolerant, and performant, is why the pipeline is staged rather than one monolithic step.",
     howItWorks:
@@ -87,7 +87,7 @@ export const webFundamentalsLessons: Lesson[] = [
   {
     id: "html-parsing",
     whatIsThis:
-      "**HTML parsing** is the browser reading HTML bytes top-to-bottom and ==building the DOM tree from them==, following a formally specified error-recovery algorithm, even badly malformed HTML gets a deterministic DOM, per spec.",
+      "**HTML parsing** is the browser reading HTML bytes top-to-bottom and ==building the DOM tree from them==, following a formally specified error-recovery algorithm, even badly malformed HTML gets a deterministic DOM, per spec. It is the first stage of the browser rendering pipeline (see the Browser Rendering lesson), and the bytes it reads are the body of the HTTP response (see the HTTP lesson).",
     whyItExists:
       "Real-world HTML on the web is often invalid, unclosed tags, wrong nesting, stray characters. Early browsers each recovered from errors differently, so pages rendered inconsistently. The HTML5 parsing algorithm exists specifically to ==make error recovery identical across every conforming browser==.",
     howItWorks:

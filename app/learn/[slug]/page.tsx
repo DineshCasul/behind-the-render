@@ -22,6 +22,7 @@ import { getQuestions } from "@/data/questions";
 import { siteUsage } from "@/data/site-usage";
 import { references } from "@/data/references";
 import { nextUp } from "@/data/next-up";
+import { ChainIntro, ChainOutro } from "@/components/lesson/ChainLines";
 import { StoryBookendBottom, StoryBookendTop } from "@/components/story/StoryBookend";
 import { NextUpList } from "@/components/lesson/NextUpList";
 import { examples as allExamples } from "@/data/examples";
@@ -94,6 +95,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <LessonNav title={concept.title} sections={navSections} />
       <main className="mx-auto w-full max-w-3xl px-6 pb-24 pt-12 sm:px-8">
         <LessonHeader concept={concept} />
+
+        <ChainIntro id={concept.id} />
 
         <Suspense fallback={null}>
           <StoryBookendTop />
@@ -184,6 +187,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
         </LessonSection>
 
         <LessonSection id="related" heading="Related concepts">
+          <ChainOutro id={concept.id} />
           <RelatedConcepts currentId={concept.id} ids={relatedIds} />
         </LessonSection>
 

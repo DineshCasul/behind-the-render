@@ -1,5 +1,21 @@
 # Build Log
 
+## Lessons now read as a sequence
+
+**Date:** 2026-09-20
+
+- **Two plain lines per lesson, no new boxes.** Under the title: *Where this fits* (why the concept exists in the chain, what it builds on, and "jumped straight here? read that first" with links that slide the page backwards). Near the end: *What this leaves open*, *Next in the chain* and *Also ties into*, so each lesson ends by handing you to the next. (`components/lesson/ChainLines.tsx`, text in `data/connections.ts`.)
+- **Two kinds of links, on purpose.** "Builds on" and "next" follow the map's own prerequisite edges, and a check confirms the text matches the map in both directions for all 16 concepts. "Also ties into" are the cross-links the map's tree shape hides (Hydration and the main thread, Caching and Web Vitals, and so on).
+- **Dangling references fixed in the body text.** Six lessons used an idea without saying where it came from (for example Browser Rendering said "received bytes" without saying they are the HTTP response). Each now has one bridging sentence that names the lesson it comes from, by name rather than "previous lesson", so it still reads correctly if you jump around.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. A tree of prerequisites hides cross-links: many topics touch each other without one depending on the other, and saying so is what makes them feel like one subject.
+2. Every technical sentence has an implied "as you know from...": if the reader may not know it, name the source in the sentence.
+3. Keeping data (connections) consistent with structure (the graph) with a check is cheaper than trusting yourself to update both.
+
 ## Tedium cleanup: glossary noise, merged section, duplicate questions, duplicate try-it steps
 
 **Date:** 2026-09-20
