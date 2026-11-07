@@ -4,7 +4,7 @@ import { renderingStrategiesQuestions } from "@/data/questions/rendering-strateg
 import { reactNextjsQuestions } from "@/data/questions/react-nextjs";
 import { modernDeliveryQuestions } from "@/data/questions/modern-delivery";
 import { productionConcernsQuestions } from "@/data/questions/production-concerns";
-import { storyConceptQuestions } from "@/data/questions/story-concepts";
+import { supportingConceptQuestions } from "@/data/questions/supporting-concepts";
 
 export const questionMap: Record<ConceptId, InterviewQuestion[]> = {
   ...webFundamentalsQuestions,
@@ -12,7 +12,7 @@ export const questionMap: Record<ConceptId, InterviewQuestion[]> = {
   ...reactNextjsQuestions,
   ...modernDeliveryQuestions,
   ...productionConcernsQuestions,
-  ...storyConceptQuestions,
+  ...supportingConceptQuestions,
 } as Record<ConceptId, InterviewQuestion[]>;
 
 export function getQuestions(id: ConceptId): InterviewQuestion[] {

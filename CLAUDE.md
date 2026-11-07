@@ -20,6 +20,8 @@ The Rendering Lab
 
 > Renamed during Phase 1 (2026-09-19) to **Behind the Render** — the original name read as generic. (Briefly renamed to "Critical Path" first, then changed again per direct request.) See learning-notes/00-build-log.md. The rest of this spec's product description, concepts, and requirements are unaffected — only the display name changed.
 
+> Renamed again on 2026-11-08 to **Web Lore**, when the project widened from rendering to how popular websites work (the tricks, algorithms and tech behind them). Rendering is now one part of it.
+
 Tagline:
 
 Explore how the modern web turns a request into pixels.

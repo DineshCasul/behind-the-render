@@ -1,5 +1,125 @@
 # Build Log
 
+## Journey on phones: the diagram stays pinned (2026-11-08)
+
+- Problem: on a phone the diagram sat below the text, so you scrolled down to see it, pressed Continue, and the page jumped back up to the text. Fix: the diagram is now position: sticky; top: 0 inside the scrolling middle, so it stays at the top while the text scrolls under it, and Continue is docked below both. Its frame is opaque with a soft shadow so scrolling text does not show through; on phones the title is smaller, the trick line is hidden, and the drawing is capped at 24svh so the text keeps room.
+- Scroll rule on a step: a new chapter scrolls to the top (to show the title); within a chapter the diagram stays pinned and only the text is brought back to just under it. Tested over the DevTools Protocol at 390x800: scrolled down, pressed Continue, the scroll position and the diagram's position stayed put.
+
+## Hero: a terminal that asks questions (2026-11-08)
+
+- The hero's terminal line (components/ui/TerminalLine.tsx) now types one question per trick (curious in data/tricks.ts), holds it, erases it and types the next, so it grows with the content. It starts as the full first question in the server HTML and on the first client render (no hydration mismatch, never blank); the typing loop begins after that; reduced motion shows the first question still. The cursor blink is a CSS keyframe (.caret) instead of a Framer loop. Verified by sampling the text over time in headless Edge.
+
+## Built to keep growing (2026-11-08)
+
+- The hero no longer lists sites. It asks 'What are you curious about?' and shows the four trick groups (a small, fixed set), a Surprise me button, and counts ('All N sites', 'All N tricks') read from the data.
+- Grouping is data-driven: each road has kind and hue, each trick has group (typed unions defined in data/categories.ts), so adding content never means editing a list; an empty group is hidden. data/road-hues.ts shrank to the default and a helper.
+- The home page caps each group (4 roads, 3 tricks) with an 'All N' link into the full pages; the picker metadata no longer names every site. Checklist for adding a site: learning-notes/17-adding-a-site.md.
+
+## Map removed, new hero, grouped lists (2026-11-08)
+
+- **Deleted:** the foundations map (pp/map, components/learning-map, MapHeading), both old heroes, and the Begin-the-journey, Browse-the-tricks and scroll-cue pieces, plus their now-dead CSS. The lessons stay (reached from trick pages); their back links now go to the tricks. Claims in data/site-usage.ts and one code example in data/examples/web-fundamentals.ts that named deleted files were rewritten to describe the journey instead (the hover-re-render entry now explains state versus motion values on the journey page).
+- **New hero** (components/home/HomeHero.tsx): asks 'Whose click do you want to follow?' and answers with one coloured chip per site (each in its road hue), a Surprise me button (SurpriseButton, a tiny client island that receives the links as a prop so the journey data stays out of the browser bundle) and a link to the tricks. One hero for phone and desktop.
+- **Categories** (data/categories.ts, components/home/Grouped.tsx): roads by kind of site (Start here, Feeds and video, Reading writing and code, Maps design and stays); tricks by the problem they solve (Load faster, Survive the crowd, Feel like an app, Change it safely). Anything not named in a group lands in a catch-all 'More' group, so a new item can never disappear. Used on the home page, the road picker and the tricks index.
+
+## New theme: plum-black ground, a real palette, one hue per site (2026-11-08)
+
+- **Tokens** (`app/globals.css`): ground changed from blue-black to a warm plum-black; text is warmer; the palette is now coral (default accent), mint, yellow, violet, plus pink and blue. The main accent is still `--state-learning`.
+- **One hue per road** (`data/road-hues.ts`): a page sets `--state-learning` on its root element (`style={hueStyle(app.id)}`), and every button, glow, eyebrow, strip and diagram highlight below it recolours with no other code change. YouTube is red, Facebook blue, GitHub green, Google Docs yellow, Uber lime, Figma violet, Airbnb pink, Twitter sky, Wikipedia pale blue. Trick pages take the hue of the road they are told on; the list dots show it.
+- **Journey controls and backdrop (later):** Continue is now one filled primary button with an arrow that nudges on hover and a step counter; Back is a small round icon button; 'Read the trick' is a quiet two-line side link; the keyboard hint uses key-cap chips. Backdrop: the line grid became a dot matrix that fades toward the edges, and a second pink glow drifts the opposite way on a different timing (CSS keyframes, transform and opacity only, off for reduced motion).
+- **Docked controls and question layout (later):** the journey is now exactly one screen tall (h-svh): top bar, a middle that scrolls on its own (overflow-y-auto, scrolled to the top on each step), and a bottom bar holding Back, Continue, the counter, the trick link and the key hint, so the buttons never move however long the text is. The question bank is a sidebar of filters (sticky) plus the list on wide screens, a filter row on top on phones; rows have a level-coloured edge, and an open answer puts the sources beside it on very wide screens. Overflow checked at 390 and 1440 px.
+- Hard-coded cyan glows (`rgba(94,203,240,...)`) became `color-mix(in srgb, var(--state-learning) N%, transparent)`, so they follow the accent too.
+- **Animations** (transform and opacity only, all off under `prefers-reduced-motion`): road and trick rows rise in one after another (`.row-rise`, delay from `--i`) and nudge sideways on hover; home sections fade up on scroll using CSS scroll-driven animation (`animation-timeline: view()`, behind `@supports`, so unsupported browsers just show the content); ghost buttons lift 1px on hover.
+
+> 🧠 Learning checkpoint
+>
+> After this step, I should understand:
+>
+> 1. How a CSS custom property set on a parent is inherited, so overriding one variable re-themes a whole subtree (and why that beats passing a colour prop through every component).
+> 2. What `color-mix()` does and why it lets one token drive translucent glows.
+> 3. How scroll-driven animations (`animation-timeline: view()`) run off the main thread without any JavaScript scroll listener, and why feature-gating them with `@supports` is progressive enhancement.
+
+## Journey page: split screen, larger type (2026-11-08)
+
+The user found the type small and wanted more of the screen used. Chosen layout: **split screen**.
+
+- `components/journey/Journey.tsx` rewritten. Wide screens: narration, quiz, sources and controls on the left in large serif type (up to `text-4xl`), the diagram on the right in a sticky column (`lg:grid-cols-[5fr_6fr]`). Chapters without a diagram use one centred column. The road is now a slim strip along the top (`RoadStrip`): nodes are buttons that jump to a chapter, the arrow moves with a `transform` and the lit trail grows with `scaleX`, both driven by one motion value, so travelling never touches layout.
+- Removed: the old SVG path and camera stage, `lib/journey-path.ts`, and click-anywhere-to-advance (it blocked text selection and scrolling). Keys still work: space, Enter and the arrows.
+- Diagram `Frame` text and padding grow on `lg`. On phones the diagram follows the narration and Continue (`order-last`), so Continue stays in view; strip labels are hidden below `sm` because they collided with the Roads button.
+- Checked by screenshots at 1440 and 390 px; no horizontal overflow.
+- **Same treatment for the other pages (later, same day):** trick pages now use a two-column layout on wide screens (idea left in large type; diagram and toy right; sources and alternatives left, interview angle and foundations right); home, tricks index and road picker widened to `max-w-6xl` with two-column lists and larger titles; question bank wider with larger question and answer text. Checked with emulated 390 px and 1440 px viewports: no horizontal overflow on any of them. (Plain headless Edge cannot go below about 500 px wide, so its narrow screenshots look clipped when they are not.)
+
+> 🧠 Learning checkpoint
+>
+> After this step, I should understand:
+>
+> 1. Why moving the arrow with `transform` driven by a motion value is cheaper than animating `left` or SVG attributes (no layout, no React render).
+> 2. How CSS grid placement (`col-start`, `row-span`, `order`) lets one DOM order serve two layouts, and why DOM order still matters for keyboard and screen-reader order.
+> 3. Why a sticky column needs `self-start` to stay put inside a grid.
+
+## Web Lore: from "how rendering works" to "how real sites work"
+
+**Date:** 2026-11-08
+
+The project widened. It is no longer only the rendering pipeline: it is the tricks, algorithms and tech behind sites people know, each backed by the company's own words. Renamed from *Behind the Render* to **Web Lore** (spec note added to `CLAUDE.md`).
+
+- **Tricks** (`data/tricks.ts`, `/trick`, `/trick/[slug]`): seven short pages (request batching, fixing the slowest paint, adaptive bitrate, canvas rendering, WebAssembly, rendering as a service, service-worker caching). Each is a hook, two or three sentences, sources, alternatives, one interview angle, and links to its foundations and to the road it is told in. A trick holds **no quotes of its own**: it points at journey chapters and reads quotes, notes and alternatives from `data/journey.ts`, so a quote is written down once.
+- **First toy:** `components/tricks/BatchingToy.tsx`. Two sliders and a mode switch show a chain of requests against one batched request. The numbers are the reader's, labelled as a toy, not YouTube's code. Bars move with `translateX(i * 100%)` (a percentage of the element's own width), so no layout work.
+- **Old lessons became "foundations".** `/learn/[slug]` stays, with a new **Seen in the wild** section (`chaptersForConcept` in `data/journey.ts`) that lists the real sites whose journey chapter covers that concept, with the verbatim quotes. Journey chapters now end with "Read the trick".
+- **Home:** hero retitled, the second button is now "Browse the tricks".
+- **Old story deleted** (2026-11-08): `app/story`, `components/story`, `data/story.ts`, `lib/story-journey.ts`, and the lesson page's story bookends. `/story/*` is now a 404. Text that still mentioned it was fixed, `cta-story` became `cta-journey`, and the three `story-concepts` data files (really the lessons for SEO, web vitals, the main thread and client components) became `supporting-concepts`.
+- **Four more roads, each from a page fetched on 2026-11-08:** Facebook (Meta's 2020 rebuild post), Wikipedia (Wikimedia's CDN post), GitHub (removing jQuery) and Uber (the H3 hexagon grid). Five more tricks: atomic CSS, loading in tiers, layered caches, gradual migration, the hexagon grid. Netflix appears as one quote on the general road, through Google's web.dev article, because Netflix's own blog blocks the fetch tool.
+- **Not covered, on purpose:** DoorDash (its blog returned 403 on both domains), Netflix's own posts (403), Reddit (its domain cannot be crawled), Instagram, Amazon and Google Search (no first-party source found). A company gets a road only with a fetched first-party source.
+- **Second toy and a rebuilt bank** (2026-11-08): `NearbyToy` (hexagon grid: resolution, rings of neighbours, "found it or missed it" against the true nearest driver). The question bank now has 72 questions: 24 for the tricks (new, shown first) and the 48 foundations; `data/trick-questions.ts` + `data/bank-items.ts` merge the two. The home page is now the hero plus the roads and the tricks; the old map moved to `/map` as "The foundations". The pinned scroll scene (`ScrollExperience`) is deleted.
+- **Checked mechanically, not by eye:** `verify-sources.mjs` fetches every quoted page and tests that each quote appears in it word for word. First run: 41 of 50 found. Five misses were my checker turning `</code>` into spaces; four were real errors (fragments ending in a full stop where the source sentence continues, and a YouTube quote that was not on the page). All 50 now match. I also replaced a sentence about atomic CSS written from general knowledge with Facebook's own explanation. All 37 links in the foundations bank load. This checks quotes, not the narration around them.
+- **Performance bug found by measuring:** while the arrow moved one chapter the page ran about 128 layout passes (0 when idle), because the lit trail animated three stroke dash lengths. The trail is now drawn once and revealed with a `clip-path` that follows the arrow: about 34 layout passes. Two infinite Framer Motion loops (the arrow's halo and the page-wide background glow) re-ran style calculation about 60 times a second even when idle (258 recalculations in 4.3 s); both are now CSS keyframes (4). About 34 layout passes per move remain, source not yet found.
+- **Lesson text corrected:** "In this very site" and the browser-check steps still pointed at the deleted scroll scene (with a measurement from it) and said the map was on the home page. They now point at the journey and `/map`.
+- **Open questions from the author:** is the foundations section reliable (not audited, see below), should the 48 foundation questions be re-verified or cut, will people actually learn from the journeys (nobody outside this project has tried them), and is the theme right. See the answers in the session notes.
+- **Foundations audited and trimmed** (2026-11-08, later): `audit-bank.mjs` and `audit-lessons.mjs` check that every number in an answer or lesson appears on a page it cites. Bank: 0 of 48 flagged, and every link loads; trimmed to 33 (cut: overlaps with a trick or journey, plain definitions, and one answer tied to a specific Next.js version). Lessons: 13 of 16 clean; the other three were an illustrative "300 ms task", the real 301 status code, and FCP's "1.8 seconds", which web.dev's FCP page does state (that page is now in the lesson's references). Not done: a line-by-line read of the lesson prose for damaged punctuation.
+- **Journey changes:** a **guess-first** question opens 11 chapters (the key number, from a verified quote), a **Skim** toggle drops the narration and keeps only the source cards, and each road ends on a **check-yourself** question (10 roads) before an end card that now offers "Poke the toy" when the road has one. The choice is remembered when you step back. Quiz text is also in the hidden transcript for screen readers. Tested in a real browser at desktop and 390px width: no sideways overflow.
+- **Animated diagrams beside the journey** (2026-11-08): `components/journey/ChapterVisual.tsx` draws five small SVG diagrams that change with each Continue, on screens 1024px and wider: Uber's hexagon grid (equal spokes, a neighborhood) and its one-seventh zoom, YouTube's waterfall collapsing into one batch and then the 76% meter, Wikipedia's data centers and 90% bar, and one cache node's two layers. A chapter opts in with `visual`; the panel is `pointer-events-none` so clicks still advance the story; the camera slides left (`focus` motion value) so the arrow never sits under it. Only numbers from the sources appear; the frame says "Illustration: the numbers come from the source, the drawing is ours". General-knowledge parts are drawn faintly or labelled (the origin box, "fast, small / slower, big"). Phones get the narration only in the journey; the same diagrams are on the trick pages (next bullet).
+- **Seven more diagrams, and diagrams on the trick pages** (2026-11-08): `ChapterVisualMore.tsx` adds YouTube's slow paint (4 to 6 s bar, the solid black poster) and playback (MTBR +7.1%, resolution -0.4%), Facebook's CSS (80 percent less, then the logarithmic growth curve) and JavaScript tiers (what each tier holds, from the post), GitHub's two chapters (late 2007 to 2018, and usage declining behind a lint gate) and Figma's load time (asm.js against WebAssembly, more than 3x). `Frame`, `T`, `MONO` and `HArrow` moved to `visual-frame.tsx`; `VISUAL_STEPS` says how many steps each diagram has. Trick pages get a **See it** section: `VisualStepper` (Back, Next, "Step 2 of 3") shows the same diagrams in the page, so phones see them too. Checked in a real browser at 1440px and 390px, no sideways overflow.
+- **Prose audit of the foundation lessons** (2026-11-08): read all 16 lessons line by line. Lessons 13-16 (main thread, SEO, web vitals, client components) were rewritten later and are clean. Lessons 1-12 had a dash, colon or full stop replaced by a comma throughout, and one sentence in the SSR lesson was broken. 112 sentences fixed by exact-match replacement (script reports any fragment that does not match exactly once; seven needed the emphasis markers `**` and `==` included). No claim was changed, only punctuation and a connecting word. I did not find factual errors in these lessons, but I only checked numbers against sources (done earlier), not every claim.
+- **Road nodes follow the trick** (2026-11-08): the shared "The Request" opener (the same four taps and two MDN quotes at the start of eight roads) was only relevant to a few, so it now stays on the general road only. YouTube, Facebook, Wikipedia, GitHub and Twitter Lite start at their own first chapter. Google Docs opens on "The Usual Way" (how a browser normally parses, lays out and paints, from MDN) because canvas rendering replaces exactly that, and Airbnb opens on "The Shell" (what a server can send back: a finished page or an empty shell). Figma split into "The Port" and "The Load" (two diagrams: `wasm-port`, `wasm-load`), with the guess-first question moved to The Load. Every title card now names the chapter's trick. Roads are 2 to 3 chapters. All 54 quotes (including the new openers') verified word for word against the live pages. `openingWith` was deleted.
+- **Skipped on purpose:** the question bank still holds the old React-rendering questions (33 foundations plus 24 trick questions). The author decided to skip rebuilding it, so it stays as is.
+- **Not done yet:** `LearningMap`'s `expanded` mode is unused; only two tricks have a toy; about 34 layout passes per journey move remain unexplained; no diagram yet for Twitter Lite, Airbnb, Google Docs or the general road.
+- **Checker lessons:** web.dev sometimes redirects a request to a translated page (`?hl=tr`) and uber.com once answered 406, so a failed quote check is first retried before it is trusted. All 50 journey quotes were re-verified word for word at the end of this work.
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why a derived view (tricks reading from journey chapters) beats copying text: one edit, no drift.
+2. Why `translateX` in percent is a good fit for bars of equal width, and why that stays off the layout path.
+3. Why a toy should state its own model and say it is not the company's code: it keeps the page honest about what is known versus illustrated.
+
+## The story becomes a narrated journey
+
+**Date:** 2026-11-07
+
+Public feedback on the first version: the first page put people to sleep, the content was not fun, and it read like a blog. Three passes in one day:
+
+1. **Rewrote the story's voice** (`data/story.ts`) and the hero. Same steps and facts, funnier, opens on tension instead of a requirements meeting. Scroll scene shortened (240vh to 180vh).
+2. **Folded the text** on lesson pages (native `<details>` rows via `LessonSection collapsed`, `OpenOnHash` so deep links still open the right row) and put the experiment and runtime animation first. Story pages fold "under the hood".
+3. **Replaced the decision-making story with `/journey`**: Dark-Souls-style subtitles, a glowing arrow travelling a curved path with a following camera. First cut was eight chapters; it is now **five** for the general road (request, the fork, the hollow page, send less send sooner, the memory), because eight felt like too many.
+4. **Every chapter ends on a "From the docs" card**: sentences copied word for word from MDN, web.dev, React, Next.js and others, with links, plus an "Also worth knowing" list of alternatives (SvelteKit, htmx, Astro islands, Qwik, plain HTTP caching). Quotes were fetched and checked on 2026-11-07, not written from memory.
+5. **Pick a road**: `/journey` is a chooser (`/journey/[app]`, prerendered): the web in general, YouTube (two web.dev case studies by Google), Google Docs (Google's 2021 canvas-rendering announcement), Figma (its own 2017 WebAssembly post), Airbnb (Hypernova README) and Twitter Lite (web.dev case study). Tinder was dropped because it is mostly a phone app, not a website. Google Search has no first-party source I could read, so it is not included; a company only gets a road when there is one. Case-study caveats are per chapter (`note`).
+
+- **New files:** `data/journey.ts` (narration, quotes and alternatives as data), `lib/journey-path.ts` (curve and distance helpers), `components/journey/Journey.tsx` (the stage), `components/journey/JourneyPicker.tsx`, `app/journey/page.tsx`, `app/journey/[app]/page.tsx`. `StartStoryButton` became `StartJourneyButton` and points at `/journey`.
+- **Left in place on purpose:** the old `/story/*` routes and components still build. Decision pending whether to delete them.
+- **Architecture:** presentation (node positions, camera) stays in the component; narration stays in data. Motion values drive the arrow and camera so React only re-renders when the reader changes beat. The camera is a transform on a wrapper, the lit trail is three strokes instead of a blur filter, and reduced motion removes the spring, the halo and the travel.
+- **Tooling note:** headless Edge driven through the DevTools Protocol (key presses plus screenshots) verified the picker, the docs cards and the arrow travelling between chapters, with no page errors. The stray `bitwarden.com` exceptions seen once came from another tab, not this site.
+
+See [[16-svg-path-camera-and-motion-values]] and [[10-css-grid-accordion-without-js-height]].
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. How `getPointAtLength` turns "distance along a path" into x/y, and how to get the direction an object should face from two nearby points.
+2. Why motion values let something animate every frame without React re-rendering, and what state is still worth keeping in React.
+3. Why a "camera" is just the opposite translate on a big wrapper, and why that is cheaper than moving each thing inside it.
+4. Why `<details>` gives collapsible sections without JavaScript, and what it can't do on its own (open itself when a link points inside).
+
 ## Lessons now read as a sequence
 
 **Date:** 2026-09-20

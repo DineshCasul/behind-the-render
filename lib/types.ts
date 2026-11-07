@@ -47,6 +47,7 @@ export type PipelineStage =
 /** The anchor ids of a lesson page's sections, typed so a topic link can't point at a section that doesn't exist. */
 export type LessonSectionId =
   | "what-is-this"
+  | "in-the-wild"
   | "why-it-exists"
   | "how-it-works"
   | "runtime"

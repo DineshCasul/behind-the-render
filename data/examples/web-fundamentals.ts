@@ -122,19 +122,19 @@ export const webFundamentalsExamples: Record<"http" | "browser-rendering" | "htm
       ],
     },
     reactNext: {
-      title: "How this site keeps its scroll animation smooth",
+      title: "How this site keeps the journey arrow smooth",
       snippets: [
         {
           lang: "tsx",
-          caption: "components/home/ScrollExperience.tsx",
+          caption: "components/journey/Journey.tsx",
           fromSite: true,
-          code: "const heroOpacity = useTransform(scrollYProgress, [0, 0.32], [1, 0]);\nconst heroScale = useTransform(scrollYProgress, [0, 0.32], [1, 1.2]);\n\n<motion.div\n  style={{ opacity: heroOpacity, scale: heroScale, willChange: \"transform, opacity\" }}\n>",
+          code: "const trail = useTransform(() => progress.get() / last);\nconst arrowX = useTransform(() => width.get() * (EDGE + SPAN * (progress.get() / last)));\n\n<motion.div style={{ x: arrowX }}>",
         },
       ],
       notice: [
         "React and Framer Motion only decide *what values to animate*. The browser's pipeline does the actual drawing.",
-        "Only `opacity` and `scale` (a transform) change during scrolling, so the browser can skip layout and paint.",
-        "`willChange` asks the browser to give these layers their own compositing layer ahead of time.",
+        "Only `x` (a translate) changes while the arrow moves, so the browser can skip layout and paint.",
+        "The motion values are read inside `useTransform`, so Framer Motion updates the element's style directly and React does not re-render.",
       ],
     },
   },

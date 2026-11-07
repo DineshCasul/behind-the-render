@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { usePrefersReducedMotion } from "@/lib/use-prefers-reduced-motion";
 
 /**
- * A handful of slow-drifting dots behind the hero/map, for ambient depth.
+ * A handful of slow-drifting dots behind the hero, for ambient depth.
  *
  * Positions are derived from the particle's index with sine/cosine, not
  * `Math.random()`. This component renders on the server first (React

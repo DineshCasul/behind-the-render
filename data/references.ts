@@ -333,6 +333,12 @@ export const references: Record<ConceptId, Reference[]> = {
   ],
   "web-vitals": [
     {
+      title: "First Contentful Paint (FCP)",
+      url: "https://web.dev/articles/fcp",
+      kind: "docs",
+      why: "States the 1.8 second target for the first content to appear.",
+    },
+    {
       title: "Web Vitals",
       url: "https://web.dev/articles/vitals",
       kind: "docs",

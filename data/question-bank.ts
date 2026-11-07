@@ -22,49 +22,13 @@ export interface BankQuestion {
   learnMore: { title: string; url: string }[];
 }
 
+/**
+ * The foundations questions (how the web renders). Audited 2026-11-08: every link loads, and every number in
+ * an answer appears on a page that answer cites. Trimmed from 48 to 33: the questions now covered by a trick
+ * or a journey, plain definitions, and one that depended on a specific framework version were removed.
+ * The questions about real sites live in data/trick-questions.ts.
+ */
 export const questionBank: BankQuestion[] = [
-  {
-    "id": 1,
-    "level": "easy",
-    "concept": "http",
-    "question": "What does a browser send and receive when you open a web page?",
-    "answer": "It sends an HTTP request (a method such as GET, a path and headers) and receives a response (a status code, headers and usually a body). For a normal page, the body of that response is the HTML.",
-    "related": [
-      "HTTP methods (GET vs POST, idempotency)",
-      "Status codes",
-      "HTTP/1.1 vs HTTP/2 vs HTTP/3",
-      "CORS"
-    ],
-    "learnMore": [
-      {
-        "title": "HTTP messages (MDN)",
-        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Messages"
-      },
-      {
-        "title": "Overview of HTTP (MDN)",
-        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview"
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "level": "easy",
-    "concept": "browser-rendering",
-    "question": "What are the DOM and the CSSOM?",
-    "answer": "The DOM is the browser's tree of elements, built from the HTML. The CSSOM is the equivalent tree built from the CSS rules. The browser combines them into a render tree of what will actually be drawn.",
-    "related": [
-      "Critical rendering path",
-      "Reflow vs repaint",
-      "CSS specificity and the cascade",
-      "Render-blocking CSS"
-    ],
-    "learnMore": [
-      {
-        "title": "Critical rendering path (MDN)",
-        "url": "https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Critical_rendering_path"
-      }
-    ]
-  },
   {
     "id": 3,
     "level": "easy",
@@ -85,67 +49,6 @@ export const questionBank: BankQuestion[] = [
       {
         "title": "Populating the page: how browsers work (MDN)",
         "url": "https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/How_browsers_work"
-      }
-    ]
-  },
-  {
-    "id": 4,
-    "level": "easy",
-    "concept": "csr",
-    "question": "What is client-side rendering, and what does the first HTML response look like?",
-    "answer": "In CSR the browser builds the page by running JavaScript. The first HTML response is usually a nearly empty shell (a container element and script tags), and the content only appears after the JavaScript has downloaded and run.",
-    "related": [
-      "Single-page apps and client-side routing",
-      "Code splitting and lazy loading",
-      "Bundle size optimization",
-      "SEO for SPAs"
-    ],
-    "learnMore": [
-      {
-        "title": "Rendering on the Web (web.dev)",
-        "url": "https://web.dev/articles/rendering-on-the-web"
-      }
-    ]
-  },
-  {
-    "id": 5,
-    "level": "easy",
-    "concept": "ssr",
-    "question": "What is server-side rendering?",
-    "answer": "The server runs the code that builds the UI for each request and sends back finished HTML, so the browser can show content before any JavaScript arrives.",
-    "related": [
-      "CSR vs SSR vs SSG trade-offs",
-      "Hydration",
-      "Streaming SSR",
-      "Time to first byte (TTFB)"
-    ],
-    "learnMore": [
-      {
-        "title": "Rendering on the Web (web.dev)",
-        "url": "https://web.dev/articles/rendering-on-the-web"
-      }
-    ]
-  },
-  {
-    "id": 6,
-    "level": "easy",
-    "concept": "ssg",
-    "question": "What is static site generation, and when is the HTML produced?",
-    "answer": "The HTML is produced once, at build time, and stored as files. Requests are then answered with those ready-made files, so no page is built per visitor.",
-    "related": [
-      "Jamstack",
-      "CDN caching",
-      "Incremental Static Regeneration",
-      "Build time vs request time"
-    ],
-    "learnMore": [
-      {
-        "title": "generateStaticParams (Next.js)",
-        "url": "https://nextjs.org/docs/app/api-reference/functions/generate-static-params"
-      },
-      {
-        "title": "Rendering on the Web (web.dev)",
-        "url": "https://web.dev/articles/rendering-on-the-web"
       }
     ]
   },
@@ -264,25 +167,6 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 13,
-    "level": "medium",
-    "concept": "isr",
-    "question": "What does stale-while-revalidate mean?",
-    "answer": "A cache may answer immediately with a slightly old (stale) copy while it fetches a fresh one in the background for next time. The visitor gets speed now and freshness a moment later.",
-    "related": [
-      "Cache-Control directives",
-      "CDN caching",
-      "Cache invalidation",
-      "ETag and conditional requests"
-    ],
-    "learnMore": [
-      {
-        "title": "Keeping things fresh with stale-while-revalidate (web.dev)",
-        "url": "https://web.dev/articles/stale-while-revalidate"
-      }
-    ]
-  },
-  {
     "id": 14,
     "level": "medium",
     "concept": "hydration",
@@ -317,44 +201,6 @@ export const questionBank: BankQuestion[] = [
       {
         "title": "Optimize long tasks (web.dev)",
         "url": "https://web.dev/articles/optimize-long-tasks"
-      }
-    ]
-  },
-  {
-    "id": 16,
-    "level": "medium",
-    "concept": "web-vitals",
-    "question": "What is the difference between lab data and field data?",
-    "answer": "Lab data comes from a controlled test on one device and network, which is good for debugging. Field data comes from real visitors on their own devices, which is what tells you what people actually experience. They often disagree.",
-    "related": [
-      "Lighthouse",
-      "Real-user monitoring (RUM)",
-      "Core Web Vitals",
-      "Performance budgets"
-    ],
-    "learnMore": [
-      {
-        "title": "Why lab and field data can be different (web.dev)",
-        "url": "https://web.dev/articles/lab-and-field-data-differences"
-      }
-    ]
-  },
-  {
-    "id": 17,
-    "level": "medium",
-    "concept": "seo",
-    "question": "How does Google process a page that needs JavaScript to show its content?",
-    "answer": "In three phases: crawling (fetching the HTML), rendering (running the JavaScript in a Chromium-based renderer) and indexing. Pages are queued for rendering, so content that only exists after JavaScript runs is seen later than content already in the HTML.",
-    "related": [
-      "SEO for SPAs",
-      "Server-side rendering",
-      "Crawl budget",
-      "Structured data and sitemaps"
-    ],
-    "learnMore": [
-      {
-        "title": "Understand JavaScript SEO Basics (Google)",
-        "url": "https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics"
       }
     ]
   },
@@ -420,25 +266,6 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 21,
-    "level": "medium",
-    "concept": "caching",
-    "question": "In Next.js 16, is a fetch request cached by default?",
-    "answer": "No. Caching is opt-in. Depending on the model you use, you turn it on with the use cache directive (Cache Components) or with options such as force-cache in the previous model.",
-    "related": [
-      "Next.js caching layers",
-      "Static vs dynamic rendering",
-      "Revalidation",
-      "The use cache directive"
-    ],
-    "learnMore": [
-      {
-        "title": "Caching (Next.js)",
-        "url": "https://nextjs.org/docs/app/getting-started/caching"
-      }
-    ]
-  },
-  {
     "id": 22,
     "level": "medium",
     "concept": "hydration",
@@ -481,29 +308,6 @@ export const questionBank: BankQuestion[] = [
       {
         "title": "Critical rendering path (MDN)",
         "url": "https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Critical_rendering_path"
-      }
-    ]
-  },
-  {
-    "id": 24,
-    "level": "medium",
-    "concept": "csr",
-    "question": "When is client-side rendering still a good choice?",
-    "answer": "When the content doesn't need to be found by search engines or shown before JavaScript loads, and the app is highly interactive: dashboards behind a login, editors, internal tools. CSR is simple to host and to reason about. The costs are a slower first content and more JavaScript to download and run before the page is useful.",
-    "related": [
-      "SPA vs MPA",
-      "SEO for SPAs",
-      "Bundle size optimization",
-      "Code splitting"
-    ],
-    "learnMore": [
-      {
-        "title": "Rendering on the Web (web.dev)",
-        "url": "https://web.dev/articles/rendering-on-the-web"
-      },
-      {
-        "title": "Understand JavaScript SEO Basics (Google)",
-        "url": "https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics"
       }
     ]
   },
@@ -615,48 +419,6 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 30,
-    "level": "hard",
-    "concept": "react-rendering",
-    "question": "Why do keys matter in a list?",
-    "answer": "Keys tell React which item is which between renders. With stable keys, state and DOM stay attached to the right item when the list is reordered or filtered. With index keys or missing keys, state can end up attached to the wrong item.",
-    "related": [
-      "Reconciliation",
-      "Component state and identity",
-      "Index as key pitfalls",
-      "List virtualization"
-    ],
-    "learnMore": [
-      {
-        "title": "Rendering Lists (React)",
-        "url": "https://react.dev/learn/rendering-lists"
-      },
-      {
-        "title": "Preserving and Resetting State (React)",
-        "url": "https://react.dev/learn/preserving-and-resetting-state"
-      }
-    ]
-  },
-  {
-    "id": 31,
-    "level": "hard",
-    "concept": "hydration",
-    "question": "Why is useSyncExternalStore a good fit for reading localStorage in a server-rendered app?",
-    "answer": "It takes a separate getServerSnapshot, so the server render and the first client render use the same value and hydration matches. React then switches to the real stored value right after hydration, without a mismatch or a manual effect.",
-    "related": [
-      "Hydration mismatch",
-      "External state (Redux, Zustand)",
-      "Tearing in concurrent rendering",
-      "localStorage with SSR"
-    ],
-    "learnMore": [
-      {
-        "title": "useSyncExternalStore (React)",
-        "url": "https://react.dev/reference/react/useSyncExternalStore"
-      }
-    ]
-  },
-  {
     "id": 32,
     "level": "hard",
     "concept": "js-main-thread",
@@ -703,29 +465,6 @@ export const questionBank: BankQuestion[] = [
     ]
   },
   {
-    "id": 34,
-    "level": "hard",
-    "concept": "caching",
-    "question": "Why can't a shared CDN cache safely hold a page that is personalized for one user?",
-    "answer": "A shared cache serves the same stored copy to everyone who asks for that URL, so a personalized page could be shown to the wrong person. Personalized responses must be marked private or kept out of shared caches, and the shared part of the page separated from the personal part.",
-    "related": [
-      "Cache-Control: private vs public",
-      "CDN caching",
-      "The Vary header",
-      "Authentication with cookies"
-    ],
-    "learnMore": [
-      {
-        "title": "Cache-Control header (MDN)",
-        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"
-      },
-      {
-        "title": "HTTP caching (MDN)",
-        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching"
-      }
-    ]
-  },
-  {
     "id": 35,
     "level": "hard",
     "concept": "web-vitals",
@@ -745,25 +484,6 @@ export const questionBank: BankQuestion[] = [
       {
         "title": "Web Vitals (web.dev)",
         "url": "https://web.dev/articles/vitals"
-      }
-    ]
-  },
-  {
-    "id": 36,
-    "level": "hard",
-    "concept": "server-components",
-    "question": "What is a request waterfall in data fetching, and how do you avoid it?",
-    "answer": "A waterfall is when requests run one after another because each waits for the previous one, so every request adds a full round trip. In a component, two awaits in a row are sequential even if the requests are independent. Start independent requests together (for example with Promise.all), or preload data before blocking work.",
-    "related": [
-      "Promise.all and parallel fetching",
-      "Suspense boundaries",
-      "Prefetching and preloading",
-      "Request deduplication and caching"
-    ],
-    "learnMore": [
-      {
-        "title": "Fetching Data (Next.js)",
-        "url": "https://nextjs.org/docs/app/getting-started/fetching-data"
       }
     ]
   },
@@ -863,25 +583,6 @@ export const questionBank: BankQuestion[] = [
       {
         "title": "JavaScript execution model (MDN)",
         "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Execution_model"
-      }
-    ]
-  },
-  {
-    "id": 42,
-    "level": "tricky",
-    "concept": "web-vitals",
-    "question": "True or false: a perfect Lighthouse score means real users have a fast experience.",
-    "answer": "False. Lighthouse is a lab measurement on one simulated device. Real users on real devices and networks can have a very different experience, which only field data shows.",
-    "related": [
-      "Lab vs field data",
-      "Real-user monitoring (RUM)",
-      "Core Web Vitals",
-      "Performance budgets"
-    ],
-    "learnMore": [
-      {
-        "title": "Why lab and field data can be different (web.dev)",
-        "url": "https://web.dev/articles/lab-and-field-data-differences"
       }
     ]
   },

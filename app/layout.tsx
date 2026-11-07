@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Behind the Render",
-  description: "Explore how the modern web turns a request into pixels.",
+  title: "Web Lore",
+  description: "Explore how the web's best sites actually work.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

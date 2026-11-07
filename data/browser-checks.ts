@@ -62,18 +62,18 @@ export const browserChecks: Partial<Record<ConceptId, BrowserCheck[]>> = {
     },
     {
       section: "how-it-works",
-      title: "See which pipeline steps scrolling costs",
+      title: "See which pipeline steps an animation costs",
       tool: "DevTools: Performance",
       devtools: true,
       chromiumOnly: true,
       steps: [
-        "Open this site's **home page**, then DevTools, then the **Performance** tab.",
-        "Click record, scroll down through the pinned scene, then stop recording.",
+        "Open this site's **journey** (`/journey/web`), then DevTools, then the **Performance** tab.",
+        "Click record, press **space** once to move to the next chapter, wait for the arrow to arrive, then stop recording.",
         "In the timeline, look for **Recalculate Style**, **Layout**, **Paint** and **Composite Layers**.",
       ],
       expect: [
         "Style recalculation is frequent, because animated values update every frame.",
-        "**Layout** entries are far fewer than frames. Only `transform` and `opacity` move during the scroll, so most frames skip layout.",
+        "**Layout** entries are far fewer than frames. Only `transform` and `opacity` move while the arrow travels (the lit trail is a `clip-path`), so most frames skip layout.",
       ],
     },
   ],

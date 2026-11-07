@@ -2,7 +2,7 @@ import type { ConceptId } from "@/lib/types";
 
 /**
  * How each concept connects to the others, in the same problem, concept, new
- * problem shape the story uses. Shown at the top of every lesson so no lesson
+ * problem shape the lessons use. Shown at the top of every lesson so no lesson
  * feels like an island.
  *
  * Two kinds of link, on purpose:
@@ -122,7 +122,7 @@ export const connections: Record<ConceptId, Connection> = {
       { id: "ssg", note: "A prebuilt page is a saved copy that never expires by itself." },
       { id: "isr", note: "A page with a refresh window is a saved copy with an expiry." },
     ],
-    leaves: "Copies go stale, and a shared copy must never hold one person's data. Deciding what to share, where and for how long is the hard part (the ticket-drop story picks it up).",
+    leaves: "Copies go stale, and a shared copy must never hold one person's data. Deciding what to share, where and for how long is the hard part.",
     leadsTo: [],
     alsoTies: [
       { id: "http", note: "Cache-Control is an HTTP header, so this is HTTP applied." },

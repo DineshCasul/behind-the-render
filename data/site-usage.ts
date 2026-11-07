@@ -44,13 +44,14 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     status: "used",
     headline: "Every animation here is built around the rendering pipeline.",
     explanation:
-      "The scroll scene, hover effects and page transition only animate `transform` and `opacity`, which the browser can hand to the GPU (compositing) without redoing layout or paint. When the scroll scene stuttered, the cause was layout changes and a per-frame blur, and removing both fixed it.",
+      "The journey's arrow, the list rows' entrance, the hover effects and the page transition only animate `transform` and `opacity`, which the browser can hand to the GPU (compositing) without redoing layout or paint. The journey's lit trail is revealed with a `clip-path`, which only repaints, and the background glow and the arrow's halo are CSS keyframe animations. Measuring has caught two mistakes here: an earlier scroll scene stuttered because of layout changes and a per-frame blur, and animating the trail's dash length caused about 120 layout passes per chapter move, which the clip-path cut to about 35.",
     evidence: [
-      { path: "components/home/ScrollExperience.tsx", what: "scroll-linked scale, tilt and fade, transform and opacity only, plus will-change" },
+      { path: "components/journey/Journey.tsx", what: "the arrow and camera move with transforms driven by motion values; the lit trail is revealed with a clip-path (the comment above it records the measurement)" },
+      { path: "components/home/HomeHero.tsx", what: "the hero text fades in with a CSS animation on opacity and transform (`reveal-fade`)" },
       { path: "app/globals.css", what: "the hover vibration, which uses small relative offsets on purpose (inline text can't take a transform)" },
     ],
     verify: [
-      "DevTools > Performance (Chrome or Edge): record while scrolling the home page. Style recalculation is frequent, because animated values update every frame, but Layout entries are far fewer than frames (about 11 layout passes against 200+ style recalculations in a 2,000px scroll).",
+      "DevTools > Performance (Chrome or Edge): open `/journey/web`, record, press space once to move to the next chapter, then stop. Style recalculation is frequent, because the arrow and camera update every frame, but Layout entries are far fewer than frames. In one measurement (headless Edge) a chapter move ran about 35 layout passes and a few hundred style recalculations, and the same page sitting idle ran no layout passes at all.",
     ],
     notes: ["06-animation-and-reduced-motion", "07-transform-composition-bug"],
   },
@@ -79,7 +80,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
       { path: "components/experiments/", what: "the experiments only exist once JavaScript runs" },
     ],
     verify: [
-      "Mark a concept as Learning, reload the home page, and watch the node change colour a moment after the page appears.",
+      "Mark a concept as Learning, reload its lesson page, and watch the status picker show your saved choice a moment after the page appears.",
     ],
     whyNot:
       "The lesson content doesn't need CSR: it's identical for every visitor, so there's no reason to make the browser build it. CSR is used only where the data can't exist anywhere else.",
@@ -132,19 +133,18 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
 
   "react-rendering": {
     status: "used",
-    headline: "Hovering a node re-renders many components but changes very little on screen.",
+    headline: "Pressing Continue re-renders the journey page, but the arrow moves without any re-render.",
     explanation:
-      "The hovered-node state lives in `LearningMap`, so every hover re-runs the map and all its node components. Yet the page only changes the few rings and dimming that actually differ. That's 'a re-render is not a DOM change' in practice. Keys matter too: nodes are keyed by concept id and edges by edge id, so React matches them correctly between renders.",
+      "Which step you are on is React state in `Journey`, so Continue re-renders the page once and React swaps in the new text. The arrow's position is different: it is a Framer Motion motion value, animated outside React, so the 0.9 second trip along the road costs no renders at all. State for what to show, motion values for what moves every frame.",
     evidence: [
-      { path: "components/learning-map/LearningMap.tsx", what: "the hover state, and the keys on nodes and edges" },
-      { path: "components/learning-map/MapNode.tsx", what: "re-runs on every hover, but most renders produce identical output" },
+      { path: "components/journey/Journey.tsx", what: "`nav` state decides the text; `progress` is a motion value that moves the arrow and the lit trail" },
     ],
     verify: [
-      "Open React DevTools, start the Profiler, hover a few nodes, then stop. Many MapNode components rendered.",
-      "Now watch the Elements panel while hovering: only a couple of ring circles and opacity values change, the rest of the SVG is untouched.",
+      "Open React DevTools, start the Profiler, press Continue once on `/journey/youtube`, then stop. The page renders once for the step.",
+      "Press Continue until the chapter changes: the arrow travels for most of a second, yet the profiler shows no extra renders during the trip.",
     ],
     whyNot:
-      "It would be easy to wrap MapNode in `memo` to skip the extra renders, but with only a handful of nodes the cost is negligible. You'd add it after measuring a real slowdown, not before.",
+      "Putting the arrow's position in state would re-render the page on every frame of the trip. A motion value skips React entirely, which is the point of using one.",
   },
 
   hydration: {
@@ -157,7 +157,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
       { path: "components/lesson/LessonProgressControl.tsx", what: "a small client island that hydrates on every lesson page" },
     ],
     verify: [
-      "Set a concept to Mastered and reload the home page. The node appears as not started for a moment, then updates: that's the swap after hydration.",
+      "Set a concept to Mastered and reload its lesson page. The picker shows the default for a moment, then updates: that's the swap after hydration.",
       "Keep the browser console open in dev: there is no hydration mismatch warning.",
     ],
     notes: ["04-hydration-and-external-stores"],
@@ -167,7 +167,7 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     status: "used",
     headline: "Lesson pages are Server Components. Only the interactive parts are Client Components.",
     explanation:
-      "The lesson page, its section components and the lesson text (including the glossary matching) run only on the server, so that code is not sent to your browser. Only parts that need state or browser measurements ship as JavaScript: the Test yourself accordion, the experiments, the status buttons, the glossary hover cards (they position themselves on screen) and the interactive story demos. Not everything stays server-side, though: the concept data behind the map (including the topic hints) does ship to the home page, because the map panel needs it.",
+      "The lesson page, its section components and the lesson text (including the glossary matching) run only on the server, so that code is not sent to your browser. Only parts that need state or browser measurements ship as JavaScript: the Test yourself accordion, the experiments, the status buttons and the glossary hover cards (they position themselves on screen). Not everything stays server-side, though: the concept data behind the map (including the topic hints) does ship to the home page, because the map panel needs it.",
     evidence: [
       { path: "app/learn/[slug]/page.tsx", what: "a Server Component that renders the whole lesson" },
       { path: "components/lesson/Prose.tsx", what: "glossary matching runs on the server only" },
@@ -229,13 +229,13 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     status: "partly",
     headline: "The site is careful not to block the main thread, but it has no long task to yield from.",
     explanation:
-      "Animations use `transform` and `opacity`, which don't need layout work on every frame, and the scroll scene reads scroll position through Framer Motion. There is no Web Worker and no explicit yielding, because no single task in the site is long enough to need it.",
+      "Animations use `transform` and `opacity`, which don't need layout work on every frame, and the journey moves its arrow and camera through Framer Motion motion values instead of re-rendering React. There is no Web Worker and no explicit yielding, because no single task in the site is long enough to need it.",
     evidence: [
-      { path: "components/home/ScrollExperience.tsx", what: "Scroll-linked animation built from transform and opacity" },
+      { path: "components/journey/Journey.tsx", what: "Arrow and camera animated with transforms from motion values, with no React re-render per frame" },
       { path: "components/ui/AmbientParticles.tsx", what: "Ambient motion kept small and disabled for reduced motion" },
     ],
     verify: [
-      "Open the Performance panel in Firefox DevTools, record while scrolling the home page, and look at the longest tasks in the main-thread flame chart.",
+      "Open the Performance panel in Firefox DevTools, record while pressing space through a journey chapter, and look at the longest tasks in the main-thread flame chart.",
     ],
     whyNot:
       "Yielding and workers pay off when one task runs for tens of milliseconds or more, such as filtering a big list. This site has no such task, so adding them would be complexity without a benefit.",
@@ -259,9 +259,9 @@ export const siteUsage: Record<ConceptId, SiteUsage> = {
     status: "used",
     headline: "Most of the site is Server Components, and `use client` marks only the interactive parts.",
     explanation:
-      "The lesson pages themselves are Server Components. The map, the panel, the tooltip, the experiments and the progress controls are Client Components because they use state, effects or browser APIs such as localStorage.",
+      "The lesson pages themselves are Server Components. The journey, the question bank, the toys, the experiments and the progress controls are Client Components because they use state, effects or browser APIs such as localStorage.",
     evidence: [
-      { path: "components/learning-map/LearningMap.tsx", what: "A Client Component: hover and selection state" },
+      { path: "components/journey/Journey.tsx", what: "A Client Component: the step state, the keyboard handler and the quiz picks" },
       { path: "components/lesson/StatusPicker.tsx", what: "A small Client Component that saves progress to localStorage" },
       { path: "app/learn/[slug]/page.tsx", what: "A Server Component that composes both kinds" },
     ],

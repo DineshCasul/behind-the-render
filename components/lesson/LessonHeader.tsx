@@ -7,10 +7,10 @@ export function LessonHeader({ concept }: { concept: Concept }) {
   return (
     <header id="lesson-top">
       <Link
-        href="/"
+        href="/trick"
         className="btn-ghost"
       >
-        ← Back to map
+        ← All tricks
       </Link>
 
       {/* Phones: just where this lesson sits, on one line. The full five-stage chain wrapped onto three lines. */}

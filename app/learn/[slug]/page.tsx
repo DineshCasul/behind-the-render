@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LessonHeader } from "@/components/lesson/LessonHeader";
 import { LessonSection } from "@/components/lesson/LessonSection";
+import { OpenOnHash } from "@/components/lesson/OpenOnHash";
+import { SeenInTheWild } from "@/components/lesson/SeenInTheWild";
 import { RuntimeSequence } from "@/components/lesson/RuntimeSequence";
 import { ServerBrowserSplit } from "@/components/lesson/ServerBrowserSplit";
 import { ReactNextCallout } from "@/components/lesson/ReactNextCallout";
@@ -18,12 +19,12 @@ import { ReferencesList } from "@/components/lesson/ReferencesList";
 import { LessonNav, type NavSection } from "@/components/lesson/LessonNav";
 import { concepts, conceptMap } from "@/data/concepts";
 import { getLesson } from "@/data/lessons";
+import { chaptersForConcept } from "@/data/journey";
 import { getQuestions } from "@/data/questions";
 import { siteUsage } from "@/data/site-usage";
 import { references } from "@/data/references";
 import { nextUp } from "@/data/next-up";
 import { ChainIntro, ChainOutro } from "@/components/lesson/ChainLines";
-import { StoryBookendBottom, StoryBookendTop } from "@/components/story/StoryBookend";
 import { NextUpList } from "@/components/lesson/NextUpList";
 import { examples as allExamples } from "@/data/examples";
 import { ExampleBox } from "@/components/lesson/ExampleBox";
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
   const concept = conceptMap[slug];
   if (!concept) return {};
   return {
-    title: `${concept.title} | Behind the Render`,
+    title: `${concept.title} | Web Lore`,
     description: concept.blurb,
   };
 }
@@ -71,19 +72,24 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const checksFor = (section: string) =>
     (browserChecks[concept.id] ?? []).filter((c) => c.section === section);
   const relatedIds = Array.from(getNeighbors(concept.id)) as ConceptId[];
+  // Real sites whose journey chapter is the short version of this lesson.
+  const wild = chaptersForConcept(concept.id);
 
   // Only sections that actually render on this page (the experiment and the
-  // quiz are conditional), in page order. Short labels for the map.
+  // quiz are conditional), in page order. Short labels for the map. The page
+  // opens on what you can play with (experiment, runtime animation); the
+  // reading sections come after, folded.
   const navSections: NavSection[] = [
     { id: "what-is-this", label: "What is this?" },
+    ...(wild.length > 0 ? [{ id: "in-the-wild", label: "Seen in the wild" }] : []),
+    ...(lesson.experiment ? [{ id: "experiment", label: "Experiment" }] : []),
+    { id: "runtime", label: "Runtime" },
     { id: "why-it-exists", label: "Why it exists" },
     { id: "how-it-works", label: "How it works" },
-    { id: "runtime", label: "Runtime" },
     { id: "server-vs-browser", label: "Server vs. browser" },
     { id: "react-next", label: "React / Next.js" },
     { id: "why-use-it", label: "Why use it, and the cost" },
     { id: "misconceptions", label: "Misconceptions" },
-    ...(lesson.experiment ? [{ id: "experiment", label: "Experiment" }] : []),
     { id: "in-this-site", label: "In this very site" },
     ...(questions.length > 0 ? [{ id: "test-yourself", label: "Test yourself" }] : []),
     { id: "go-deeper", label: "Go deeper" },
@@ -93,16 +99,13 @@ export default async function LessonPage({ params }: LessonPageProps) {
   return (
     <div className="relative flex flex-1 flex-col">
       <LessonNav title={concept.title} sections={navSections} />
+      <OpenOnHash />
       <main className="mx-auto w-full max-w-3xl px-6 pb-24 pt-12 sm:px-8">
         <LessonHeader concept={concept} />
 
         <ChainIntro id={concept.id} />
 
-        <Suspense fallback={null}>
-          <StoryBookendTop />
-        </Suspense>
-
-        <LessonSection id="what-is-this" heading="1. What is this?">
+        <LessonSection id="what-is-this" heading="What is this?">
           <p>
             <Prose text={lesson.whatIsThis} />
           </p>
@@ -110,7 +113,23 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {checksFor("what-is-this").map((c) => <BrowserCheckBox key={c.title} check={c} />)}
         </LessonSection>
 
-        <LessonSection id="why-it-exists" heading="2. Why does it exist?">
+        {wild.length > 0 && (
+          <LessonSection id="in-the-wild" heading="Seen in the wild">
+            <SeenInTheWild entries={wild} />
+          </LessonSection>
+        )}
+
+        {lesson.experiment && (
+          <LessonSection id="experiment" heading="Play with it">
+            <ExperimentPanel lesson={lesson} />
+          </LessonSection>
+        )}
+
+        <LessonSection id="runtime" heading="What happens at runtime?">
+          <RuntimeSequence steps={lesson.runtime} />
+        </LessonSection>
+
+        <LessonSection id="why-it-exists" heading="Why does it exist?" collapsed>
           <p>
             <Prose text={lesson.whyItExists} />
           </p>
@@ -118,7 +137,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {checksFor("why-it-exists").map((c) => <BrowserCheckBox key={c.title} check={c} />)}
         </LessonSection>
 
-        <LessonSection id="how-it-works" heading="3. How does it work?">
+        <LessonSection id="how-it-works" heading="How does it work?" collapsed>
           <p>
             <Prose text={lesson.howItWorks} />
           </p>
@@ -126,23 +145,20 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {checksFor("how-it-works").map((c) => <BrowserCheckBox key={c.title} check={c} />)}
         </LessonSection>
 
-        <LessonSection id="runtime" heading="4. What happens at runtime?">
-          <RuntimeSequence steps={lesson.runtime} />
-        </LessonSection>
-
-        <LessonSection id="server-vs-browser" heading="5. Server vs. browser">
+        <LessonSection id="server-vs-browser" heading="Server vs. browser" collapsed>
           <ServerBrowserSplit data={lesson.serverVsBrowser} />
         </LessonSection>
 
-        <LessonSection id="react-next" heading="6. React / Next.js connection">
+        <LessonSection id="react-next" heading="React / Next.js connection" collapsed>
           <ReactNextCallout text={lesson.reactNextConnection} />
           {examples.reactNext && <ExampleBox example={examples.reactNext} />}
           {checksFor("react-next").map((c) => <BrowserCheckBox key={c.title} check={c} />)}
         </LessonSection>
 
         {/* Benefits and costs are one decision, so they are one section. The inner
-            #tradeoffs anchor keeps the map panel's topic links (`#tradeoffs`) working. */}
-        <LessonSection id="why-use-it" heading="7. Why use it, and what it costs">
+            #tradeoffs anchor keeps the map panel's topic links (`#tradeoffs`) working:
+            <OpenOnHash> opens the fold that contains it. */}
+        <LessonSection id="why-use-it" heading="Why use it, and what it costs" collapsed>
           <ul className="flex flex-col gap-2">
             {lesson.whyUseIt.map((reason, i) => (
               <li key={i} className="flex gap-2 text-[15px] text-[var(--color-text-primary)]">
@@ -161,27 +177,21 @@ export default async function LessonPage({ params }: LessonPageProps) {
           </div>
         </LessonSection>
 
-        <LessonSection id="misconceptions" heading="8. Common misconceptions">
+        <LessonSection id="misconceptions" heading="Common misconceptions" collapsed>
           <MisconceptionsList items={lesson.misconceptions} />
         </LessonSection>
 
-        {lesson.experiment && (
-          <LessonSection id="experiment" heading="Experiment">
-            <ExperimentPanel lesson={lesson} />
-          </LessonSection>
-        )}
-
-        <LessonSection id="in-this-site" heading="In this very site">
+        <LessonSection id="in-this-site" heading="In this very site" collapsed>
           <SiteUsageCallout usage={siteUsage[concept.id]} />
         </LessonSection>
 
         {questions.length > 0 && (
-          <LessonSection id="test-yourself" heading="Test yourself">
+          <LessonSection id="test-yourself" heading="Test yourself" collapsed>
             <InterviewQuestions questions={questions} />
           </LessonSection>
         )}
 
-        <LessonSection id="go-deeper" heading="Go deeper">
+        <LessonSection id="go-deeper" heading="Go deeper" collapsed>
           <NextUpList items={nextUp[concept.id]} />
           <ReferencesList items={references[concept.id]} />
         </LessonSection>
@@ -197,9 +207,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
           </Link>
         </div>
 
-        <Suspense fallback={null}>
-          <StoryBookendBottom />
-        </Suspense>
       </main>
     </div>
   );

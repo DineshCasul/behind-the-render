@@ -78,7 +78,11 @@ export function LessonNav({ title, sections }: { title: string; sections: NavSec
 
   function go(e: React.MouseEvent, id: string) {
     e.preventDefault();
-    document.getElementById(id)?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    const target = document.getElementById(id);
+    // Collapsed sections are `<details>`: open the one we are jumping to, or it lands on a closed row.
+    const fold = target?.closest("details");
+    if (fold) fold.open = true;
+    target?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     window.history.replaceState(null, "", `#${id}`);
   }
 
@@ -101,11 +105,11 @@ export function LessonNav({ title, sections }: { title: string; sections: NavSec
           {/* Full width (not the centred text column) so the title can sit at the true right edge. */}
           <div className="flex h-11 items-center gap-3 px-6 sm:px-8">
             <Link
-              href="/"
+              href="/trick"
               tabIndex={showBar ? 0 : -1}
               className="shrink-0 font-mono text-[11px] text-[var(--state-learning)] underline-offset-4 transition-colors hover:text-[var(--color-text-primary)] hover:underline"
             >
-              ← Map
+              ← Tricks
             </Link>
             {active && (
               <span className="hidden min-w-0 items-center gap-2 sm:flex">
