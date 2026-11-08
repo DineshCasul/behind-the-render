@@ -15,7 +15,6 @@ export interface Group {
 }
 
 export const ROAD_KINDS = [
-  { id: "start", title: "Start here", blurb: "One click, followed from your finger to the screen." },
   { id: "feeds", title: "Feeds and video", blurb: "Sites people open all day, on bad networks and old phones." },
   { id: "knowledge", title: "Reading, writing and code", blurb: "Pages that millions read and a few edit." },
   { id: "tools", title: "Maps, design and stays", blurb: "Apps that behave like software, not like pages." },

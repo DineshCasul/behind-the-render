@@ -2,6 +2,32 @@
 
 Newest first. Each entry says what changed and what to understand after it.
 
+## Basics page, tricks filter, caching toy (2026-11-09)
+
+"The web, in general" left the sites list and became its own page, `/basics`, so the sites are all companies. A first version was one long scroll with only hidden answers, which was a wall of text. It now has clickable guess-first questions (`QuizCard`), a caching toy (`CacheToy`: pick a Cache-Control value and which cache holds the copy, drag the age, see what the cache does), and each section's quotes folded behind a button.
+
+**Folded sections and a rendering toy.** Each of the eight sections now starts folded (`components/ui/Fold.tsx`, a native `<details>`), showing its title, a one-line description of what is inside and a count of its parts (examples, toys, questions, quotes). Only the first is open. A small effect opens a section when a link like `#web-memory` points at it, because browsers do not open a closed `<details>` for an id on the `<details>` itself. The page went from about 20,600px to about 3,900px tall on desktop. A second toy (`BlockingToy`) lets you change how a script loads (plain, `async`, `defer`) and how slow the stylesheet and script are, and shows when the first paint happens and what it waited for, using only what MDN states.
+
+Bug worth remembering: two nested elements both called `group` made the inner button react to the outer section being open. Tailwind's named groups (`group/fold`, `group/docs`) fix it.
+
+The tricks page has a one-line filter (`$ grep`). It matches every word you type against a trick's title, hook, companies, group and a hidden keyword list (`data/trick-keywords.ts`), so "crdt" or "cache lru" finds the right tricks even when the word is not in the title. Plain substring matching, no library. The row components moved to `components/ui/Rows.tsx` so the client-side filter can reuse them without pulling in the data files.
+
+### 🧠 Learning checkpoint
+
+1. Why a filter that only searches titles is weak: people search by concept, so the data needs synonyms.
+2. Why the filter is a client component but its data is prepared on the server and passed in as props.
+3. How a caching toy can stay honest: it models only what MDN states and says so in its note.
+
+---
+
+## Minimal home page (2026-11-09)
+
+The home page used to list all 24 tricks and 13 sites, which left a first-time visitor unsure what to click. It is now the title, one sentence, one big number as the hook, and two rows: tricks and sites. The full lists were already at `/trick` and `/journey`, so nothing was lost.
+
+The big number is one trick's `stat`, picked by the day (`app/featured.ts`) and linking to that trick. The page uses `export const revalidate = 86400`, so Next.js rebuilds it at most once a day: the same stale-while-revalidate idea the web road teaches. The clock read lives in its own function because the lint rule `react-hooks/purity` forbids calling `Date.now()` while a component renders.
+
+---
+
 ## "The web, in general" rebuilt with real examples (2026-11-09)
 
 The old three chapters were thin and one claim (ISR as stale-while-revalidate) had no source. They are now eight chapters in `data/journey-web.ts`: the request, bytes to pixels, the fork (client, server, static, ISR), hydration, freshness and the 304, versioned files and no-cache vs no-store, private vs shared caches and Vary, and stale-while-revalidate. Sources are MDN, web.dev, React and Next.js; 61 new quotes, all verified.

@@ -1,15 +1,5 @@
 import type { RoadKind } from "@/data/categories";
 import {
-  webFingerprints,
-  webFork,
-  webHandover,
-  webMemory,
-  webPath,
-  webRequest,
-  webStale,
-  webWhose,
-} from "@/data/journey-web";
-import {
   discordCassandra,
   discordMove,
   discordRust,
@@ -904,23 +894,6 @@ const airbnbShell: JourneyChapter = {
 };
 
 export const journeys: JourneyApp[] = [
-  {
-    id: "web",
-    kind: "start",
-    name: "The web, in general",
-    check: {
-      question: "What can go wrong if a personalised page is stored in a shared cache?",
-      options: [
-        "The page loads more slowly",
-        "Other users may be able to retrieve those contents",
-        "The cache refuses to store it",
-      ],
-      answer: 1,
-      reveal: "Other users may be able to retrieve personalised contents from a shared cache, which can leak information.",
-    },
-    blurb: "One click, with real HTTP examples: the request, the pixels, who builds the HTML, and who remembers the answer.",
-    chapters: [webRequest, webPath, webFork, webHandover, webMemory, webFingerprints, webWhose, webStale],
-  },
   {
     id: "youtube",
     kind: "feeds",

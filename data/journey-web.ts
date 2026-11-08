@@ -1,8 +1,9 @@
-import type { Alternative, JourneyChapter } from "@/data/journey";
+import type { Alternative, JourneyChapter, Quiz } from "@/data/journey";
 
 /**
- * "The web, in general": one click, followed from the request to the cache. Eight
- * chapters, each with a concrete example card.
+ * The basics: one click, followed from the request to the cache. Eight sections, each
+ * with a concrete example. Shown as one readable page at /basics (app/basics/page.tsx),
+ * not as a company walk.
  *
  * Sources are MDN, web.dev, React and Next.js (all first-party for what they describe).
  * Every `docs` quote is copied word for word from its page (npm run verify:quotes).
@@ -50,8 +51,8 @@ export const webRequest: JourneyChapter = {
     "Both have the same shape: a start line, some headers, an empty line, and sometimes a body. In HTTP/1.1 it is plain text, which is why you can read it.",
     "A request's start line says what you want: a method, a target and a protocol version. GET means: send me this resource.",
     "A response's start line says what happened: a protocol version, a status code and a reason phrase. 200 is success, 404 is not found, 302 is a redirect.",
-    "The headers are metadata. A response says what it is (Content-Type) and how it may be cached (Cache-Control). Remember that second one. The last four chapters are about it.",
-    "The next card is a real response, captured with curl.",
+    "The headers are metadata. A response says what it is (Content-Type) and how it may be cached (Cache-Control). Remember that second one. The last four sections are about it.",
+    "The example below is a real response, captured with curl.",
   ],
   example: {
     title: "A request, and the response it got",
@@ -93,7 +94,7 @@ export const webPath: JourneyChapter = {
     "With the DOM and the CSSOM done, the browser builds the render tree, which only holds visible content. An element with display: none, and everything inside it, is left out.",
     "Then layout works out the size and position of everything, and paint puts the pixels on the screen.",
     "Layout is not a one-off. Add nodes, change content or change a box model style, and layout happens again.",
-    "The next card marks which lines of a tiny page do what.",
+    "The example below marks which lines of a tiny page do what.",
   ],
   example: {
     title: "A tiny page, annotated",
@@ -110,7 +111,7 @@ export const webPath: JourneyChapter = {
     <p style="display: none">Hidden</p>        <!-- in the DOM, not in the render tree -->
   </body>
 </html>`,
-    note: "Illustrative: a made-up page. Each comment restates what the MDN pages quoted on the next card say. async and defer both avoid parser-blocking JavaScript; they differ in when the script runs.",
+    note: "Illustrative: a made-up page. Each comment restates what the MDN pages quoted below say. async and defer both avoid parser-blocking JavaScript; they differ in when the script runs.",
   },
   docs: [
     { text: "The Critical Rendering Path is the sequence of steps the browser goes through to convert the HTML, CSS, and JavaScript into pixels on the screen.", source: "MDN: Critical rendering path", href: MDN_CRP },
@@ -149,7 +150,7 @@ export const webFork: JourneyChapter = {
     "Static rendering: the HTML is made at build time, usually one file per URL. TTFB is consistently fast. The price is that you need a file for every possible URL, which gets hard for sites with a huge number of unique pages.",
     "You do not have to pick one for the whole site. Netflix, for example, server-renders its relatively static landing pages while prefetching the JavaScript for interaction-heavy pages.",
     "Next.js adds a fourth option, Incremental Static Regeneration. After the time you set has passed, the next visitor still gets the cached, stale page immediately, while Next.js generates a fresh one in the background.",
-    "Each option moves the work somewhere else and sends you the bill. The next card shows what actually lands in the browser for the first three.",
+    "Each option moves the work somewhere else and sends you the bill. The example below shows what actually lands in the browser for the first three.",
   ],
   example: {
     title: "What the browser receives",
@@ -173,7 +174,7 @@ export const webFork: JourneyChapter = {
   <h1>About us</h1>
   <p>We make things.</p>
 </body>`,
-    note: "Illustrative: made-up pages that show the shape of each approach. In practice a server-rendered page also carries the data and scripts it needs to come alive in the browser, which is the next chapter.",
+    note: "Illustrative: made-up pages that show the shape of each approach. In practice a server-rendered page also carries the data and scripts it needs to come alive in the browser, which is section 4.",
   },
   docs: [
     { text: "Client-side rendering means rendering pages directly in the browser with JavaScript.", source: "web.dev: Rendering on the Web", href: WEBDEV_RENDERING },
@@ -223,7 +224,7 @@ hydrateRoot(document.getElementById("root"), <App />);
 
 // Between 1 and 2 the button looks ready and does nothing.
 // After 2, React manages the DOM inside #root and the click works.`,
-    note: "Illustrative sketch of the sequence the quotes on the next card describe. hydrateRoot is React's API for attaching to server-rendered HTML.",
+    note: "Illustrative sketch of the sequence the quotes below describe. hydrateRoot is React's API for attaching to server-rendered HTML.",
   },
   docs: [
     { text: "Running client-side scripts to add application state and interactivity to server-rendered HTML.", source: "web.dev: Rendering on the Web", href: WEBDEV_RENDERING },
@@ -248,14 +249,14 @@ export const webMemory: JourneyChapter = {
     "A thousand people ask for the same page. Do the work a thousand times and your server dies screaming.",
     "A reusable response saves the server from parsing and routing the request, restoring the session from the cookie, querying the database, and rendering the template. All of that, skipped.",
     "A stored response is either fresh or stale, decided by its age: the time since it was generated. Cache-Control: max-age=3600 means fresh for an hour.",
-    "On the card: the response says max-age=3600, and the shared cache in front of it says Age: 3155. So it stays fresh for 3600 minus 3155, which is 445 more seconds.",
+    "In the example: the response says max-age=3600, and the shared cache in front of it says Age: 3155. So it stays fresh for 3600 minus 3155, which is 445 more seconds.",
     "When it goes stale, a cache does not throw it away. It asks the server whether it changed. That is validation.",
     "The cache sends the ETag it stored back as If-None-Match. If the ETag still matches, the server answers 304 Not Modified, with no body. The stored copy is fresh again.",
-    "The card shows a real 304. One honest note: I sent the conditional request while the copy was still fresh, to capture it. A browser normally only asks once a copy is stale, or when you reload.",
+    "The example shows a real 304. One honest note: I sent the conditional request while the copy was still fresh, to capture it. A browser normally only asks once a copy is stale, or when you reload.",
   ],
   example: {
     title: "Fresh, stale, and the 304",
-    code: `# 1. The response from chapter 1
+    code: `# 1. The response from section 1
 HTTP/1.1 200 OK
 Cache-Control: public, max-age=3600
 ETag: "3b051d96cd8f7ee12110e82a83735516"
@@ -304,7 +305,7 @@ export const webFingerprints: JourneyChapter = {
     "The best things to cache are files that never change. The trouble: bundle.js does change, and if the versions of the JavaScript and CSS a client uses are out of sync, the display breaks.",
     "The fix is to change the URL every time the content changes. A cache tells resources apart by URL, so a new URL is a new resource.",
     "Put a version or a hash in the file name, and the file can be cached for a long time.",
-    "The card has a real one. MDN's own stylesheet has a hash in its name and a max-age of 31536000 seconds. That is 365 days.",
+    "The example has a real one. MDN's own stylesheet has a hash in its name and a max-age of 31536000 seconds. That is 365 days.",
     "The HTML that points at those files is the opposite: it changes. A common default for it is no-cache, which means check with the server before reusing.",
     "And no-cache does not mean do not cache. It means store it, but validate before each reuse. If you mean do not store, that is no-store.",
   ],
@@ -324,7 +325,7 @@ GET /static/client/styles-global.<a different hash>.css
 # 3. The page that names the file is a different story
 Cache-Control: no-cache
 #   store it, but check with the server before each reuse`,
-    note: "Step 1 is real: headers captured with curl -I from developer.mozilla.org on 8 November 2026 and trimmed. Steps 2 and 3 are illustrative of the pattern the quotes on the next card describe. MDN's own HTML page, captured in chapter 1, uses max-age=3600 instead.",
+    note: "Step 1 is real: headers captured with curl -I from developer.mozilla.org on 8 November 2026 and trimmed. Steps 2 and 3 are illustrative of the pattern the quotes below describe. MDN's own HTML page, captured in section 1, uses max-age=3600 instead.",
   },
   docs: [
     { text: "Also, if the versions of JavaScript and CSS resources that a client uses are out of sync, the display will break.", source: "MDN: HTTP caching", href: MDN_CACHING },
@@ -344,7 +345,7 @@ export const webWhose: JourneyChapter = {
     "There are two kinds of cache. A private cache is tied to one client, typically your browser. A shared cache sits between the client and the server, like a CDN or a proxy, and reuses one response for many people.",
     "That is the danger. If a personalised response lands in a shared cache, other users may be able to retrieve it. The docs call it unintentional information leakage. In real life it reads like an incident report.",
     "The fix is a single word. Cache-Control: private stores the response only in a private cache.",
-    "On the card: the home page of GitHub, captured logged out, says max-age=0, private, must-revalidate.",
+    "In the example: the home page of GitHub, captured logged out, says max-age=0, private, must-revalidate.",
     "A separate problem: the same URL can give different responses depending on a request header. Vary tells a cache which header to key on. MDN's example is Vary: Accept-Language, so the English and Japanese copies of one URL are cached separately.",
     "A cookie is not a Vary header. For personalised content, the docs say to use private instead of varying on the cookie.",
     "And when many identical requests reach a shared cache at the same moment, it forwards a single request to the origin and reuses the answer for all of them. MDN calls that request collapse. It is the stampede protection from the Wikipedia site.",
@@ -395,7 +396,7 @@ export const webStale: JourneyChapter = {
   day 0 to 7    fresh   served from the cache, no questions asked
   day 7 to 8    stale   still served, and revalidated in the background
   after day 8           the next request revalidates normally`,
-    note: "The header is MDN's own example. The timeline restates what the quotes on the next card say, with 604800 seconds as 7 days and 86400 seconds as 1 day.",
+    note: "The header is MDN's own example. The timeline restates what the quotes below say, with 604800 seconds as 7 days and 86400 seconds as 1 day.",
   },
   docs: [
     { text: "The stale-while-revalidate response directive indicates that the cache could reuse a stale response while it revalidates it to a cache.", source: "MDN: Cache-Control", href: MDN_CACHE_CONTROL },
@@ -404,4 +405,50 @@ export const webStale: JourneyChapter = {
     { text: "After an hour has passed, the next visitor will still receive the cached (stale) version of the page immediately for a fast response.", source: "Next.js: Incremental Static Regeneration", href: NEXT_ISR },
     { text: "Background regeneration (stale-while-revalidate) runs on the instance that receives the triggering request.", source: "Next.js: Incremental Static Regeneration", href: NEXT_ISR },
   ],
+};
+
+// ---- The page ----
+
+/** What /basics shows: an intro, a short "how it fits together" list, then the eight sections in order. */
+export const basics: {
+  name: string;
+  intro: string;
+  /** One line per section, each linking to the section that backs it. */
+  steps: { text: string; chapter: string }[];
+  /** One line per section: what is inside it. Shown on the folded section's header, so a reader knows what opening it gets them. */
+  summaries: Record<string, string>;
+  /** A closing question about the whole page. */
+  check: Quiz;
+  chapters: JourneyChapter[];
+} = {
+  name: "How the web works",
+  intro:
+    "One click, followed from your finger to the screen, with real examples. A request leaves your browser, a server answers, and the browser turns the bytes into pixels. Then come the two questions every site on this website has to answer: who builds the HTML, and who remembers the answer? The HTTP examples were captured on 8 November 2026, so you can see what a header actually looks like.",
+  steps: [
+    { text: "You click. The browser sends a request (a start line, headers, maybe a body) and the server answers with a response that has a status code and headers.", chapter: "web-request" },
+    { text: "The HTML arrives. The browser parses it into the DOM, building as the bytes come in. Stylesheets block rendering, and plain scripts can block parsing.", chapter: "web-path" },
+    { text: "Who wrote that HTML decides the trade-off: the browser (client-side), the server on each request (server-side), or a build step (static).", chapter: "web-fork" },
+    { text: "A server-rendered page can look ready before hydration has attached its handlers.", chapter: "web-handover" },
+    { text: "Every response says how long it stays fresh, and a stale copy is revalidated with a conditional request that can end in a 304.", chapter: "web-memory" },
+    { text: "Versioned file names make year-long caching safe. no-cache means validate first, and no-store means do not keep it at all.", chapter: "web-fingerprints" },
+    { text: "A shared cache must never hold a personalised response: private and Vary decide whose copy is whose.", chapter: "web-whose" },
+    { text: "And sometimes the best answer is a stale one, served now and refreshed in the background.", chapter: "web-stale" },
+  ],
+  summaries: {
+    "web-request": "What a request and a response look like, with a real response captured from MDN.",
+    "web-path": "How the browser turns HTML into pixels, and what holds it up. Try it: change how a script loads and watch the first paint.",
+    "web-fork": "Client, server or static: who writes the HTML, and what each one actually sends to the browser.",
+    "web-handover": "Why a server-rendered page can look ready and still ignore your click, and what hydration does about it.",
+    "web-memory": "Fresh, stale and the 304: how a cache decides whether to ask the server, with real headers.",
+    "web-fingerprints": "Why a file name can carry a hash, and what no-cache and no-store really mean. Try it: pick a header and see what a cache does.",
+    "web-whose": "Private and shared caches, Vary, and how a personalised page can leak.",
+    "web-stale": "Serving an old answer on purpose, then refreshing it in the background.",
+  },
+  check: {
+    question: "What can go wrong if a personalised page is stored in a shared cache?",
+    options: ["The page loads more slowly", "Other users may be able to retrieve those contents", "The cache refuses to store it"],
+    answer: 1,
+    reveal: "Other users may be able to retrieve personalised contents from a shared cache, which can leak information.",
+  },
+  chapters: [webRequest, webPath, webFork, webHandover, webMemory, webFingerprints, webWhose, webStale],
 };

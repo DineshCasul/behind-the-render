@@ -29,28 +29,6 @@ export interface SiteOverview {
 }
 
 export const siteOverviews: Record<string, SiteOverview> = {
-  web: {
-    intro:
-      "Before any company gets a road, this one follows a single click, with real examples. A request leaves your browser, a server answers, and the browser turns the bytes into pixels. Then come the two questions every site below has to answer: who builds the page, and who remembers it? The examples are real HTTP captured on 8 November 2026, so you can see what a header actually looks like.",
-    flows: [
-      {
-        title: "One click, start to finish",
-        steps: [
-          { text: "You click. The browser sends a request (a start line, headers, maybe a body) and the server answers with a response that has a status code and headers.", chapter: "web-request" },
-          { text: "The HTML arrives. The browser parses it into the DOM, building as the bytes come in.", chapter: "web-path" },
-          { text: "Stylesheets block rendering. Plain scripts can block parsing. async and defer avoid that.", chapter: "web-path" },
-          { text: "DOM plus CSSOM become the render tree. Then layout, then paint.", chapter: "web-path" },
-          { text: "Who wrote that HTML decides the trade-off: the browser (client-side), the server on each request (server-side), or a build step (static).", chapter: "web-fork" },
-          { text: "A server-rendered page can look ready before hydration has attached its handlers.", chapter: "web-handover" },
-          { text: "Meanwhile, every response says how long it stays fresh, and a stale copy is revalidated with a conditional request that can end in a 304.", chapter: "web-memory" },
-          { text: "Versioned file names make year-long caching safe. no-cache means validate first, and no-store means do not keep it at all.", chapter: "web-fingerprints" },
-          { text: "A shared cache must never hold a personalised response: private and Vary decide whose copy is whose.", chapter: "web-whose" },
-          { text: "And sometimes the best answer is a stale one, served now and refreshed in the background.", chapter: "web-stale" },
-        ],
-      },
-    ],
-  },
-
   youtube: {
     intro:
       "YouTube's web team wrote up three problems and their fixes: watch pages that took 4 to 6 seconds to paint their biggest element on some phones, a chain of requests that waited on each other, and a player that picked resolutions a device could not play smoothly. The numbers come from Google's own case studies.",

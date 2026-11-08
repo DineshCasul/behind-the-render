@@ -23,6 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <span className="text-[var(--state-got-it)]">~</span> web-lore <span className="caret text-[var(--state-got-it)]">_</span>
           </Link>
           <nav className="flex gap-5 text-[var(--color-text-muted)]">
+            <Link href="/basics" className="hover:text-[var(--color-text-primary)]">basics</Link>
             <Link href="/journey" className="hover:text-[var(--color-text-primary)]">sites</Link>
             <Link href="/trick" className="hover:text-[var(--color-text-primary)]">tricks</Link>
           </nav>
