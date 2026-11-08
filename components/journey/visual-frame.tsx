@@ -1,4 +1,4 @@
-/** Fade and slide between steps; off for people who ask for reduced motion. */
+/** Fade between steps; off for people who ask for reduced motion. */
 export const T = "transition-all duration-700 motion-reduce:transition-none";
 export const MONO = { fontFamily: "var(--font-mono)" } as const;
 
@@ -9,13 +9,12 @@ export const MONO = { fontFamily: "var(--font-mono)" } as const;
  */
 export function Frame({ title, caption, children }: { title: string; caption: string; children: React.ReactNode }) {
   return (
-    <div role="img" aria-label={`${title}. ${caption}`} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 shadow-[0_14px_14px_-6px_var(--color-bg)] lg:bg-[var(--color-bg-elevated)]/90 lg:p-5 lg:shadow-none">
-      <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--state-learning)] lg:text-xs">{title}</p>
-      <svg viewBox="0 0 340 220" className="mx-auto mt-2 block max-h-[24svh] w-full lg:max-h-none" aria-hidden>
+    <div role="img" aria-label={`${title}. ${caption}`} className="border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 lg:p-5">
+      <p className="label"># {title.toLowerCase()}</p>
+      <svg viewBox="0 0 340 220" className="mx-auto mt-2 block max-h-[24svh] w-full lg:max-h-[380px]" aria-hidden>
         {children}
       </svg>
-      <p className="mt-3 min-h-[3.2em] text-[13px] leading-snug text-[var(--color-text-primary)] lg:text-lg">{caption}</p>
-      <p className="mt-2 text-[11px] leading-snug text-[var(--color-text-muted)] lg:text-xs">Illustration: the numbers come from the source, the drawing is ours.</p>
+      <p className="mt-3 min-h-[3.2em] text-[var(--color-text-primary)]">{caption}</p>
     </div>
   );
 }

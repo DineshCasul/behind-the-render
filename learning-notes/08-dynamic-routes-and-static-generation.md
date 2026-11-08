@@ -1,99 +1,62 @@
-# Dynamic Routes + `generateStaticParams`: SSG in This Codebase
+# Dynamic Routes + `generateStaticParams`: Static Pages From Data
 
 ## What is this?
 
-A dynamic route (`app/learn/[slug]/page.tsx`) is a single page component that
-serves many URLs (`/learn/http`, `/learn/ssr`, ...) by reading the matched
-segment from `params`. `generateStaticParams` is the App Router API that
-tells Next.js the *complete* list of values that segment can take, so it can
-render every one of them **at build time** instead of per request.
+A dynamic route (`app/trick/[slug]/page.tsx`) is one page component that serves many URLs (`/trick/consistent-hashing`, `/trick/virtual-list`, ...). It reads the matched segment from `params`. `generateStaticParams` tells Next.js the complete list of values that segment can take, so every page is rendered **once, at build time**, instead of on each request.
 
 ## Why are we using it here?
 
-Every lesson's content ([[03-modeling-a-dag-in-typescript|the same 12 concepts]])
-is fixed, local TypeScript data — there is no user-specific or request-specific
-input a lesson page needs. That's exactly the shape [[SSG]] is for: identical
-output for every visitor, computed once. Using it here also means this
-project can *demonstrate* SSG in its own source, not just describe it in a
-lesson.
+All content is local TypeScript in `data/`. A trick page needs nothing from the visitor or the request: the output is identical for everyone. That is the shape static generation is for. The result is plain HTML on disk, served as fast as a file, and readable before any JavaScript runs.
 
-## What did we implement
+## What did we implement?
 
-`app/learn/[slug]/page.tsx` exports `generateStaticParams`, returning
-`concepts.map(c => ({ slug: c.id }))` — the 12 known concept ids. The page
-component itself is an `async function` that awaits `params` (a Promise, as
-of Next.js 15+) and looks up the matching `Concept`/`Lesson`/questions from
-`data/concepts.ts`, `data/lessons/`, `data/questions/`.
+- `app/trick/[slug]/page.tsx` and `app/journey/[app]/page.tsx` both export `generateStaticParams`, returning one `{ slug }` (or `{ app }`) per item in the data.
+- `generateMetadata` runs for each one too, so every page has its own `<title>` and description.
+- An unknown value calls `notFound()`, which renders the 404 page.
+- Adding a trick means adding an object to `data/tricks.ts`. No route file changes; the next build produces the new page.
+
+You can see it in the build output: `●` means "prerendered as static HTML (uses generateStaticParams)", and the list says how many paths were produced (`[+20 more paths]`).
 
 ## How does it work?
 
-At build time, Next.js calls `generateStaticParams`, gets back 12 param
-objects, and renders the page component once per object — exactly like
-calling the same function with 12 different arguments and saving each
-result to its own file. No server code runs again for these routes at
-request time; a matching request is served the pre-built file directly.
-
-## What happens at runtime
-
 ```
-next build
+npm run build
   ↓
-generateStaticParams() → ["http", "browser-rendering", ..., "streaming"]
+Next.js calls generateStaticParams()  →  [{slug:"request-batching"}, {slug:"field-data"}, ...]
   ↓
-For each slug: run LessonPage({ params: { slug } }) once
+for each one: render the page component on the server  →  HTML
   ↓
-Write result to a static HTML file (+ RSC payload)
+write the files to .next/
   ↓
-(later, in production) request for /learn/ssr
-  ↓
-Serve the pre-built file — no render logic executes now
+at request time: serve the file. The page component does not run.
 ```
 
-Verified directly in this project's own `npm run build` output:
+## What happens at runtime?
 
-```
-● /learn/http
-● /learn/browser-rendering
-● /learn/html-parsing
-[+9 more paths]
+- **Server:** nothing is rendered per request for these pages. The HTML already exists.
+- **Browser:** receives finished HTML for the whole page: the title, the text, the quotes, the code. A visitor with JavaScript switched off can read it.
+- **JavaScript is needed only for the interactive parts**, which are Client Components: `VisualStepper` (the diagram steps), the two toys, and the walkthrough `Journey`. Those are hydrated: React attaches event handlers to HTML that is already there.
+- **A detail of this Next.js version:** `params` is a `Promise`, so the page does `const { slug } = await params`. Older tutorials show it as a plain object.
 
-●  (SSG)  prerendered as static HTML (uses generateStaticParams)
-```
+## Parent → child: where the boundary is
 
-## Rendering behavior
-
-- What runs on the server: the entire lesson page, but only once per
-  concept, at build time — not per visitor.
-- What runs in the browser: only the Client Component islands inside the
-  page (`StatusPicker` via `LessonProgressControl`, the experiments, the
-  interview accordion) — see [[01-nextjs-app-router-boundaries]].
-- What gets sent over the network: a pre-built HTML file, identical for
-  every visitor of a given lesson.
-- Whether JavaScript is required: no, to read the lesson content — only
-  for the interactive pieces.
+The page itself is a Server Component. It reads data and renders plain elements, so none of that code is sent to the browser. It imports a few Client Components (`"use client"`) and passes them plain props: a diagram `kind`, a list of quotes. Whatever a server component passes to a client component has to be serialisable, which is why the pages pass data and never functions.
 
 ## Why this approach?
 
-The alternative — rendering each lesson per request (SSR) — would re-run
-identical work for every visitor of every lesson, for content that never
-changes between requests. There's no request-specific data here to justify
-that cost.
+The alternatives are rendering on every request, which costs server time to produce an identical page each time, or a client-rendered page that fetches the same data from an API, which adds a round trip and an empty first paint. For content that only changes when we edit the repo, build time is the right time.
 
-## Alternatives
+## When this would be wrong
 
-- **SSR without `generateStaticParams`** — Next.js would render `/learn/*`
-  per request instead; correct but strictly more server work for
-  identical output, with no benefit.
-- **A single `/learn` page with client-side routing/state** — would avoid
-  real URLs per lesson (no direct linking, no per-lesson metadata, no
-  static generation at all) — a strictly worse fit here.
+If a page depended on the user (a dashboard) or the data changed minute to minute, static output would be stale. Then you would render per request, regenerate on a schedule (incremental static regeneration), or fetch the changing part in the browser.
 
 ## Interview questions
 
-1. **Fundamentals:** What does `generateStaticParams` need to return, and when does Next.js call it?
-2. **Tricky:** If `generateStaticParams` returns 12 objects but a user requests a 13th, unlisted slug, what happens by default?
-3. **Senior/Scenario:** Your dynamic route's data comes from a CMS that's updated hourly, not fixed at build time like this project's. What would you change about this exact pattern to keep pages fresh without full rebuilds?
+1. **What does `generateStaticParams` do, and what does the build output tell you about it?** (It lists the values of a dynamic segment so each page is prerendered. `●` marks those routes.)
+2. **A visitor requests a slug that was not in `generateStaticParams`. What happens?** (By default, `dynamicParams` is `true`, so the page is generated at request time; calling `notFound()` for an unknown value gives a 404. With `dynamicParams = false` it returns 404 without rendering.)
+3. **Why can a statically generated page still contain interactive widgets?** (The HTML is static. Client Components inside it are hydrated in the browser.)
+4. **Senior / scenario:** the marketing team wants a price on 5,000 static product pages, and it changes hourly. What are your options? (Regenerate on a schedule with ISR, or render the price client-side or on demand with a short cache. Weigh staleness against server cost and invalidation.)
 
 ## Related concepts
 
-[[SSG]] · [[01-nextjs-app-router-boundaries]] · [[ISR]]
+[[01-nextjs-app-router-boundaries]] · [[04-hydration-and-external-stores]] · [[Static generation]] · [[ISR]]

@@ -196,13 +196,13 @@ function Waterfall({ step }: { step: number }) {
       </text>
 
       <g className={T} style={{ opacity: step === 2 ? 1 : 0 }}>
-        <rect x={252} y={36} width={46} height={18} rx={3} fill="none" stroke="var(--state-learning)" />
-        <text x={275} y={48} textAnchor="middle" fontSize={8} fill="var(--state-learning)" style={MONO}>
+        <rect x={243} y={36} width={46} height={18} rx={3} fill="none" stroke="var(--state-learning)" />
+        <text x={266} y={48} textAnchor="middle" fontSize={8} fill="var(--state-learning)" style={MONO}>
           top-level
         </text>
-        {[228, 275, 322].map((x) => (
+        {[220, 266, 312].map((x) => (
           <g key={x}>
-            <line x1={275} y1={54} x2={x} y2={100} stroke="var(--state-learning)" strokeOpacity={0.6} />
+            <line x1={266} y1={54} x2={x} y2={100} stroke="var(--state-learning)" strokeOpacity={0.6} />
             <rect x={x - 20} y={100} width={40} height={16} rx={3} fill="none" stroke="var(--state-learning)" strokeOpacity={0.8} />
           </g>
         ))}
@@ -244,16 +244,16 @@ function CacheEdge({ step }: { step: number }) {
       <g className={T} style={{ opacity: step >= 1 ? 1 : 0, transform: `translateX(${step >= 1 ? 0 : -14}px)` }}>
         {[40, 80, 120].map((y) => (
           <g key={y}>
-            <rect x={110} y={y} width={52} height={26} rx={4} fill="none" stroke="var(--state-got-it)" />
-            <text x={136} y={y + 16} textAnchor="middle" fontSize={8} fill="var(--state-got-it)" style={MONO}>
+            <rect x={100} y={y} width={76} height={26} rx={4} fill="none" stroke="var(--state-got-it)" />
+            <text x={138} y={y + 16} textAnchor="middle" fontSize={8} fill="var(--state-got-it)" style={MONO}>
               caching PoP
             </text>
           </g>
         ))}
         {[56, 100].map((y) => (
           <g key={y}>
-            <rect x={225} y={y} width={84} height={34} rx={4} fill="none" stroke="var(--state-revisit)" />
-            <text x={267} y={y + 20} textAnchor="middle" fontSize={8} fill="var(--state-revisit)" style={MONO}>
+            <rect x={218} y={y} width={106} height={34} rx={4} fill="none" stroke="var(--state-revisit)" />
+            <text x={271} y={y + 20} textAnchor="middle" fontSize={8} fill="var(--state-revisit)" style={MONO}>
               main data center
             </text>
           </g>

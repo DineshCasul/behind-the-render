@@ -1,14 +1,26 @@
 import type { RoadKind } from "@/data/categories";
-import type { ConceptId } from "@/lib/types";
+import {
+  cloudflareRing,
+  discordGc,
+  discordPartition,
+  facebookNavigation,
+  figmaMultiplayer,
+  figmaOrder,
+  githubInstant,
+  githubVirtual,
+  notionOffline,
+  notionShard,
+  uberRingpop,
+  wikipediaHerd,
+} from "@/data/journey-more";
 
 /**
- * The journeys: one click, followed from your finger to the screen, told as a
- * short narrated walk. You pick whose click to follow; each road is a few
- * chapters, and the lessons (`/learn/<concept>`) hold the detail.
+ * The journeys, shown on the site as "sites": one company's engineering, told as
+ * a short narrated walk of a few chapters. (The code says "road" and "journey";
+ * the page says "site".)
  *
- * Voice: a weary guide, a little ominous, mildly cursed. The jokes never get to
- * change a fact. Every chapter ends with a "From the docs" card: sentences
- * copied word for word from the official source (checked 2026-11-07), each
+ * Voice: dry and a little playful. The jokes never get to change a fact. Every chapter ends with a "From the docs" card: sentences
+ * copied word for word from the official source (checked 2026-11-07; the later chapters in journey-more.ts, 2026-11-08), each
  * with its link, so the narration can be checked at the source.
  *
  * Rules for editing this file:
@@ -41,7 +53,7 @@ export interface Alternative {
   href: string;
 }
 
-/** Which animated diagram sits beside a chapter on wide screens (components/journey/ChapterVisual.tsx). */
+/** Which diagram sits beside a chapter's narration (components/journey/ChapterVisual.tsx). */
 export type VisualKind =
   | "hexagons"
   | "hex-zoom"
@@ -71,8 +83,6 @@ export interface JourneyChapter {
   id: string;
   /** The chapter's title card. */
   title: string;
-  /** The lesson this chapter is the short version of, if there is one; linked from the docs card. */
-  concept?: ConceptId;
   lines: string[];
   docs: DocQuote[];
   alternatives?: Alternative[];
@@ -91,12 +101,8 @@ export interface JourneyApp {
   name: string;
   /** Which group of roads it is listed under (see data/categories.ts). */
   kind: RoadKind;
-  /** Its accent colour: the whole road page takes this hue. */
-  hue: string;
-  /** One line for the picker. */
+  /** One line for the sites list. */
   blurb: string;
-  /** Where the quotes on this road come from, for the picker. */
-  sources: string;
   /** One closing question about the whole road. */
   check?: Quiz;
   chapters: JourneyChapter[];
@@ -110,8 +116,6 @@ const MDN_CACHE_CONTROL = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Ref
 const MDN_CACHING = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching";
 const WEBDEV_RENDERING = "https://web.dev/articles/rendering-on-the-web";
 const REACT_HYDRATE = "https://react.dev/reference/react-dom/client/hydrateRoot";
-const REACT_SUSPENSE = "https://react.dev/reference/react/Suspense";
-const REACT_RSC = "https://react.dev/reference/rsc/server-components";
 const NEXT_RSC = "https://nextjs.org/docs/app/getting-started/server-and-client-components";
 const HYPERNOVA = "https://github.com/airbnb/hypernova";
 const YOUTUBE_PAINT = "https://web.dev/case-studies/better-youtube-web-part1";
@@ -158,7 +162,6 @@ const TWITTER_NOTE =
 const request: JourneyChapter = {
   id: "request",
   title: "The Request",
-  concept: "http",
   lines: [
     "You clicked a link.",
     "A request left your browser: a method, a path, some headers. A server answered with a status code and, optionally, a body.",
@@ -181,7 +184,6 @@ const request: JourneyChapter = {
 const webFork: JourneyChapter = {
   id: "fork",
   title: "The Fork",
-  concept: "ssr",
   lines: [
     "Now a question older than React: who wrote this HTML?",
     "Client rendering: the browser builds the page itself, with JavaScript. Server rendering: the server builds it first, which takes time before the first byte arrives.",
@@ -220,59 +222,9 @@ const webFork: JourneyChapter = {
   ],
 };
 
-const webHollowPage: JourneyChapter = {
-  id: "hollow-page",
-  title: "The Hollow Page",
-  concept: "hydration",
-  lines: [
-    "The page is here. You can see it. You tap the button.",
-    "Nothing.",
-    "The HTML is only a picture until React attaches your components' logic to it. That is hydration, and it can hurt TBT and INP even while it improves FCP.",
-    "And if the server's HTML and the client's disagree, event handlers can end up attached to the wrong elements. That is the worst case. The best case is a slowdown.",
-  ],
-  docs: [
-    {
-      text: "it can have a significant negative impact on TBT and INP, even if it improves FCP.",
-      source: "web.dev: Rendering on the Web",
-      href: WEBDEV_RENDERING,
-    },
-    {
-      text: "In the best case, they'll lead to a slowdown; in the worst case, event handlers can get attached to the wrong elements.",
-      source: "React: hydrateRoot",
-      href: REACT_HYDRATE,
-    },
-  ],
-  alternatives: [ASTRO, QWIK],
-};
-
-const webSendLess: JourneyChapter = {
-  id: "send-less",
-  title: "Send Less, Send Sooner",
-  concept: "server-components",
-  lines: [
-    "One slow query should not hold the whole page hostage. Streaming sends the shell and a fallback first, then each part's HTML as it is ready.",
-    "And some code never has to travel at all. Server Components are not sent to the browser, so they cannot use useState.",
-    "In Next.js, pages and layouts are Server Components by default. You add \"use client\" only to the interactive bits.",
-    "Streaming is when. Server Components are where. Hydration is how it comes alive. Three ideas, not one.",
-  ],
-  docs: [
-    {
-      text: "With any streaming server rendering API, React sends the shell with the fallback first, then streams in each boundary's HTML and swaps out its fallback as that content arrives.",
-      source: "React: Suspense",
-      href: REACT_SUSPENSE,
-    },
-    {
-      text: "Server Components are not sent to the browser, so they cannot use interactive APIs like useState.",
-      source: "React: Server Components",
-      href: REACT_RSC,
-    },
-  ],
-};
-
 const webMemory: JourneyChapter = {
   id: "memory",
   title: "The Memory",
-  concept: "caching",
   lines: [
     "A thousand people ask for the same page. Do the work a thousand times and your server dies screaming.",
     "A reusable response means the server does not parse the request, query the database or render the template again.",
@@ -299,7 +251,6 @@ const airbnbFork: JourneyChapter = {
   trick: "server-rendering-service",
   note: HYPERNOVA_NOTE,
   title: "The Fork",
-  concept: "ssr",
   lines: [
     "Airbnb built a service whose whole job is server-side rendering JavaScript views. They called it Hypernova.",
     "Here is how it works. Your web server sends a request to a Hypernova server. Hypernova computes the views into an HTML string and sends it back.",
@@ -332,7 +283,6 @@ const airbnbHollowPage: JourneyChapter = {
   trick: "server-rendering-service",
   note: HYPERNOVA_NOTE,
   title: "The Hollow Page",
-  concept: "hydration",
   lines: [
     "The HTML arrives from Hypernova. It looks like a page. It is a picture of a page.",
     "Then, on the browser, JavaScript is used to progressively enhance the application and make it dynamic. That is Hypernova's own description.",
@@ -368,7 +318,6 @@ const youtubePaint: JourneyChapter = {
   },
   trick: "field-data",
   title: "The Slow Paint",
-  concept: "web-vitals",
   note: YOUTUBE_NOTE,
   lines: [
     "Largest Contentful Paint measures how long the biggest thing on screen takes to appear. YouTube's web team found it clocking in at 4 to 6 seconds in some cases.",
@@ -404,7 +353,6 @@ const youtubeWaterfall: JourneyChapter = {
   },
   trick: "request-batching",
   title: "The Waterfall",
-  concept: "http",
   note: YOUTUBE_NOTE,
   lines: [
     "A waterfall is requests that wait on each other: one finishes, the next starts, and the user waits through all of them.",
@@ -446,7 +394,6 @@ const youtubeStream: JourneyChapter = {
   },
   trick: "adaptive-bitrate",
   title: "The Stream",
-  concept: "web-vitals",
   note: YOUTUBE_NOTE,
   lines: [
     "Then there is the video itself. YouTube used the Media Capabilities API so its adaptive bitrate algorithm would not automatically select resolutions a device could not play smoothly.",
@@ -471,7 +418,6 @@ const docsCanvas: JourneyChapter = {
   id: "docs-canvas",
   trick: "canvas-rendering",
   title: "The Canvas",
-  concept: "browser-rendering",
   note: DOCS_NOTE,
   lines: [
     "Google announced that Docs would change how it renders documents: from the current HTML-based rendering approach to a canvas-based approach.",
@@ -496,7 +442,6 @@ const docsCatch: JourneyChapter = {
   id: "docs-catch",
   trick: "canvas-rendering",
   title: "The Catch",
-  concept: "html-parsing",
   note: DOCS_NOTE,
   lines: [
     "Every change has a bill. The post warns that some Chrome extensions rely on the way the backend of a Google Doc is structured, and may not work as intended.",
@@ -522,7 +467,6 @@ const figmaPort: JourneyChapter = {
   visual: "wasm-port",
   trick: "webassembly",
   title: "The Port",
-  concept: "js-main-thread",
   note: FIGMA_NOTE,
   lines: [
     "Figma's product is written in C++. Before WebAssembly, C++ code could be run in the browser by cross-compiling it to a subset of JavaScript known as asm.js.",
@@ -547,7 +491,6 @@ const figmaLoad: JourneyChapter = {
   visual: "wasm-load",
   trick: "webassembly",
   title: "The Load",
-  concept: "js-main-thread",
   note: FIGMA_NOTE,
   predict: {
     question: "How much did Figma's load time improve after switching to WebAssembly?",
@@ -583,7 +526,6 @@ const twitterWeight: JourneyChapter = {
   trick: "service-worker-cache",
   note: TWITTER_NOTE,
   title: "The Weight",
-  concept: "js-main-thread",
   lines: [
     "Twitter Lite is a progressive web app. Installing the native Android app meant downloading 23.5MB. The PWA was 600KB over the wire.",
     "Twitter reported a 50% reduction in 99th percentile time-to-interactive latency.",
@@ -619,7 +561,6 @@ const twitterMemory: JourneyChapter = {
   trick: "service-worker-cache",
   note: TWITTER_NOTE,
   title: "The Memory",
-  concept: "caching",
   lines: [
     "A service worker script caches additional resources, enabling fast navigation to other screens.",
     "The numbers Twitter reported: a 65% increase in pages per session, and a 75% increase in Tweets sent.",
@@ -660,7 +601,6 @@ const facebookWeight: JourneyChapter = {
   },
   trick: "atomic-css",
   title: "The Weight",
-  concept: "browser-rendering",
   note: FACEBOOK_NOTE,
   lines: [
     "In 2020 Facebook rebuilt the tech stack for the new Facebook.com. A full rewrite, because in their words it was the only way to achieve their goals for performance and sustainable future growth.",
@@ -701,7 +641,6 @@ const facebookTiers: JourneyChapter = {
   },
   trick: "loading-tiers",
   title: "The Tiers",
-  concept: "js-main-thread",
   note: FACEBOOK_NOTE,
   lines: [
     "Not all JavaScript is equally urgent.",
@@ -720,7 +659,6 @@ const facebookTiers: JourneyChapter = {
 const facebookStream: JourneyChapter = {
   id: "facebook-stream",
   title: "The Stream",
-  concept: "streaming",
   note: FACEBOOK_NOTE,
   lines: [
     "Slow data should not hold the whole page back.",
@@ -751,7 +689,6 @@ const wikipediaEdge: JourneyChapter = {
   },
   trick: "layered-cache",
   title: "The Edge",
-  concept: "caching",
   note: WIKIMEDIA_NOTE,
   lines: [
     "Wikipedia is read by a lot of people, and most of them never touch a database.",
@@ -777,7 +714,6 @@ const wikipediaLayers: JourneyChapter = {
   visual: "cache-layers",
   trick: "layered-cache",
   title: "Two Layers",
-  concept: "caching",
   note: WIKIMEDIA_NOTE,
   lines: [
     "Each cache node ran Varnish twice: one in-memory instance for caching in RAM, and one for on-disk caching.",
@@ -818,7 +754,6 @@ const githubLibrary: JourneyChapter = {
   },
   trick: "gradual-migration",
   title: "The Library",
-  concept: "js-main-thread",
   note: GITHUB_NOTE,
   lines: [
     "GitHub.com pulled in jQuery 1.2.1 as a dependency in late 2007.",
@@ -854,7 +789,6 @@ const githubSlowBurn: JourneyChapter = {
   },
   trick: "gradual-migration",
   title: "The Slow Burn",
-  concept: "js-main-thread",
   note: GITHUB_NOTE,
   lines: [
     "They did not rewrite it in one go. They tracked jQuery usage over time.",
@@ -922,7 +856,6 @@ const uberZoom: JourneyChapter = {
 const docsUsual: JourneyChapter = {
   id: "docs-usual",
   title: "The Usual Way",
-  concept: "browser-rendering",
   lines: [
     "You open a Google Doc. A page like this normally reaches your screen the way every web page does.",
     "The browser parses the HTML, converting the received bytes to the DOM tree.",
@@ -951,7 +884,6 @@ const docsUsual: JourneyChapter = {
 const airbnbShell: JourneyChapter = {
   id: "airbnb-shell",
   title: "The Shell",
-  concept: "csr",
   lines: [
     "You search for somewhere to stay on Airbnb. Your browser asks a server for the page.",
     "What comes back can be a finished page, or an empty shell. With client-side rendering, the browser builds the page itself, with JavaScript.",
@@ -975,26 +907,23 @@ export const journeys: JourneyApp[] = [
   {
     id: "web",
     kind: "start",
-    hue: "#ff8a5c",
     name: "The web, in general",
     check: {
-      "question": "Streaming, Server Components and hydration are three different ideas. Which one is about when pieces of output arrive?",
-      "options": [
-        "Hydration",
-        "Streaming",
-        "Server Components"
+      question: "What can go wrong if a personalised page is stored in a shared cache?",
+      options: [
+        "The page loads more slowly",
+        "Other users may be able to retrieve those contents",
+        "The cache refuses to store it",
       ],
-      "answer": 1,
-      "reveal": "Streaming is when. Server Components are where. Hydration is how it comes alive."
+      answer: 1,
+      reveal: "Other users may be able to retrieve personalised contents from a shared cache, which can leak information.",
     },
-    blurb: "One click, from request to pixels, straight from the official docs.",
-    sources: "MDN, web.dev, React, Next.js",
-    chapters: [request, webFork, webHollowPage, webSendLess, webMemory],
+    blurb: "One click, from the request to the cache: who builds the page, and who remembers it.",
+    chapters: [request, webFork, webMemory],
   },
   {
     id: "youtube",
     kind: "feeds",
-    hue: "#ff5252",
     name: "YouTube",
     check: {
       "question": "How did YouTube's web team cut the waterfalls?",
@@ -1007,13 +936,11 @@ export const journeys: JourneyApp[] = [
       "reveal": "They determined the minimal set of components needed in a view and batched them in a single network request."
     },
     blurb: "A 4 to 6 second paint, a batch of requests and a playback fix, from Google's own case studies.",
-    sources: "web.dev case studies by Google",
     chapters: [youtubePaint, youtubeWaterfall, youtubeStream],
   },
   {
     id: "facebook",
     kind: "feeds",
-    hue: "#5b8cff",
     name: "Facebook",
     check: {
       "question": "Why can atomic CSS stay small as a site grows?",
@@ -1025,14 +952,12 @@ export const journeys: JourneyApp[] = [
       "answer": 0,
       "reveal": "In Facebook's words, it is proportional to the number of unique style declarations rather than to the number of styles and features you write."
     },
-    blurb: "The 2020 rebuild: 80 percent less homepage CSS, JavaScript in three tiers, and streamed data.",
-    sources: "Engineering at Meta (2020)",
-    chapters: [facebookWeight, facebookTiers, facebookStream],
+    blurb: "The 2020 rebuild: 80 percent less homepage CSS, JavaScript in three tiers, streamed data, and fetching before you click.",
+    chapters: [facebookWeight, facebookTiers, facebookStream, facebookNavigation],
   },
   {
     id: "wikipedia",
     kind: "knowledge",
-    hue: "#9fd3ff",
     name: "Wikipedia",
     check: {
       "question": "Why did each cache node run Varnish twice?",
@@ -1044,14 +969,12 @@ export const journeys: JourneyApp[] = [
       "answer": 1,
       "reveal": "One instance for caching in RAM and one for caching on disk."
     },
-    blurb: "Why over 90% of read requests never need a fresh page.",
-    sources: "Wikimedia's own blog (2020)",
-    chapters: [wikipediaEdge, wikipediaLayers],
+    blurb: "Why over 90% of read requests never need a fresh page, and what stops a stampede on a cold one.",
+    chapters: [wikipediaEdge, wikipediaLayers, wikipediaHerd],
   },
   {
     id: "github",
     kind: "knowledge",
-    hue: "#4ee3a0",
     name: "GitHub",
     check: {
       "question": "What kept new jQuery use from creeping back in?",
@@ -1063,14 +986,12 @@ export const journeys: JourneyApp[] = [
       "answer": 2,
       "reveal": "An ESLint plugin that would fail CI checks if anyone tried to use jQuery features."
     },
-    blurb: "How GitHub removed a library it added in 2007, without a big rewrite.",
-    sources: "The GitHub Blog (2018)",
-    chapters: [githubLibrary, githubSlowBurn],
+    blurb: "Removing a library without a rewrite, a code view that only draws what you see, and Issues that open from local data.",
+    chapters: [githubLibrary, githubSlowBurn, githubVirtual, githubInstant],
   },
   {
     id: "google-docs",
     kind: "knowledge",
-    hue: "#ffd24a",
     name: "Google Docs",
     check: {
       "question": "What did Google say would not be impacted by the move to canvas rendering?",
@@ -1083,13 +1004,11 @@ export const journeys: JourneyApp[] = [
       "reveal": "Compatibility with assistive technologies such as screen readers. Extensions that rely on how a Doc is structured might stop working as intended."
     },
     blurb: "When Docs stopped building documents out of HTML.",
-    sources: "Google Workspace Updates blog (2021)",
     chapters: [docsUsual, docsCanvas, docsCatch],
   },
   {
     id: "uber",
     kind: "tools",
-    hue: "#c9f26b",
     name: "Uber",
     check: {
       "question": "Why did Uber choose hexagons for its grid?",
@@ -1101,14 +1020,12 @@ export const journeys: JourneyApp[] = [
       "answer": 2,
       "reveal": "Hexagons have only one distance between a hexagon centerpoint and its neighbors."
     },
-    blurb: "The hexagon grid that turns a map into something you can count.",
-    sources: "Uber's engineering blog (2018)",
-    chapters: [uberGrid, uberZoom],
+    blurb: "The hexagon grid that turns a map into something you can count, and the ring that shares work between servers.",
+    chapters: [uberGrid, uberZoom, uberRingpop],
   },
   {
     id: "figma",
     kind: "tools",
-    hue: "#c58bff",
     name: "Figma",
     check: {
       "question": "What did Figma say made WebAssembly quick to load?",
@@ -1120,14 +1037,12 @@ export const journeys: JourneyApp[] = [
       "answer": 1,
       "reveal": "The format was designed to be as fast as possible for the browser to parse."
     },
-    blurb: "How switching to WebAssembly made Figma load more than 3x faster.",
-    sources: "Figma's own blog (2017)",
-    chapters: [figmaPort, figmaLoad],
+    blurb: "WebAssembly for load speed, and the simple rules that keep many people editing one file.",
+    chapters: [figmaPort, figmaLoad, figmaMultiplayer, figmaOrder],
   },
   {
     id: "airbnb",
     kind: "tools",
-    hue: "#ff5d9e",
     name: "Airbnb",
     check: {
       "question": "When Hypernova's HTML arrives, what makes the page interactive?",
@@ -1140,13 +1055,11 @@ export const journeys: JourneyApp[] = [
       "reveal": "On the browser, JavaScript is used to progressively enhance the application and make it dynamic."
     },
     blurb: "The service Airbnb open-sourced to render JavaScript views on the server.",
-    sources: "Airbnb's Hypernova README, React, web.dev",
     chapters: [airbnbShell, airbnbFork, airbnbHollowPage],
   },
   {
     id: "twitter",
     kind: "feeds",
-    hue: "#4cc3ff",
     name: "Twitter Lite",
     check: {
       "question": "What does Twitter Lite's service worker do, per the case study?",
@@ -1159,8 +1072,58 @@ export const journeys: JourneyApp[] = [
       "reveal": "A service worker script caches additional resources, enabling fast navigation to other screens."
     },
     blurb: "A 600KB web app against a 23.5MB Android install.",
-    sources: "web.dev case study (2017)",
     chapters: [twitterWeight, twitterMemory],
+  },
+  {
+    id: "discord",
+    kind: "backend",
+    name: "Discord",
+    check: {
+      question: "Why did making Discord's Go cache smaller trade one problem for another?",
+      options: [
+        "Smaller caches use more CPU",
+        "The collector scanned less, but more requests missed the cache and hit the database",
+        "A smaller cache cannot hold Read States at all",
+      ],
+      answer: 1,
+      reveal: "The garbage collector had less to scan, but a smaller cache meant more database loads and a worse 99th percentile.",
+    },
+    blurb: "A cache the garbage collector had to scan, and one busy channel that slowed a whole database.",
+    chapters: [discordGc, discordPartition],
+  },
+  {
+    id: "notion",
+    kind: "backend",
+    name: "Notion",
+    check: {
+      question: "Why did Notion pick workspace ID as its partition key?",
+      options: [
+        "It is the shortest ID",
+        "Each block belongs to exactly one workspace, and people mostly query inside one, so most joins stay on one shard",
+        "Workspaces are all the same size",
+      ],
+      answer: 1,
+      reveal: "Rows stay together with the workspace they belong to, which avoids most cross-shard joins.",
+    },
+    blurb: "Which key to shard a database by, and how to track why a page is kept offline.",
+    chapters: [notionShard, notionOffline],
+  },
+  {
+    id: "cloudflare",
+    kind: "backend",
+    name: "Cloudflare",
+    check: {
+      question: "What does a consistent hash ring do when a server is added?",
+      options: [
+        "Every Worker is re-homed",
+        "Only the Workers that lie before the new server on the ring are re-homed",
+        "Nothing, new servers are ignored",
+      ],
+      answer: 1,
+      reveal: "All the Workers that lie before it on the ring get re-homed, but none of the others are disturbed.",
+    },
+    blurb: "Fewer cold starts, by sending each request to a server that already has the code.",
+    chapters: [cloudflareRing],
   },
 ];
 
@@ -1173,14 +1136,4 @@ export function findChapter(id: string): { road: JourneyApp; chapter: JourneyCha
     if (chapter) return { road, chapter };
   }
   return undefined;
-}
-
-/**
- * The real-site chapters that are the short version of a concept. The general
- * road is left out (it is not a site) and so is the shared "request" opener.
- */
-export function chaptersForConcept(concept: ConceptId): { road: JourneyApp; chapter: JourneyChapter }[] {
-  return journeys
-    .filter((road) => road.id !== "web")
-    .flatMap((road) => road.chapters.filter((c) => c.concept === concept && c.id !== "request").map((chapter) => ({ road, chapter })));
 }

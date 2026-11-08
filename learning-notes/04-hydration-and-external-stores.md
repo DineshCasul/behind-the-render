@@ -1,5 +1,7 @@
 # Hydration Mismatches and `useSyncExternalStore`
 
+> Written during an earlier version of this site. The idea still holds. Some files it names (the lessons, the knowledge map, the progress store) have since been removed.
+
 ## What is this?
 
 **Hydration** (one of the site's own 12 concepts) is React attaching event

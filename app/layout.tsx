@@ -1,44 +1,32 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import Link from "next/link";
+import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { GridBackdrop } from "@/components/ui/GridBackdrop";
-// Space Grotesk: a geometric display face with a technical, slightly
-// mechanical character, used for headings so the site doesn't default to
-// the generic Inter/Geist look every Next.js starter ships with.
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-});
 
-// JetBrains Mono: built for developer tools, used for labels, node
-// captions, and anything meant to read as "instrument readout" rather
-// than prose.
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
+// Monospace for the chrome (header, labels, lists, code) so the site still reads like a terminal.
+const jetbrainsMono = JetBrains_Mono({ variable: "--font-jetbrains-mono", subsets: ["latin"] });
+// A sans only for text you read in sentences (explanations, quotes, narration). Long prose in
+// monospace is slow to read; this is the one place the site leaves the terminal look.
+const plexSans = IBM_Plex_Sans({ variable: "--font-read", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
   title: "Web Lore",
-  description: "Explore how the web's best sites actually work.",
+  description: "The engineering and algorithms inside real websites, in the companies' own words.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
-        {/*
-          The backdrop lives in the layout, outside the animated template:
-          a transformed ancestor becomes the containing block for
-          `position: fixed`, so inside the page transition it rode along
-          with the rise animation and snapped to the viewport when the
-          transform reset to `none` (visible jitter). Out here it never
-          moves or re-fades between routes.
-        */}
-        <GridBackdrop />
+    <html lang="en" className={`${jetbrainsMono.variable} ${plexSans.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col font-mono">
+        <header className="flex h-12 shrink-0 items-center gap-6 border-b border-[var(--color-border)] px-5 text-xs lg:px-10">
+          <Link href="/" className="text-[var(--color-text-primary)]">
+            <span className="text-[var(--state-got-it)]">~</span> web-lore <span className="caret text-[var(--state-got-it)]">_</span>
+          </Link>
+          <nav className="flex gap-5 text-[var(--color-text-muted)]">
+            <Link href="/journey" className="hover:text-[var(--color-text-primary)]">sites</Link>
+            <Link href="/trick" className="hover:text-[var(--color-text-primary)]">tricks</Link>
+          </nav>
+        </header>
         {children}
       </body>
     </html>

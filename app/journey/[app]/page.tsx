@@ -9,8 +9,8 @@ interface JourneyPageProps {
 }
 
 /**
- * The list of roads is fixed, so every `/journey/<app>` page is prerendered at
- * build time (the same trick as the lesson pages). The title, the first
+ * The list of sites is fixed, so every `/journey/<app>` page is prerendered at
+ * build time. The title, the first
  * subtitle and the full transcript are in the HTML before any JavaScript runs.
  */
 export function generateStaticParams() {
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: JourneyPageProps): Promise<Me
   const journey = journeyMap[app];
   if (!journey) return {};
   return {
-    title: `${journey.name} | The Journey | Web Lore`,
+    title: `${journey.name} | Web Lore`,
     description: journey.blurb,
   };
 }

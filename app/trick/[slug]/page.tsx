@@ -3,18 +3,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BatchingToy } from "@/components/tricks/BatchingToy";
 import { NearbyToy } from "@/components/tricks/NearbyToy";
+import { OwnershipToy } from "@/components/tricks/OwnershipToy";
+import { RingToy } from "@/components/tricks/RingToy";
 import { VisualStepper } from "@/components/tricks/VisualStepper";
+import { AlternativesList } from "@/components/tricks/AlternativesList";
 import { DocQuoteList } from "@/components/tricks/DocQuoteList";
-import { conceptMap } from "@/data/concepts";
+import { Emph } from "@/components/ui/Emph";
 import { findChapter, type Alternative } from "@/data/journey";
-import { hueStyle } from "@/data/road-hues";
+import { trickExtras } from "@/data/trick-extras";
 import { trickMap, tricks } from "@/data/tricks";
 
 interface TrickPageProps {
   params: Promise<{ slug: string }>;
 }
 
-const label = "font-mono text-[11px] uppercase tracking-[0.3em] lg:text-xs";
+/** The poke-able toy for each `toy` value in data/tricks.ts. */
+const TOYS = { batching: BatchingToy, nearby: NearbyToy, ownership: OwnershipToy, ring: RingToy } as const;
 
 /** Every trick is known ahead of time, so every page is prerendered at build time. */
 export function generateStaticParams() {
@@ -44,163 +48,218 @@ export default async function TrickPage({ params }: TrickPageProps) {
   const roads = Array.from(new Map(found.map(({ road }) => [road.id, road])).values());
   // The journey's diagrams for this trick's chapters, once each, in order.
   const visuals = Array.from(new Set(found.flatMap(({ chapter }) => (chapter.visual ? [chapter.visual] : []))));
-  const hasMedia = visuals.length > 0 || Boolean(trick.toy);
+  const extras = trickExtras[slug];
+  const Toy = trick.toy ? TOYS[trick.toy] : undefined;
+  // "Uber and Cloudflare": used in headings and in the notes that say what is quoted and what is not.
+  const names = roads.map((r) => r.name);
+  const joined = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "the company");
+
+  // The page's sections, in order. Drives the "jump to" row so the page can be scanned before it is read.
+  const jump = [
+    visuals.length > 0 && ["see-it", "diagram"],
+    trick.toy && ["try-it", "toy"],
+    extras && ["how", "how it works"],
+    extras && ["build", "code"],
+    extras && ["wrong", "pitfalls"],
+    ["sources", "sources"],
+    ["interview", "interview"],
+  ].filter(Boolean) as [string, string][];
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-14 lg:px-10" style={hueStyle(roads[0]?.hue)}>
-      <Link href="/trick" className="btn-ghost !px-3.5 !py-1.5">
-        <span aria-hidden>←</span> All tricks
+    <main className="fade-in mx-auto w-full max-w-4xl flex-1 px-5 py-10 lg:px-8">
+      <Link href="/trick" className="label hover:text-[var(--color-text-primary)]">
+        ← tricks
       </Link>
 
-      <p className={`${label} mt-10 text-[var(--state-learning)]`}>A trick</p>
-      <h1
-        className="mt-3 text-balance font-serif text-4xl text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl"
-        style={{ textShadow: "0 0 28px color-mix(in srgb, var(--state-learning) 55%, transparent)" }}
-      >
-        {trick.title}
-      </h1>
+      <h1 className="mt-6 text-3xl leading-tight text-[var(--color-text-primary)]">{trick.title}</h1>
+      <p className="read mt-3 !text-xl !text-[var(--color-text-primary)]">{trick.hook}</p>
 
-      {/* The idea on the left, the drawing and the toy on the right (stacked on phones). */}
-      <div className={`mt-8 grid gap-x-14 gap-y-10 ${hasMedia ? "lg:grid-cols-[5fr_6fr]" : "max-w-3xl"}`}>
-        <div>
-          <p className="text-pretty font-serif text-2xl leading-snug text-[var(--color-text-primary)] lg:text-4xl">{trick.hook}</p>
-          <div className="mt-8 flex flex-col gap-5 text-lg leading-relaxed text-[var(--color-text-primary)] lg:text-xl">
-            {trick.idea.map((p) => (
-              <p key={p}>{p}</p>
-            ))}
-          </div>
-        </div>
+      {trick.stat && (
+        <p className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-l-2 border-[var(--state-got-it)] pl-4">
+          <span className="text-3xl tabular-nums text-[var(--state-got-it)] sm:text-4xl">{trick.stat.value}</span>
+          <span className="read !text-base !text-[var(--color-text-muted)]">{trick.stat.label}</span>
+        </p>
+      )}
 
-        {hasMedia && (
-          <div className="flex min-w-0 flex-col gap-10 lg:self-start">
-            {visuals.length > 0 && (
-              <section aria-label="See it">
-                <p className={`${label} mb-3 text-[var(--state-learning)]`}>See it</p>
-                <div className="flex flex-col gap-8">
-                  {visuals.map((kind) => (
-                    <VisualStepper key={kind} kind={kind} />
-                  ))}
-                </div>
-              </section>
-            )}
-            {trick.toy && (
-              <section aria-label="Try it">
-                <p className={`${label} mb-3 text-[var(--state-got-it)]`}>Poke it</p>
-                {trick.toy === "batching" ? <BatchingToy /> : <NearbyToy />}
-              </section>
-            )}
-          </div>
-        )}
+      <nav aria-label="On this page" className="mt-6 flex flex-wrap gap-x-5 gap-y-1 text-sm text-[var(--color-text-muted)]">
+        {jump.map(([id, name]) => (
+          <a key={id} href={`#${id}`} className="hover:text-[var(--state-learning)]">
+            {name}
+          </a>
+        ))}
+      </nav>
+
+      <div className="mt-10 flex flex-col gap-5">
+        {trick.idea.map((p) => (
+          <p key={p} className="read">
+            <Emph text={p} />
+          </p>
+        ))}
       </div>
 
-      {/* Sources and alternatives on the left; the interview angle and what to read next on the right. */}
-      <div className="mt-16 grid gap-x-14 gap-y-12 lg:grid-cols-2">
-        <div className="flex min-w-0 flex-col gap-12">
-          <section aria-label="Seen in the wild">
-            <p className={`${label} text-[var(--state-learning)]`}>From the source</p>
-            <ul className="mt-4 flex flex-col gap-8">
-              {found.map(({ road, chapter }) => (
-                <li key={chapter.id}>
-                  <p className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
-                    {road.name} · {chapter.title}
-                  </p>
-                  <div className="mt-3">
-                    <DocQuoteList quotes={chapter.docs} />
-                  </div>
-                  {chapter.note && <p className="mt-3 text-sm leading-snug text-[var(--color-text-muted)]">{chapter.note}</p>}
+      {visuals.length > 0 && (
+        <section id="see-it" aria-label="See it" className="mt-16 scroll-mt-6">
+          <h2 className="section-title">see it</h2>
+          <div className="flex flex-col gap-10">
+            {visuals.map((kind) => (
+              <VisualStepper key={kind} kind={kind} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {Toy && (
+        <section id="try-it" aria-label="Try it" className="mt-16 scroll-mt-6">
+          <h2 className="section-title">try it</h2>
+          <Toy />
+        </section>
+      )}
+
+      {extras && (
+        <>
+          <section id="how" aria-label="How it works" className="mt-16 scroll-mt-6">
+            <h2 className="section-title">
+              how it works <small>{extras.how.name}</small>
+            </h2>
+            <ol className="flex flex-col gap-4">
+              {extras.how.steps.map((st, i) => (
+                <li key={st} className="grid grid-cols-[2.25rem_1fr]">
+                  <span className="pt-0.5 tabular-nums text-[var(--state-learning)]">{i + 1}</span>
+                  <span className="read">
+                    <Emph text={st} />
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <p className="read mt-6 border-l-2 border-[var(--color-border)] pl-4 !text-base">
+              <span className="font-mono text-sm text-[var(--state-got-it)]">cost </span>
+              <Emph text={extras.how.cost} />
+            </p>
+            {extras.how.versus && (
+              <p className="read mt-6">
+                <span className="mb-1 block font-mono text-sm text-[var(--state-learning)]">how is it different from {extras.how.versus.name}?</span>
+                <Emph text={extras.how.versus.difference} />
+              </p>
+            )}
+            <p className="label mt-4">The principle is general engineering, not a claim by {joined}.</p>
+          </section>
+
+          <section id="build" aria-label="Build it" className="mt-16 scroll-mt-6">
+            <h2 className="section-title">
+              build it <small>{extras.code.title}</small>
+            </h2>
+            <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-sm leading-relaxed">
+              <code>{extras.code.src}</code>
+            </pre>
+            <p className="label mt-3">A simplified teaching sketch, not source code from {joined}.</p>
+          </section>
+
+          <section id="wrong" aria-label="Where it goes wrong" className="mt-16 scroll-mt-6">
+            <h2 className="section-title">where it goes wrong</h2>
+            <ul className="flex flex-col gap-4">
+              {extras.pitfalls.map((x) => (
+                <li key={x.text} className="grid grid-cols-[2.25rem_1fr]">
+                  <span className="pt-0.5 text-[var(--state-revisit)]">!</span>
+                  <span className="read">
+                    <Emph text={x.text} />
+                    {x.fix && (
+                      <span className="mt-1 block">
+                        <span className="font-mono text-sm text-[var(--state-got-it)]">fix </span>
+                        {x.fix}
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
-            <p className="mt-6 flex flex-wrap gap-3">
-              {roads.map((r) => (
-                <Link key={r.id} href={`/journey/${r.id}`} className="btn-ghost">
-                  Follow {r.name}&apos;s road
-                </Link>
-              ))}
-            </p>
           </section>
 
-          {alternatives.length > 0 && (
-            <section aria-label="Also worth knowing">
-              <p className={`${label} text-[var(--state-revisit)]`}>Also worth knowing</p>
-              <ul className="mt-3 flex flex-col gap-3 text-base leading-snug text-[var(--color-text-muted)] lg:text-lg">
-                {alternatives.map((a) => (
-                  <li key={a.name}>
-                    <a
-                      href={a.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-[var(--color-text-primary)] underline underline-offset-4 hover:text-[var(--state-revisit)]"
-                    >
-                      {a.name} <span aria-hidden>↗</span>
-                      <span className="sr-only"> (opens in a new tab)</span>
-                    </a>{" "}
-                    {a.why}
+          {extras.inspect && (
+            <section aria-label="See it yourself" className="mt-16">
+              <h2 className="section-title">see it yourself</h2>
+              <p className="read grid grid-cols-[2.25rem_1fr]">
+                <span className="font-mono text-[var(--state-learning)]">$</span>
+                <span>{extras.inspect}</span>
+              </p>
+            </section>
+          )}
+        </>
+      )}
+
+      <section id="sources" aria-label="Sources" className="mt-16 scroll-mt-6">
+        <h2 className="section-title">
+          what {joined} {names.length > 1 ? "say" : "says"} <small>copied word for word, with the link</small>
+        </h2>
+        <ul className="flex flex-col gap-10">
+          {found.map(({ road, chapter }) => (
+            <li key={chapter.id}>
+              <p className="mb-3 text-[var(--color-text-primary)]">
+                {road.name} <span className="text-[var(--color-text-muted)]">/ {chapter.title}</span>
+              </p>
+              <DocQuoteList quotes={chapter.docs} />
+              {chapter.note && <p className="label mt-3 max-w-[65ch]">{chapter.note}</p>}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-6 flex flex-wrap gap-3">
+          {roads.map((r) => (
+            <Link key={r.id} href={`/journey/${r.id}`} className="btn">
+              walk through {r.name} →
+            </Link>
+          ))}
+        </p>
+      </section>
+
+      {alternatives.length > 0 && (
+        <section aria-label="Alternatives" className="mt-16">
+          <h2 className="section-title">alternatives</h2>
+          <AlternativesList alternatives={alternatives} />
+        </section>
+      )}
+
+      <section id="interview" aria-label="Interview challenge" className="mt-16 scroll-mt-6">
+        <h2 className="section-title">
+          interview challenge <small>say your answer out loud first, then compare</small>
+        </h2>
+        <p className="read !text-xl !text-[var(--color-text-primary)]">{trick.question.q}</p>
+        <details className="group mt-4">
+          <summary className="btn inline-flex list-none [&::-webkit-details-marker]:hidden">
+            <span className="group-open:hidden">show a model answer</span>
+            <span className="hidden group-open:inline">hide the answer</span>
+          </summary>
+          <p className="read mt-4 border-l-2 border-[var(--color-border)] pl-4">{trick.question.a}</p>
+          <p className="label mt-2">Where the answer says what a company&apos;s post says, that comes from the source. The rest is general engineering reasoning.</p>
+          {trick.question.followUps && (
+            <div className="mt-6">
+              <p className="label mb-2">follow-ups an interviewer might ask</p>
+              <ul className="flex flex-col gap-2">
+                {trick.question.followUps.map((f) => (
+                  <li key={f} className="read grid grid-cols-[2.25rem_1fr]">
+                    <span className="font-mono text-[var(--state-learning)]">?</span>
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
-            </section>
+            </div>
           )}
-        </div>
+        </details>
+      </section>
 
-        <div className="flex min-w-0 flex-col gap-12">
-          <section aria-label="Interview angle">
-            <p className={`${label} text-[var(--state-learning)]`}>The interview angle</p>
-            <p className="mt-3 font-serif text-2xl leading-snug text-[var(--color-text-primary)] lg:text-3xl">{trick.question.q}</p>
-            <details className="group/fold mt-4 border-t border-[var(--color-border)]">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3 font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)] outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--state-learning)] [&::-webkit-details-marker]:hidden">
-                Try answering first, then open this
-                <span aria-hidden className="transition-transform group-open/fold:rotate-90">
-                  ›
-                </span>
-              </summary>
-              <p className="pb-2 text-lg leading-relaxed text-[var(--color-text-primary)]">{trick.question.a}</p>
-            </details>
-            <p className="mt-4">
-              <Link href="/questions" className="font-mono text-xs uppercase tracking-widest text-[var(--state-learning)] underline underline-offset-4">
-                More questions like this →
-              </Link>
-            </p>
-          </section>
-
-          <section aria-label="Foundations and related tricks">
-            {trick.concepts.length > 0 && (
-              <>
-                <p className={`${label} text-[var(--color-text-muted)]`}>Foundations</p>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {trick.concepts.map((id) => (
-                    <li key={id}>
-                      <Link
-                        href={`/learn/${id}`}
-                        className="group block rounded-lg border border-[var(--color-border)] p-4 transition-colors hover:border-[var(--state-got-it)]"
-                      >
-                        <span className="text-base font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--state-got-it)] lg:text-lg">
-                          {conceptMap[id].title} <span aria-hidden>↗</span>
-                        </span>
-                        <span className="mt-0.5 block text-sm leading-snug text-[var(--color-text-muted)] lg:text-base">{conceptMap[id].blurb}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-            {trick.related.length > 0 && (
-              <>
-                <p className={`${label} mt-8 text-[var(--color-text-muted)]`}>Read next</p>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {trick.related.map((s) => (
-                    <li key={s}>
-                      <Link href={`/trick/${s}`} className="text-base text-[var(--state-learning)] underline underline-offset-4 lg:text-lg">
-                        {trickMap[s].title} →
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </section>
-        </div>
-      </div>
+      {trick.related.length > 0 && (
+        <section aria-label="Related" className="mt-16">
+          <h2 className="section-title">next</h2>
+          <ul className="flex flex-col gap-1">
+            {trick.related.map((s) => (
+              <li key={s}>
+                <Link href={`/trick/${s}`} className="link text-[var(--color-text-primary)]">
+                  {trickMap[s].title} →
+                </Link>{" "}
+                <span className="text-[var(--color-text-muted)]">{trickMap[s].hook}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </main>
   );
 }

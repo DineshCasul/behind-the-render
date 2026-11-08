@@ -12,21 +12,22 @@ export interface Group {
   id: string;
   title: string;
   blurb: string;
-  hue: string;
 }
 
 export const ROAD_KINDS = [
-  { id: "start", title: "Start here", blurb: "One click, followed from your finger to the screen.", hue: "#ff8a5c" },
-  { id: "feeds", title: "Feeds and video", blurb: "Sites people open all day, on bad networks and old phones.", hue: "#ff5252" },
-  { id: "knowledge", title: "Reading, writing and code", blurb: "Pages that millions read and a few edit.", hue: "#4ee3a0" },
-  { id: "tools", title: "Maps, design and stays", blurb: "Apps that behave like software, not like pages.", hue: "#c58bff" },
+  { id: "start", title: "Start here", blurb: "One click, followed from your finger to the screen." },
+  { id: "feeds", title: "Feeds and video", blurb: "Sites people open all day, on bad networks and old phones." },
+  { id: "knowledge", title: "Reading, writing and code", blurb: "Pages that millions read and a few edit." },
+  { id: "tools", title: "Maps, design and stays", blurb: "Apps that behave like software, not like pages." },
+  { id: "backend", title: "Behind the page", blurb: "Databases, caches and servers, where the interesting trade-offs live." },
 ] as const satisfies readonly Group[];
 
 export const TRICK_GROUPS = [
-  { id: "faster", title: "Load faster", blurb: "Get something on the screen sooner.", hue: "#ffd24a" },
-  { id: "scale", title: "Survive the crowd", blurb: "Serve millions without melting.", hue: "#5aa9ff" },
-  { id: "native", title: "Feel like an app", blurb: "Do what the page was never meant to do.", hue: "#c58bff" },
-  { id: "change", title: "Change it safely", blurb: "Replace the engine while the plane is flying.", hue: "#4ee3a0" },
+  { id: "faster", title: "Load faster", blurb: "Get something on the screen sooner." },
+  { id: "scale", title: "Survive the crowd", blurb: "Serve millions without melting." },
+  { id: "native", title: "Feel like an app", blurb: "Do what the page was never meant to do." },
+  { id: "change", title: "Change it safely", blurb: "Replace the engine while the plane is flying." },
+  { id: "sync", title: "Stay in sync", blurb: "Many people, one document, and no one waiting." },
 ] as const satisfies readonly Group[];
 
 export type RoadKind = (typeof ROAD_KINDS)[number]["id"];

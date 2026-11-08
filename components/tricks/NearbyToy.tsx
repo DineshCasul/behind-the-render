@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { Legend, Slider, Stats, ToyFrame } from "@/components/tricks/toy-ui";
+import { useMemo, useState, type KeyboardEvent, type PointerEvent } from "react";
 
 const W = 600;
 const H = 400;
@@ -82,7 +83,6 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * the SVG small even at the finest resolution.
  */
 export function NearbyToy() {
-  const uid = useId();
   const [seed, setSeed] = useState(7);
   const [level, setLevel] = useState(1);
   const [rings, setRings] = useState(1);
@@ -125,40 +125,17 @@ export function NearbyToy() {
     setRider((r) => ({ x: clamp(r.x + m.x, 0, W), y: clamp(r.y + m.y, 0, H) }));
   };
 
+  const cellsSearched = 1 + 3 * rings * (rings + 1);
+  const result = found === null ? "no driver in range" : missed ? "missed the nearest" : "found the nearest";
+
   return (
-    <div className="rounded-lg border border-[var(--color-border)] p-5">
+    <ToyFrame
+      title="find the nearest driver"
+      note="A toy hex grid, not H3. It copies two things from Uber's post: cells are hexagons, and each finer resolution has cells with one seventh the area. The drivers, the rings and the found-or-missed check are this toy's own, to show why a grid lookup finds candidates quickly but is not a guarantee."
+    >
       <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor={`${uid}-level`} className="flex justify-between font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-muted)]">
-            <span>Resolution</span>
-            <span className="text-[var(--color-text-primary)]">{level}</span>
-          </label>
-          <input
-            id={`${uid}-level`}
-            type="range"
-            min={0}
-            max={3}
-            value={level}
-            onChange={(e) => setLevel(Number(e.target.value))}
-            className="mt-2 w-full accent-[var(--state-learning)]"
-          />
-          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">Each step up: cells with one seventh the area.</p>
-        </div>
-        <div>
-          <label htmlFor={`${uid}-rings`} className="flex justify-between font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-muted)]">
-            <span>Rings of neighbours searched</span>
-            <span className="text-[var(--color-text-primary)]">{rings}</span>
-          </label>
-          <input
-            id={`${uid}-rings`}
-            type="range"
-            min={0}
-            max={2}
-            value={rings}
-            onChange={(e) => setRings(Number(e.target.value))}
-            className="mt-2 w-full accent-[var(--state-learning)]"
-          />
-        </div>
+        <Slider label="Resolution" value={level} min={0} max={3} hint="Each step up: cells with one seventh the area." onChange={setLevel} />
+        <Slider label="Rings of neighbours searched" value={rings} min={0} max={2} hint="0 is the rider's own cell only." onChange={setRings} />
       </div>
 
       {/* The map. Pointer or arrow keys move the rider. */}
@@ -166,11 +143,10 @@ export function NearbyToy() {
         tabIndex={0}
         onKeyDown={onKey}
         aria-label="Map with 60 drivers and one rider. Click or drag to move the rider, or use the arrow keys."
-        className="mt-5 rounded-md outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--state-learning)]"
       >
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="block w-full cursor-crosshair touch-none rounded-md bg-[var(--color-bg-elevated)]"
+          className="block w-full cursor-crosshair touch-none border border-[var(--color-border)] bg-[var(--color-bg)]"
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId);
             moveTo(e);
@@ -195,9 +171,7 @@ export function NearbyToy() {
             <circle key={d.id} cx={d.x} cy={d.y} r={candidateIds.has(d.id) ? 4.5 : 3} fill={candidateIds.has(d.id) ? "var(--state-got-it)" : "var(--color-text-muted)"} fillOpacity={candidateIds.has(d.id) ? 1 : 0.55} />
           ))}
 
-          {missed && (
-            <line x1={rider.x} y1={rider.y} x2={trueNearest.x} y2={trueNearest.y} stroke="var(--state-revisit)" strokeWidth={1.5} strokeDasharray="5 4" />
-          )}
+          {missed && <line x1={rider.x} y1={rider.y} x2={trueNearest.x} y2={trueNearest.y} stroke="var(--state-revisit)" strokeWidth={1.5} strokeDasharray="5 4" />}
           {found && <line x1={rider.x} y1={rider.y} x2={found.x} y2={found.y} stroke="var(--state-got-it)" strokeWidth={2} />}
 
           <circle cx={rider.x} cy={rider.y} r={9} fill="none" stroke="var(--state-revisit)" strokeWidth={2} />
@@ -205,31 +179,28 @@ export function NearbyToy() {
         </svg>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setSeed((s) => s + 1)}
-          className="rounded-full border border-[var(--color-border)] px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-[var(--color-text-muted)] transition-colors hover:border-[var(--state-learning)] hover:text-[var(--state-learning)]"
-        >
-          New drivers
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Legend
+          items={[
+            { color: "var(--state-revisit)", label: "rider (drag me)" },
+            { color: "var(--state-learning)", label: "searched cells" },
+            { color: "var(--state-got-it)", label: "candidate drivers" },
+            { color: "var(--color-text-muted)", label: "never looked at" },
+          ]}
+        />
+        <button type="button" onClick={() => setSeed((s) => s + 1)} className="btn">
+          new drivers
         </button>
-        <p className="font-mono text-xs text-[var(--color-text-primary)]" aria-live="polite">
-          Exact distances worked out for <span className="text-[var(--state-learning)]">{candidates.length}</span> of {DRIVERS} drivers.
-        </p>
       </div>
-      <p className="mt-2 text-sm text-[var(--color-text-primary)]" aria-live="polite">
-        {found === null
-          ? "No drivers in the searched cells. Zoom out or search another ring."
-          : missed
-            ? "Missed it. The true nearest driver (dashed line) is outside the searched cells."
-            : "Found the true nearest driver."}
-      </p>
 
-      <p className="mt-4 text-xs leading-relaxed text-[var(--color-text-muted)]">
-        A toy hex grid, not H3. It copies two things from Uber&apos;s post: cells are hexagons, and each finer resolution has
-        cells with one seventh the area. The drivers, the rings and the &ldquo;found it or missed it&rdquo; check are this
-        toy&apos;s own, to show why a grid lookup finds candidates quickly but is not a guarantee.
-      </p>
-    </div>
+      <Stats
+        items={[
+          { label: `cells searched (1 + 3·${rings}·${rings + 1})`, value: String(cellsSearched) },
+          { label: "exact distances worked out", value: `${candidates.length} of ${DRIVERS}` },
+          { label: "result", value: result, tone: found === null || missed ? "bad" : "good" },
+        ]}
+      />
+      {missed && <p className="text-sm text-[var(--state-revisit)]">The true nearest driver (dashed line) is outside the searched cells. Raise the rings, or the resolution, and try again.</p>}
+    </ToyFrame>
   );
 }

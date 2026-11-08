@@ -1,5 +1,7 @@
 # GPU-Friendly Animation and `prefers-reduced-motion`
 
+> Written during an earlier version of this site. The idea still holds. Some files it names (the lessons, the knowledge map, the progress store) have since been removed.
+
 ## What is this?
 
 Not every CSS property animates the same way under the hood. Animating
@@ -69,4 +71,4 @@ fraction of the cost.
 
 ## Related concepts
 
-[[02-svg-as-a-ui-system]] · [[00-build-log]]
+[[00-build-log]]

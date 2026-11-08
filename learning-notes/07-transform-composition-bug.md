@@ -1,5 +1,7 @@
 # The Hover Bug: Two Things Writing to One `transform`
 
+> Written during an earlier version of this site. The idea still holds. Some files it names (the lessons, the knowledge map, the progress store) have since been removed.
+
 ## What is this?
 
 `transform` is a single CSS/SVG attribute, but many different pieces of
@@ -76,4 +78,4 @@ split.
 
 ## Related concepts
 
-[[02-svg-as-a-ui-system]] · [[06-animation-and-reduced-motion]]
+[[06-animation-and-reduced-motion]]

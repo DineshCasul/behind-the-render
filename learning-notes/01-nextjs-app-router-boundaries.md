@@ -1,5 +1,7 @@
 # Next.js App Router: Server/Client Component Boundaries
 
+> Written during an earlier version of this site. The idea still holds. Some files it names (the lessons, the knowledge map, the progress store) have since been removed.
+
 ## What is this?
 
 The App Router (`app/`) renders every component as a **Server Component by

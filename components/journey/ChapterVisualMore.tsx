@@ -356,7 +356,7 @@ export function WasmPort({ step }: { step: number }) {
 
   return (
     <Frame title="Figma: the port" caption={caption}>
-      <PipelineRow y={50} middle="asm.js (JavaScript subset)" color="var(--state-revisit)" dim={step >= 1} />
+      <PipelineRow y={50} middle="asm.js (JS subset)" color="var(--state-revisit)" dim={step >= 1} />
       <g className={T} style={{ opacity: step >= 1 ? 1 : 0 }}>
         <PipelineRow y={110} middle="WebAssembly (binary)" color="var(--state-got-it)" dim={false} />
         <text x={164} y={158} textAnchor="middle" fill="var(--state-got-it)" style={label(8)}>

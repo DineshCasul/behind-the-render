@@ -1,5 +1,4 @@
 import type { TrickGroup } from "@/data/categories";
-import type { ConceptId } from "@/lib/types";
 
 /**
  * Tricks: the named ideas behind how real websites work. Short on purpose: a
@@ -10,89 +9,103 @@ import type { ConceptId } from "@/lib/types";
  * from there (`data/journey.ts`), so a quote is only ever written down once.
  * The `idea` text only restates what those quotes say.
  *
- * `concepts` are the foundations (the older rendering lessons) a trick builds
- * on. `question` is one interview angle, written to stay inside what the
+ * `question` is one interview angle, written to stay inside what the
  * sources support and to flag where it is general engineering knowledge.
  */
-export interface Trick {
+interface Trick {
   slug: string;
   title: string;
   /** Which group of tricks it is listed under (see data/categories.ts). */
   group: TrickGroup;
-  /** A question this trick answers, lowercase, shown in the home page's terminal line. */
-  curious: string;
   hook: string;
+  /** One number worth remembering, taken from a verified quote for this trick. Shown big at the top of the page and on the lists. */
+  stat?: { value: string; label: string };
   idea: string[];
   /** A poke-able toy for this trick, if there is one. Implemented in components/tricks. */
-  toy?: "batching" | "nearby";
+  toy?: "batching" | "nearby" | "ownership" | "ring";
   /** Journey chapter ids this trick is told in. */
   chapters: string[];
-  concepts: ConceptId[];
   /** Slugs of tricks worth reading next. */
   related: string[];
-  question: { q: string; a: string };
+  question: {
+    q: string;
+    a: string;
+    /** What an interviewer might ask next. Questions only, so nothing here needs a source. */
+    followUps?: string[];
+  };
 }
 
 export const tricks: Trick[] = [
   {
     slug: "request-batching",
     group: "faster",
-    curious: "why does one slow request hold up the whole page?",
     title: "Batch the Requests",
     hook: "Ten requests that wait on each other are ten waits.",
+    stat: { value: "many → 1", label: "network requests for one view, once they are batched" },
     idea: [
       "A waterfall is requests that wait on each other: one finishes, the next starts, and the user waits through all of them.",
       "YouTube's web team cut them by working out the minimal set of components a view needs, and batching them in a single network request.",
     ],
     toy: "batching",
     chapters: ["youtube-waterfall"],
-    concepts: ["http"],
     related: ["field-data"],
     question: {
       q: "A page makes six API calls when it loads and feels slow. Where do you start?",
       a: "Find out which calls depend on each other. Calls that don't can already run in parallel. A chain, where each call needs the previous answer, is a waterfall, and its cost is the number of round trips. Collapse the chain, for example by asking for the minimal set of data a view needs in one request, which is what YouTube's web team describes doing. Then measure again on a real device, not your laptop.",
+      followUps: [
+        "Which of the six calls could already run in parallel, and which cannot?",
+        "What happens to the whole batch if one call fails?",
+        "How would you cache a batched response?",
+      ],
     },
   },
   {
     slug: "field-data",
     group: "faster",
-    curious: "why do real users see a slower page than your laptop does?",
     title: "Fix the Slowest Paint",
     hook: "Four to six seconds is a long time to stare at a watch page.",
+    stat: { value: "76%", label: "of YouTube's mobile URLs pass Core Web Vitals" },
     idea: [
       "YouTube's web team found Largest Contentful Paint clocking in at 4 to 6 seconds in some cases. They also tested what to show while the video loads: a solid black poster image showed the best results in user studies.",
       "They tracked the outcome in the field, on real devices: 76% of YouTube's mobile website URLs now pass Core Web Vitals thresholds.",
     ],
     chapters: ["youtube-paint", "youtube-waterfall"],
-    concepts: ["web-vitals"],
     related: ["request-batching", "adaptive-bitrate"],
     question: {
       q: "Lighthouse says the page is fast, but users say it's slow. What do you check?",
       a: "Lab data comes from one controlled test. Field data comes from real people on real devices and networks, and a page can pass in the lab and still fail in the field. Look at field data (the Chrome UX Report is one source) for the slow cases, then reproduce them. YouTube's team found some mobile watch pages with a Largest Contentful Paint of 4 to 6 seconds this way.",
+      followUps: [
+        "Why the 75th percentile, and not the average or the median?",
+        "Your lab score is great but field data is poor. What would explain that?",
+        "How would you collect and aggregate this without slowing the page down?",
+      ],
     },
   },
   {
     slug: "adaptive-bitrate",
     group: "scale",
-    curious: "how does a video keep playing on bad wifi?",
     title: "Don't Pick What the Device Can't Play",
     hook: "The best resolution is the one that doesn't stall.",
+    stat: { value: "+7.1%", label: "time between rebuffers, for 0.4% lower resolution" },
     idea: [
       "YouTube used the Media Capabilities API to prevent its adaptive bitrate algorithm from automatically selecting resolutions that a device could not play smoothly.",
       "In the experiment, the mean time between rebuffers increased by 7.1%, while average resolution by video height only declined by 0.4%.",
     ],
     chapters: ["youtube-stream"],
-    concepts: ["web-vitals"],
     related: ["field-data"],
     question: {
       q: "Why would a player ever choose a lower resolution than the network allows?",
       a: "Because the network isn't the only limit: a device can struggle to play a resolution smoothly. If the player keeps choosing something the device can't handle, you get rebuffering. YouTube used the Media Capabilities API to stop its adaptive bitrate algorithm choosing those resolutions, and reported a 7.1% increase in mean time between rebuffers for a 0.4% decline in average resolution.",
+      followUps: [
+        "What stops the player flipping quality up and down every few seconds?",
+        "Why does a player start at a low quality?",
+        "What would you measure to decide that a change was an improvement?",
+      ],
     },
   },
   {
     slug: "canvas-rendering",
     group: "native",
-    curious: "how can a doc editor draw its own text?",
     title: "Paint It Yourself",
     hook: "HTML is one way to put a page on screen. A canvas is the other.",
     idea: [
@@ -100,35 +113,42 @@ export const tricks: Trick[] = [
       "The bill: some Chrome extensions rely on the way the backend of a Google Doc is structured and may not work as intended. Google said compatibility with assistive technologies such as screen readers would not be impacted.",
     ],
     chapters: ["docs-canvas", "docs-catch"],
-    concepts: ["browser-rendering", "html-parsing"],
     related: ["webassembly"],
     question: {
       q: "What do you give up when you render your UI to a canvas instead of HTML elements?",
       a: "Anything that relied on the page's structure. A canvas is a drawing surface, so there is no tree of elements for the browser, extensions or assistive technology to read unless you provide one (that part is general web knowledge, not from Google's post). Google said extensions relying on how a Google Doc is structured might stop working as intended after the move, and that screen reader compatibility would not be impacted. Accessibility on a canvas is work you do on purpose.",
+      followUps: [
+        "How would you make a canvas app accessible?",
+        "How do you know which shape the user clicked?",
+        "When is the DOM still the better choice?",
+      ],
     },
   },
   {
     slug: "webassembly",
     group: "native",
-    curious: "how does a design tool written in C++ run in a browser?",
     title: "Ship Machine Code",
     hook: "Figma's editor is C++. The browser runs it.",
+    stat: { value: "3x", label: "faster load after the switch to WebAssembly" },
     idea: [
       "Before WebAssembly, C++ code could be run in the browser by cross-compiling it to a subset of JavaScript known as asm.js. WebAssembly is a binary format for machine code, designed with browsers in mind and designed to be as fast as possible for the browser to parse.",
       "Figma reported that its load time improved by more than 3x after it switched to WebAssembly, regardless of document size.",
     ],
     chapters: ["figma-port", "figma-load"],
-    concepts: ["js-main-thread"],
     related: ["canvas-rendering"],
     question: {
       q: "Why was Figma's load time better with WebAssembly than with asm.js?",
       a: "Figma's post says the format was designed to be as fast as possible for the browser to parse, and reports a load time more than 3x better after the switch, regardless of document size. A takeaway for an interview: measure load time separately from steady-state speed, because a format can win at startup.",
+      followUps: [
+        "What kind of work benefits from WebAssembly, and what does not?",
+        "What does a call between JavaScript and the module cost?",
+        "How would you decide between shipping a module and optimising the JavaScript?",
+      ],
     },
   },
   {
     slug: "server-rendering-service",
     group: "faster",
-    curious: "why would you build a whole service just to render views?",
     title: "Rendering as a Service",
     hook: "Airbnb built a whole service just to render views on the server.",
     idea: [
@@ -136,120 +156,403 @@ export const tricks: Trick[] = [
       "In the browser, JavaScript is then used to progressively enhance the application and make it dynamic.",
     ],
     chapters: ["airbnb-fork", "airbnb-hollow-page"],
-    concepts: ["ssr", "hydration"],
     related: [],
     question: {
       q: "What's the trade-off of putting server rendering in its own service?",
-      a: "The web app makes an extra HTTP request to the renderer for every server-rendered page, and you now run and scale one more service. In exchange, rendering is separated from the main app. The request and response shape is what Hypernova describes: your server submits an HTTP request to a Hypernova server, which sends back HTML. The costs and benefits are general engineering reasoning, not claims from the README.",
+      a: "The web app makes an extra HTTP request to the renderer for every server-rendered page, and you now run and scale one more service. In exchange, rendering is separated from the main app. The request and response shape is what Hypernova describes: your server submits an HTTP request to a Hypernova server, which sends back HTML.",
+      followUps: [
+        "What is a hydration mismatch, and how would you cause one?",
+        "What does server rendering cost on every request, and how would you reduce it?",
+        "What does the user see between the first paint and hydration finishing?",
+      ],
     },
   },
   {
     slug: "service-worker-cache",
     group: "native",
-    curious: "how does a website work with no signal?",
     title: "The App on the Device",
     hook: "Twitter Lite was 600KB over the wire. The Android app was 23.5MB.",
+    stat: { value: "600KB vs 23.5MB", label: "the web app against the Android install" },
     idea: [
       "Twitter described its PWA as only 600KB over the wire, against 23.5MB of downloaded data needed to install the native Android app. A service worker script caches additional resources, enabling fast navigation to other screens.",
       "It reported a 65% increase in pages per session and a 75% increase in Tweets sent.",
     ],
     chapters: ["twitter-weight", "twitter-memory"],
-    concepts: ["caching"],
     related: ["request-batching", "field-data"],
     question: {
       q: "What can a service worker do that a normal page can't?",
-      a: "It is a script that sits between the page and the network and can cache resources, which is how Twitter Lite cached additional resources for fast navigation to other screens. Because it controls caching, you also have to plan how outdated files get replaced (general knowledge, not from the case study).",
+      a: "It is a script that sits between the page and the network and can cache resources, which is how Twitter Lite cached additional resources for fast navigation to other screens. Because it controls caching, you also have to plan how outdated files get replaced.",
+      followUps: [
+        "How do you ship an update to a site that a service worker has cached?",
+        "Cache-first or network-first: which for the HTML, and which for images?",
+        "What happens when the cache fills the device's storage?",
+      ],
     },
   },
   {
     slug: "atomic-css",
     group: "faster",
-    curious: "how do you ship less CSS as the site grows?",
     title: "Ship Less CSS",
     hook: "Facebook cut the CSS on its homepage by 80 percent.",
+    stat: { value: "80%", label: "less CSS on the homepage" },
     idea: [
       "In its 2020 rebuild of Facebook.com, the team generated atomic CSS at build time and reduced the CSS on the homepage by 80 percent.",
       "The post explains why that works: atomic CSS has a logarithmic growth curve because it is proportional to the number of unique style declarations rather than to the number of styles and features the team writes.",
     ],
     chapters: ["facebook-weight"],
-    concepts: ["browser-rendering"],
     related: ["loading-tiers"],
     question: {
       q: "Why can atomic CSS make a stylesheet smaller as an app grows?",
       a: "Facebook's post explains it: atomic CSS has a logarithmic growth curve because it is proportional to the number of unique style declarations rather than to the number of styles and features you write. In its 2020 rebuild the team generated atomic CSS at build time and reduced the CSS on the homepage by 80 percent.",
+      followUps: [
+        "Why does atomic CSS stop growing with the app?",
+        "What goes wrong when two atomic classes set the same property?",
+        "When would you not use atomic CSS?",
+      ],
     },
   },
   {
     slug: "loading-tiers",
     group: "faster",
-    curious: "does all the JavaScript need to load at once?",
     title: "Load in Tiers",
     hook: "Not all JavaScript is equally urgent.",
+    stat: { value: "3 tiers", label: "of JavaScript, split by urgency" },
     idea: [
       "Facebook split the JavaScript needed for the initial load into three tiers, using a declarative, statically analyzable API.",
-      "It also streams slow data: with @defer, different sections of a response can be streamed as soon as they are ready. The reasoning, load what the first paint needs first and let the rest follow, is general engineering, not a quote.",
+      "It also streams slow data: with @defer, different sections of a response can be streamed as soon as they are ready. The idea is to load what the first paint needs first and let the rest follow.",
     ],
     chapters: ["facebook-tiers", "facebook-stream"],
-    concepts: ["js-main-thread", "streaming"],
     related: ["atomic-css", "request-batching"],
     question: {
       q: "How would you decide which JavaScript goes in the first load?",
       a: "Ask what the first paint and first interaction need, and load only that up front. Things that do not change what is on screen, like logging, can come later. Facebook describes splitting the JavaScript for the initial load into three tiers using a declarative, statically analyzable API.",
+      followUps: [
+        "How would you decide which code belongs in tier 1?",
+        "What is the risk of loading tier 3 too early?",
+        "How would you check that the tiers are working?",
+      ],
     },
   },
   {
     slug: "layered-cache",
     group: "scale",
-    curious: "how do you serve millions of readers without melting?",
     title: "Two Layers of Memory",
     hook: "Over 90% of Wikimedia's read requests are served by its caches.",
+    stat: { value: "90%+", label: "of read requests served by the caches" },
     idea: [
       "Wikimedia's post says that on a normal day over 90% of read requests are served by its caching solution. Each cache node ran Varnish twice: one in-memory instance for caching in RAM, and one instance for on-disk caching.",
       "If the request hits the in-memory cache, the HTTP response is sent back directly to the user.",
     ],
     chapters: ["wikipedia-edge", "wikipedia-layers"],
-    concepts: ["caching"],
     related: ["service-worker-cache"],
     question: {
       q: "Why would a cache have both a RAM layer and a disk layer?",
-      a: "RAM is fast but small, and disk is slower but holds much more, so a request that misses the fast layer can still be answered by the big one instead of reaching the origin (the speed and size trade-off is general knowledge). Wikimedia's post describes each cache node running one in-memory and one on-disk Varnish instance.",
+      a: "RAM is fast but small, and disk is slower but holds much more, so a request that misses the fast layer can still be answered by the big one instead of reaching the origin. Wikimedia's post describes each cache node running one in-memory and one on-disk Varnish instance.",
+      followUps: [
+        "How do you invalidate a copy that sits in several layers?",
+        "Why not one big cache?",
+        "What does a 90% hit rate mean for the other 10%?",
+      ],
     },
   },
   {
     slug: "gradual-migration",
     group: "change",
-    curious: "how do you delete a library without breaking the site?",
     title: "Delete It Slowly",
     hook: "GitHub added jQuery in late 2007. In 2018 it announced it was gone.",
+    stat: { value: "2007 → 2018", label: "from adding jQuery to announcing it was gone" },
     idea: [
       "GitHub.com pulled in jQuery 1.2.1 as a dependency in late 2007. Modern browsers later offered native equivalents, so the team could achieve everything it needed using standard browser APIs.",
       "It did not rewrite everything at once: it tracked jQuery usage over time, and a lint plugin would fail CI checks if anyone tried to use jQuery features. The expected prize was dropping a 30 kB dependency from its bundles.",
     ],
     chapters: ["github-library", "github-slow-burn"],
-    concepts: ["js-main-thread"],
     related: ["loading-tiers"],
     question: {
       q: "You want to remove a library that is used in thousands of places. What is the plan?",
       a: "Do not rewrite it in one go. Measure where it is used and track that number over time, stop new usage with a lint rule that fails CI, then chip away at the existing uses. That is the approach GitHub describes for jQuery: tracking usage and failing CI checks on new jQuery use.",
+      followUps: [
+        "How do you know when it is safe to delete the old code?",
+        "How do you stop new uses of the old library from appearing?",
+        "When is a full rewrite the better choice?",
+      ],
     },
   },
   {
     slug: "hexagon-grid",
     group: "scale",
-    curious: "how does a map app know what is nearby?",
     title: "Cut the Map into Hexagons",
     hook: "Uber turned the Earth into a grid of hexagons.",
+    stat: { value: "1/7", label: "the area of a cell at each finer resolution" },
     idea: [
       "H3 is Uber's grid system: it divides areas of the Earth into hexagonal cells. Hexagons have only one distance between a hexagon centerpoint and its neighbors, and analysis on areas such as neighborhoods within a city is much more practical.",
       "It is hierarchical: each finer resolution has cells with one seventh the area of the coarser resolution.",
     ],
     toy: "nearby",
     chapters: ["uber-grid", "uber-zoom"],
-    concepts: [],
-    related: [],
+    related: ["consistent-hashing"],
     question: {
       q: "How would you find the drivers near a rider without checking every driver?",
-      a: "Put locations into grid cells, look up the rider's cell and the cells around it, and only work out exact distances for the drivers found there. Uber's H3 does the grid part with hexagons at several resolutions, and its post notes that hexagons have only one distance between a cell's centerpoint and its neighbors. The lookup-then-refine approach is general geospatial indexing, not a quote.",
+      a: "Put locations into grid cells, look up the rider's cell and the cells around it, and only work out exact distances for the drivers found there. Uber's H3 does the grid part with hexagons at several resolutions, and its post notes that hexagons have only one distance between a cell's centerpoint and its neighbors.",
+      followUps: [
+        "Why do neighbours matter when finding the nearest driver?",
+        "How would you choose a resolution?",
+        "What happens at the edge of a search ring?",
+      ],
+    },
+  },
+  {
+    slug: "last-writer-wins",
+    group: "sync",
+    title: "Let the Server Pick the Winner",
+    hook: "Figma looked at operational transforms and built something simpler.",
+    idea: [
+      "Figma's multiplayer servers keep track of the latest value any client has sent for a given property on a given object. Two people changing different properties never conflict.",
+      "A conflict happens only when two clients change the same property of the same object. Then the document ends up with the last value that was sent to the server. Because the server is the central authority, it can define the order of events, so no timestamps are needed.",
+      "The price: simultaneous editing of the same text value doesn't merge. Figma is a design tool, not a text editor.",
+    ],
+    chapters: ["figma-multiplayer"],
+    related: ["fractional-indexing", "ownership-reasons"],
+    question: {
+      q: "Two users edit the same field at the same time. How do you decide whose edit wins?",
+      a: "Pick one rule and make it predictable. Figma's post describes last-writer-wins per property: the server defines the order and the last value it receives is the one that stays. The client shows its own pending change meanwhile so the screen doesn't flicker. Whether that is acceptable depends on the data: it's fine for a colour or a position, but it can't merge two people typing in one text field, which the post says Figma doesn't try to do.",
+      followUps: [
+        "How is this different from a CRDT?",
+        "What happens to a user's own edit while it waits for the server to acknowledge it?",
+        "Why can't it merge two people typing in the same text field?",
+        "What would you change to support offline or peer-to-peer editing?",
+      ],
+    },
+  },
+  {
+    slug: "fractional-indexing",
+    group: "sync",
+    title: "Put It Between",
+    hook: "To move a layer, change one number.",
+    stat: { value: "1 value", label: "edited to move a layer" },
+    idea: [
+      "Figma gives every object a number and sorts the children of a parent by it. To insert between two objects, it sets the new index to the average of the two on either side.",
+      "Reordering then means editing a single value, however long the list is. Figma stores each index as a string and averages by string manipulation, so it can't run out of precision after lots of edits.",
+      "Concurrent inserts can interleave, which would hurt a text editor but is usually fine for design layers, because new objects likely don't overlap.",
+    ],
+    chapters: ["figma-order"],
+    related: ["last-writer-wins"],
+    question: {
+      q: "How would you let many people reorder a list at once without rewriting every item's position?",
+      a: "Give each item a sortable key instead of an array position, and compute a new key between its neighbours when you insert. Figma's post describes averaging the two neighbouring indexes, using strings so precision never runs out. Moving an item is then one edit. The general trade-off, which the post also notes, is that concurrent inserts can interleave.",
+      followUps: [
+        "What goes wrong if you store positions as 0, 1, 2, and so on?",
+        "What happens when two people insert into the same gap at once?",
+        "What happens to a key after many inserts into one gap?",
+      ],
+    },
+  },
+  {
+    slug: "virtual-list",
+    group: "faster",
+    title: "Draw Only What You See",
+    hook: "A 27 second render dropped to under a second.",
+    stat: { value: "27 s → <1 s", label: "initial render of a huge file" },
+    idea: [
+      "GitHub's first code view rendered every line, and performance scaled badly with the number of lines in the file.",
+      "Virtualization looks at the scroll state of the page and decides what content to include in the DOM. Virtualizing the file content brought the 27 second initial render to under a second.",
+      "It is not a cure-all. Without the whole file in the page, the browser's built-in find-in-file only found what was visible in the viewport, and GitHub treated losing it as a hard problem to solve.",
+    ],
+    chapters: ["github-virtual"],
+    related: ["canvas-rendering", "local-first-navigation"],
+    question: {
+      q: "A page renders 20,000 rows and is unusably slow. What do you do, and what does it break?",
+      a: "Render only the rows near the viewport and swap them as the user scrolls, which is what GitHub's post calls virtualization. What it can break is anything that relies on the whole content being in the DOM: the post's example is the browser's find-in-page, which only sees visible lines. Accessibility and text selection across the full document are the other usual casualties.",
+      followUps: [
+        "How do you handle rows of different heights?",
+        "What does virtualization break for accessibility?",
+        "When would pagination be the better choice?",
+      ],
+    },
+  },
+  {
+    slug: "local-first-navigation",
+    group: "faster",
+    title: "Show It, Then Check It",
+    hook: "GitHub made Issues feel instant without a faster server.",
+    stat: { value: "4% → 22%", label: "of React navigations became instant" },
+    idea: [
+      "GitHub's approach was to shift work to the client and optimize perceived latency: render instantly from locally available data, then revalidate in the background.",
+      "The cache lives in IndexedDB. After rollout, approximately 22% of React navigations became instant.",
+      "The trade-off is controlled staleness, which GitHub measured. And since a cache only helps when it hits, the next goal was to make sure some usable data is already local by the time the user clicks.",
+    ],
+    chapters: ["github-instant"],
+    related: ["service-worker-cache", "prefetch-before-click"],
+    question: {
+      q: "Your app's navigation feels slow even though the API is fast. What would you try?",
+      a: "Remove the network from the path the user waits on: show cached data immediately and revalidate in the background, which GitHub's post calls render from local data then revalidate. Be ready to answer what happens when the data is stale. GitHub says staleness is the main tradeoff and measured it. A cache only helps on a hit, so it also matters how data gets there before the click, which is the idea behind prefetching.",
+      followUps: [
+        "How do you handle a stale view the user is about to act on?",
+        "What is a good cache-hit ratio, and what do you do when it is low?",
+        "What would you put in the cache key?",
+      ],
+    },
+  },
+  {
+    slug: "prefetch-before-click",
+    group: "faster",
+    title: "Start Before the Click",
+    hook: "Facebook starts loading when you hover.",
+    stat: { value: "2 → 1", label: "network round trips for code and data" },
+    idea: [
+      "Meta's rebuilt Facebook.com kicks off fetches early, preloading on hover or focus, and fetching on mousedown.",
+      "A traditional React and Relay app with lazy loaded routes needs two round trips, one for code and one for data. Facebook fetches code and data in parallel, in a single round trip.",
+      "While the next page loads, React Suspense transitions keep rendering the previous route instead of showing a blank screen. The post says this is much less jarring and mimics standard browser behavior.",
+    ],
+    chapters: ["facebook-navigation"],
+    related: ["local-first-navigation", "loading-tiers"],
+    question: {
+      q: "How do you make navigation in a single-page app feel instant?",
+      a: "Start the work before the user finishes the click. Meta's post describes preloading on hover or focus, fetching code and data in parallel so there is one round trip instead of two, and keeping the previous page on screen until the next is ready. The risk is wasted bandwidth when a hover doesn't turn into a click, so you choose how eagerly to prefetch.",
+      followUps: [
+        "How would you prefetch on a touch device?",
+        "When does prefetching make a site slower?",
+        "Which URLs must never be prefetched?",
+      ],
+    },
+  },
+  {
+    slug: "request-coalescing",
+    group: "scale",
+    title: "Stop the Stampede",
+    hook: "A thousand requests for one cold page should cost one request.",
+    stat: { value: "N → 1", label: "origin requests for one cold object" },
+    idea: [
+      "When many clients ask for the same page at the same moment and it isn't cached yet, a naive cache treats each request independently and sends them all to the application servers. For popular content the load can overwhelm the application.",
+      "The better approach, as Wikimedia describes it: notice they are the same object, send one request to the application while putting all clients on hold, cache the object, and send the same response to everyone.",
+      "Varnish does this by default, and calls it request coalescing. This problem is known as a cache stampede, or thundering herd.",
+    ],
+    chapters: ["wikipedia-herd"],
+    related: ["layered-cache", "request-batching"],
+    question: {
+      q: "A cache entry expires and a thousand requests arrive in the same second. What happens, and how do you stop it?",
+      a: "All thousand miss and hit the origin together: a cache stampede. Wikimedia's post describes the fix as request coalescing: send one request to the origin and make the others wait for its answer. The trade-off is that the waiting clients all depend on that one request, so it needs a timeout.",
+      followUps: [
+        "How is coalescing different from batching?",
+        "What if the single request to the origin fails?",
+        "How would you coalesce across several servers?",
+      ],
+    },
+  },
+  {
+    slug: "consistent-hashing",
+    group: "scale",
+    title: "Hash Onto a Ring",
+    hook: "Add a server and only a slice of the work moves.",
+    stat: { value: "0.1% → 0.01%", label: "cold start rate on enterprise traffic" },
+    idea: [
+      "A naive way to assign work to servers is a hash table from an id to a server address. It works until servers come and go, and servers do: they crash, get rebooted and decommissioned.",
+      "A consistent hash ring maps both the work and the servers onto a number line that wraps around. To find a Worker's home server, Cloudflare hashes its script and takes the first server on or after that position. If a server appears, only the Workers before it on the ring get re-homed. None of the others are disturbed.",
+      "Uber's Ringpop uses the same idea to assign work across workers. Cloudflare used it to send requests to servers that already have the code loaded, and its enterprise cold start rate went from 0.1% to 0.01%.",
+    ],
+    toy: "ring",
+    chapters: ["uber-ringpop", "cloudflare-ring"],
+    related: ["hexagon-grid", "partition-key"],
+    question: {
+      q: "Why use consistent hashing instead of hash(key) % number_of_servers?",
+      a: "With a plain modulo, changing the number of servers changes the answer for almost every key, so almost everything moves. Cloudflare's post describes the ring: when a server is added, only the Workers lying before it get re-homed.",
+      followUps: [
+        "What happens to the keys on a server that fails?",
+        "Why do real rings give each server many points?",
+        "How would you handle one extremely popular key?",
+      ],
+    },
+  },
+  {
+    slug: "cache-vs-gc",
+    group: "scale",
+    title: "The Cache the Collector Scanned",
+    hook: "Discord's service spiked every two minutes, and the cache was the cause.",
+    stat: { value: "~2 min", label: "between latency spikes in the Go service" },
+    idea: [
+      "Discord's Go Read States service kept a Least Recently Used cache. It was fast most of the time, but every few minutes it saw large latency spikes.",
+      "The spikes were huge not because there was a lot of memory to free, but because the garbage collector needed to scan the entire LRU cache to decide whether memory was still referenced. Shrinking the cache helped the spikes but raised 99th percentile latency, because more reads missed and went to the database.",
+      "In the Rust version, an entry evicted from the cache is freed immediately, with no collector. Discord's load tests showed latency just as good as Go's, with no spikes.",
+    ],
+    chapters: ["discord-gc"],
+    related: ["layered-cache"],
+    question: {
+      q: "Your cache is large and your service has periodic latency spikes. What would you suspect?",
+      a: "Per Discord's post, the garbage collector scanning a huge cache. They shrank the cache, which cut the spikes but hurt p99 because of cache misses, then moved to Rust where evicted entries are freed immediately. The takeaway is to look at what a runtime does with a big long-lived heap before blaming your own code.",
+      followUps: [
+        "How would you prove that the garbage collector is the cause?",
+        "What are the trade-offs of shrinking the cache?",
+        "What could you try before rewriting the service?",
+      ],
+    },
+  },
+  {
+    slug: "hot-partition",
+    group: "scale",
+    title: "One Busy Channel",
+    hook: "Partition by channel, then watch one channel melt a node.",
+    idea: [
+      "Discord partitions messages by the channel they're sent in, along with a bucket, which is a static time window. All messages for a channel and bucket are stored together.",
+      "That has a pitfall: a server with a small group of friends sends orders of magnitude fewer messages than a server with hundreds of thousands of people. One channel and bucket that gets a lot of traffic is a hot partition, and Discord says it frequently affected latency across the whole database cluster.",
+      "Moving to ScyllaDB didn't remove the problem. Hot partitions can still happen, so they also improved the systems upstream of the database to shield it.",
+    ],
+    chapters: ["discord-partition"],
+    related: ["partition-key", "request-coalescing"],
+    question: {
+      q: "You partition data by a natural key and one key gets far more traffic than the others. What now?",
+      a: "That's a hot partition, and Discord's post says it can slow a whole cluster. A new database didn't fix it for them, so they invested in the systems in front of the database to shield it. Splitting the key further (Discord already adds a time bucket) and coalescing duplicate reads upstream are the usual levers.",
+      followUps: [
+        "How would you detect a hot partition?",
+        "How would you split a hot key?",
+        "What protects the database from a hot read?",
+      ],
+    },
+  },
+  {
+    slug: "partition-key",
+    group: "scale",
+    title: "Pick the Key That Keeps Data Together",
+    hook: "Notion split its database by workspace, not by user.",
+    stat: { value: "480 / 32", label: "logical shards across physical databases" },
+    idea: [
+      "Notion's data is trees of blocks that vary wildly in size, and one large enterprise customer generates more load than many personal workspaces combined.",
+      "The partition key matters because distributed joins are expensive and transactions are typically limited to a single host. Each block belongs to exactly one workspace and users typically query within one, so Notion used the workspace ID, which avoids most cross-shard joins.",
+      "They chose application-level sharding for control over the distribution, and settled on 480 logical shards evenly distributed across 32 physical databases.",
+    ],
+    chapters: ["notion-shard"],
+    related: ["hot-partition", "consistent-hashing"],
+    question: {
+      q: "You're sharding a multi-tenant database. How do you choose the shard key?",
+      a: "Notion's post gives the reasoning: pick a key that keeps related rows on one shard so queries avoid cross-shard joins, since distributed joins are expensive and transactions are usually limited to one host. For them that's the workspace ID. The risk, which the post hints at with the large enterprise customer, is uneven load, so they also separate logical shards from physical databases.",
+      followUps: [
+        "What would make workspace ID a bad partition key?",
+        "How would you move a logical shard to a new database?",
+        "How do you run a query across all workspaces?",
+      ],
+    },
+  },
+  {
+    slug: "ownership-reasons",
+    group: "sync",
+    title: "Remember Why You Kept It",
+    hook: "A page can be offline for several reasons. Delete it when the last one goes.",
+    idea: [
+      "Notion's Offline Mode needs a strong promise: a page you open offline is complete. Opening a page and seeing half the content missing would be worse than not opening it at all.",
+      "Their first design was a single set of pages kept offline, added on toggle and removed on untoggle. It broke once pages could be offline for other reasons, such as automatic downloads or because a parent page was offline.",
+      "So they track the reasons each page is offline, and only remove a page when the last reason disappears.",
+    ],
+    toy: "ownership",
+    chapters: ["notion-offline"],
+    related: ["last-writer-wins", "service-worker-cache"],
+    question: {
+      q: "A cached item can be needed by several features. How do you decide when it is safe to delete?",
+      a: "I wouldn't let individual features delete shared cached items. I'd keep a set of ownership reasons for each item. When a feature needs it, it registers its own, uniquely named reason, and when it no longer needs it, it releases only that one. The item becomes a candidate for eviction only when the set is empty. That gives independent ownership, prevents accidental deletion, and makes debugging easy, because I can see exactly why an item is still cached. For production I'd also think about lifecycle management, persisted state, concurrent updates and cascading parent-child dependencies. It is the same idea as reference counting, except that it records who owns the references rather than how many there are. Notion's post describes tracking the reasons a page is offline and removing it when the last reason disappears.",
+      followUps: [
+        "How is this different from traditional reference counting?",
+        "What happens if a feature forgets to release its reason?",
+        "How would you handle parent-child cache dependencies?",
+        "How would you prevent eviction while another operation is adding a reason?",
+        "How would you make this work across several browser tabs?",
+      ],
     },
   },
 ];

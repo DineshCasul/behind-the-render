@@ -1,59 +1,31 @@
-# Adding a new site (checklist)
+# Adding a site or a trick (checklist)
 
 ## What is this?
 
-The site is built to keep growing. Adding a website means adding **data**, not
-editing pages. The pages group, count and colour themselves from the data, so
-nothing on the home page, the pickers or the hero names a site.
+The site is built to keep growing, and adding content means adding **data**, not editing pages. The lists, the counts, the grouping and the "jump to" row are all generated from the data, so no page names a particular site.
 
 ## Why is it built this way?
 
-An earlier hero listed every site as a pill. That worked for ten sites and would
-have been wrong at thirty. The rule now: **anything that shows "all of X" is
-generated from the data, and anything that must stay short is capped.**
+A hand-written list is right for ten items and wrong for thirty. The rule: anything that shows "all of X" is generated from the data, and the categories are a small closed set that the compiler checks.
 
 ## The steps
 
-1. **Fetch the source first.** Only add a site when you can quote a first-party page
-   (its own blog or docs, or a case study Google published). Check every quote word
-   for word before it goes in (see the build log for the method).
-2. **A road** in `data/journey.ts`: add a `JourneyApp` to `journeys`. Two fields do
-   the filing: `kind` (which group: `start`, `feeds`, `knowledge`, `tools`) and
-   `hue` (its accent colour; the whole road page takes it). Chapters hold the lines,
-   the quotes (`docs`), the `alternatives`, and optionally a `visual` and a `predict`
-   question.
-3. **A trick** (if the site shows a named idea) in `data/tricks.ts`: add a `Trick`
-   with a `group` (`faster`, `scale`, `native`, `change`) and `chapters` pointing at
-   the road's chapter ids. The trick does not repeat quotes; it reads them from the
-   chapters.
-4. **A question** for the trick in `data/trick-questions.ts` (it flows into the
-   question bank through `data/bank-items.ts`).
-5. Run `npx tsc --noEmit`, `npx eslint app components data lib`, then `npx next build`.
-
-That is all: the home page, `/journey`, `/trick`, the hero counts and the
-Surprise me button pick it up by themselves.
+1. **Fetch the source first.** Only add a site when you can quote a first-party page: its own blog, docs or repo, or a case study Google published about it. Blocked hosts (Medium, DoorDash, the Netflix tech blog) are not worked around; ask for the text to be pasted instead.
+2. **Write the chapters.** Put them in `data/journey-more.ts` (or `journey.ts`). A `JourneyChapter` has `lines` (the narration, short enough to read in one breath), `docs` (verbatim quotes with their link), optionally `alternatives`, a `predict` question (only when there is one clear number to guess), a `visual`, and `trick` (the slug of the trick it belongs to). Declare each source URL as a `const` at the top, because the quote checker reads those.
+3. **Add the site** to `journeys` in `data/journey.ts`: `id`, `name`, `kind` (a group from `data/categories.ts`), `blurb`, `chapters`, and a closing `check` question.
+4. **Add the trick** to `data/tricks.ts`: `slug`, `group`, `title`, `hook`, an optional `stat` (a number that appears in one of the verified quotes), `idea`, `chapters`, `related`, and an interview `question`. The trick does not repeat quotes; it reads them from its chapters.
+5. **Add the extras** for the trick in `data/trick-extras.ts`: how it works (with a `versus`: what it is most often confused with), a code sketch, pitfalls (give a `fix` when the pitfall does not already say what to do), and where possible a "see it yourself" tip. These are general engineering and the page labels them so. Also give the trick's `question` a few `followUps`, and keep provenance notes out of the model answer itself.
+6. **Verify the quotes:** `npm run verify:quotes`. It fetches every source and tests the exact wording: same capitals, same curly or straight quotes, same dashes. It must report `0 not found, 0 punctuation mismatches`.
+7. **Check the build:** `npx tsc --noEmit`, `npm run lint`, `npm run build`. Then open the new pages on desktop and at 390px wide.
 
 ## What if the groups no longer fit?
 
-Groups live in `data/categories.ts`: `ROAD_KINDS` and `TRICK_GROUPS`. Add an entry
-and TypeScript then accepts it as a `kind` or `group`. A group with nothing in it
-is not shown. Because the group names are a union type, a typo in a road's `kind`
-fails the build instead of silently losing the road.
-
-## How the home page stays short
-
-`GroupedRoads` and `GroupedTricks` take a `limit`. The home page passes 4 roads and
-3 tricks per group and shows an "All N →" link into the full page whenever a group
-has more. The full pages (`/journey`, `/trick`) pass no limit.
+Groups live in `data/categories.ts`: `ROAD_KINDS` and `TRICK_GROUPS`. Add an entry and TypeScript accepts it as a `kind` or `group`. A group with nothing in it is not shown. Because the names form a union type, a typo in a site's `kind` fails the build instead of silently hiding the site.
 
 ## Interview angle
 
-*"How would you design a list page whose content will grow from 10 to 1,000 items?"*
-Generate it from data; group by a small fixed set of categories; cap the preview and
-link to the full list; later add search, pagination or filters (the question bank
-already filters). Keep the categories as a closed type so the compiler catches a
-mistake.
+*"How would you design a list page whose content will grow from 10 to 1,000 items?"* Generate it from data. Group it by a small fixed set of categories. Cap or paginate the preview and link to the full list. Later add search or filters. Keep the categories a closed type so the compiler catches mistakes.
 
 ## Related concepts
 
-[[Static generation]] · [[Data-driven UI]] · [[Discriminated unions]]
+[[08-dynamic-routes-and-static-generation]] · [[Data-driven UI]] · [[Discriminated unions]]
