@@ -2,6 +2,46 @@
 
 Newest first. Each entry says what changed and what to understand after it.
 
+## "The web, in general" rebuilt with real examples (2026-11-09)
+
+The old three chapters were thin and one claim (ISR as stale-while-revalidate) had no source. They are now eight chapters in `data/journey-web.ts`: the request, bytes to pixels, the fork (client, server, static, ISR), hydration, freshness and the 304, versioned files and no-cache vs no-store, private vs shared caches and Vary, and stale-while-revalidate. Sources are MDN, web.dev, React and Next.js; 61 new quotes, all verified.
+
+**Examples.** A chapter can now carry an `example` card (`ChapterExample` in `data/journey.ts`, shown by `Journey.tsx` between the narration and the sources). The HTTP ones are real: captured with curl on 8 November 2026 from developer.mozilla.org and github.com, trimmed, and labelled as such. Code ones are labelled illustrative. The 304 was captured by sending a conditional request while the copy was still fresh, and the note says so.
+
+**Layout bug found and fixed.** A wide code block on a phone made the walk's grid column wider than the screen, because a grid item will not shrink below its content unless it has `min-w-0`. The page-level overflow check missed it, because the overflow was inside the walk's own scroll area; the check now looks there too.
+
+### 🧠 Learning checkpoint
+
+1. Why `no-cache` does not mean "do not cache" (store, but validate before each reuse), and what `no-store` is for.
+2. How a 304 works: the cache sends the stored ETag as `If-None-Match`, and the server answers with no body.
+3. Why a grid or flex child needs `min-w-0` before `overflow-x: auto` can work inside it.
+
+---
+
+## Accuracy audit, trick intros and deep sites (2026-11-08)
+
+**Accuracy audit.** Every trick was read against its sources. `verify:quotes` was already clean; the audit looked at what the quotes do not cover. Fixed: a stat (`4%` on the GitHub trick) that was not in any verified quote, a mislabelled "request coalescing" that was really batching, an answer that claimed more than the Notion post said, and the LCP reporting code on the field-data trick (a beacon on every candidate, no percentile edge case). A review pasted for trick 2 was checked against web.dev before anything was taken from it.
+
+**Intros.** Every trick page now opens with an "ever wondered" paragraph for a reader who has never heard of the company (`data/trick-intros.ts`). Casual tone; only facts already in the trick's quotes.
+
+**Deep sites.** Wikipedia, Facebook, Figma, Discord and Notion got 22 new chapters from their own posts (`data/journey-deep.ts`), a new trick (`migrate-live`), and extra quotes on existing chapters. Every site now has an overview card at the start (`data/site-overviews.ts`), and the five deep ones end with "how it fits together" flows whose steps jump back to the chapter that backs them. The quote checker now covers the new file and accepts quotes written on one line. 231 quotes, 0 not found.
+
+**A real bug found while checking the flows.** In `Journey.tsx`, `useEffect(() => scrollRef.current?.scrollTo({ top: 0 }), [beat])` returned the value of `scrollTo()`. Current Chromium (157) returns a Promise from it, so React treated the Promise as a cleanup function and crashed on the first "next" ("i is not a function"). Every site walk was broken in a recent Chrome or Edge. The fix is braces around the effect body, so it returns nothing. Rule: an effect callback must return nothing or a function, so never use a bare arrow that returns a call.
+
+**"Read the real thing".** Every trick's "build it" section now links to where the technique comes from (`data/trick-reading.ts`): the library, the official docs or the article that named the idea (for example Martin Fowler's Strangler Fig page for the GitHub jQuery trick). 28 links; each was fetched and checked to load and to mention what its note says. These are general-engineering references, not company claims, and the sketch is still labelled as not the company's code.
+
+**Checked:** all five deep sites walked to the end in headless Edge, desktop and 390px, no sideways scroll, flows render and jump back to chapters. **Not done:** the Meta post is blocked to plain fetches, so its quotes came through the fetch agent (capped at 125 characters each).
+
+### 🧠 Learning checkpoint
+
+After this step, I should understand:
+
+1. Why a quote verifier is not an accuracy check: it proves the wording is real, not that the narration or the stat built on it is right.
+2. The live-migration pattern in [[19-live-database-migration]], and why 480 shards beats 512.
+3. Why the flows say what the quotes say, and are labelled when the source gives no single timeline (Facebook).
+
+---
+
 ## Depth pass: a review's suggestions, applied where they held up
 
 A review of one page (the Notion offline page) listed improvements. Each was checked before applying; not all were taken.

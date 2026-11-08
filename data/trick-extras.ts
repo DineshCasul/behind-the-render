@@ -25,7 +25,7 @@ interface TrickExtras {
 export const trickExtras: Record<string, TrickExtras> = {
   "request-batching": {
     how: {
-      name: "Request coalescing (the DataLoader pattern)",
+      name: "Batching (the DataLoader pattern)",
       steps: [
         "Several parts of the page ask for data in the same moment.",
         "Instead of sending each ask, collect them in a queue until the current tick of the event loop ends.",
@@ -66,28 +66,47 @@ async function flush() {
       steps: [
         "Measure the metric in each visitor's browser (here, Largest Contentful Paint).",
         "Collect the numbers and sort them.",
-        "Report the 75th percentile, the value three quarters of visits beat, instead of the average.",
+        "Report the 75th percentile instead of the average: the value at or below which 75% of visits fall. The slowest 25% sit at or above it, and for LCP those are the visits to investigate.",
       ],
-      cost: "Sorting is O(n log n); at scale, services keep histograms so they never sort the raw list.",
+      cost: "Sorting is O(n log n); at scale, services keep histograms so they never sort the raw list. Percentile methods differ slightly, so two tools can report slightly different p75s.",
       versus: { name: "lab data", difference: "A lab run is one machine on one network under controlled conditions. Field data is measured on real visits, so it shows the whole spread, including the slow tail." },
     },
     code: {
       title: "Measure LCP in the browser",
-      src: `new PerformanceObserver((list) => {
-  const entries = list.getEntries();
-  const last = entries[entries.length - 1]; // the latest candidate wins
-  navigator.sendBeacon("/rum", JSON.stringify({ lcp: last.startTime }));
-}).observe({ type: "largest-contentful-paint", buffered: true });
+      src: `let lcp = 0;
+let sent = false;
 
-// server side: the p75 of a list of samples
-const p75 = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.ceil(xs.length * 0.75) - 1];`,
+const observer = new PerformanceObserver((list) => {
+  const last = list.getEntries().at(-1); // each new candidate replaces the last
+  if (last) lcp = last.startTime;
+});
+observer.observe({ type: "largest-contentful-paint", buffered: true });
+
+// Report once, when the page is hidden. Candidates stop arriving at the first input anyway.
+function report() {
+  if (sent || !lcp) return;
+  sent = true;
+  observer.disconnect();
+  navigator.sendBeacon("/rum", JSON.stringify({ lcp }));
+}
+addEventListener("visibilitychange", () => document.visibilityState === "hidden" && report());
+addEventListener("pagehide", report);
+
+// server side: nearest-rank p75 of a list of samples
+const p75 = (xs: number[]) => {
+  if (xs.length === 0) return null;
+  const sorted = [...xs].sort((a, b) => a - b);
+  return sorted[Math.ceil(sorted.length * 0.75) - 1];
+};`,
     },
     pitfalls: [
       { text: "A lab run on your laptop is one fast machine on one good network; your users are not that." },
       { text: "An average hides the slow tail. A few terrible visits barely move it, but they are real people.", fix: "Report percentiles such as p75 and p95, not the mean." },
-      { text: "The browser may report several LCP candidates while the page loads; only the last one counts." },
+      { text: "The browser may report several LCP candidates while the page loads; only the last one counts. It stops reporting once the user taps, scrolls or presses a key, so sending a beacon on every entry records several wrong numbers per visit.", fix: "Keep the latest candidate and send once, when the page is hidden." },
+      { text: "You cannot average percentiles. The mean of ten regional p75s is not the global p75.", fix: "Aggregate the raw samples, or keep mergeable histograms and compute the percentile from the merged one." },
+      { text: "A poor LCP is a symptom, not a cause. Its time splits into four parts: time to first byte, resource load delay, resource load duration and element render delay.", fix: "Find the LCP element in DevTools, see which of the four parts is biggest, then fix that one (for example, preload the hero image or send it with a higher fetch priority)." },
     ],
-    inspect: "Paste a URL into PageSpeed Insights. It shows field data from real Chrome users above the lab test, when enough visits exist.",
+    inspect: "Paste a URL into PageSpeed Insights. It shows field data from real Chrome users above the lab test, when enough visits exist. web.dev calls an LCP of 2.5 seconds or less good, measured at the 75th percentile of page loads.",
   },
 
   "adaptive-bitrate": {
@@ -393,6 +412,55 @@ export function enhance(feature: string, el: Element) {
       { text: "The migration can stall halfway, leaving two ways to do everything forever." },
       { text: "Both libraries ship during the transition, so the page gets heavier before it gets lighter." },
       { text: "It needs a way to measure progress. Without a count of what's left, nobody knows when to delete." },
+    ],
+  },
+
+  "migrate-live": {
+    how: {
+      name: "Double-write, backfill, verify, switch",
+      steps: [
+        "Start double-writing: every new write goes to the old database and to the new one, directly, through a log, or through replication.",
+        "Backfill the old data into the new database. Before writing an old record, compare versions and skip it if the new database already has a more recent update.",
+        "Verify: compare records between the two, with a script and with reads that go to both. Log every difference.",
+        "Switch reads, then writes, when the differences are zero or understood. Keep the old database and a way back until you trust the new one.",
+      ],
+      cost: "Two systems running at once for a while, extra write load, and a lot of care. In return there is no big-bang cutover.",
+      versus: { name: "a big-bang cutover", difference: "A big-bang migration stops the world, copies everything and switches in one go. A live migration keeps the product running and moves in stages, so every stage can be checked and undone." },
+    },
+    code: {
+      title: "A double-write and shadow-read sketch",
+      src: `type Row = { id: string; version: number; data: unknown };
+
+// 1. double-write: the old database stays the source of truth
+async function write(row: Row) {
+  await oldDb.put(row);
+  await auditLog.append(row); // a catch-up job replays the log into newDb
+}
+
+// 2. backfill: copy history, but never overwrite something newer
+async function backfill(row: Row) {
+  const existing = await newDb.get(row.id);
+  if (existing && existing.version >= row.version) return;
+  await newDb.put(row);
+}
+
+// 3. verify: answer from the old database, compare with the new one on the side
+async function read(id: string) {
+  const oldRow = await oldDb.get(id);
+  newDb.get(id).then((newRow) => {
+    if (JSON.stringify(newRow) !== JSON.stringify(oldRow)) log.warn("mismatch", id);
+  });
+  return oldRow;
+}
+
+// 4. switch: flip a flag so reads, then writes, use newDb. Keep oldDb until you trust it.`,
+    },
+    pitfalls: [
+      { text: "A backfill that blindly copies old rows can overwrite newer writes that the double-write already delivered.", fix: "Compare a version or timestamp before writing, and skip older data." },
+      { text: "Writing directly to both databases looks simple, but if either write fails the two drift apart.", fix: "Write to one, record the change in a log, and let a catch-up job apply it to the other." },
+      { text: "Verification written by the person who wrote the migration tends to share its blind spots.", fix: "Have someone else write the checks." },
+      { text: "Reading from both databases adds latency, because every read now does two lookups.", fix: "Sample a small share of reads, or run the comparison in the background." },
+      { text: "The last stretch can stall. Discord's migrator sat at 99.9999% because a few token ranges held huge runs of uncompacted tombstones.", fix: "Look at the data in the stuck range before tuning the tool." },
     ],
   },
 

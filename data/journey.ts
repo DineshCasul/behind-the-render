@@ -1,5 +1,39 @@
 import type { RoadKind } from "@/data/categories";
 import {
+  webFingerprints,
+  webFork,
+  webHandover,
+  webMemory,
+  webPath,
+  webRequest,
+  webStale,
+  webWhose,
+} from "@/data/journey-web";
+import {
+  discordCassandra,
+  discordMove,
+  discordRust,
+  discordShield,
+  facebookBet,
+  facebookBudget,
+  facebookPreload,
+  facebookRoutes,
+  facebookStyles,
+  figmaCatch,
+  figmaObjects,
+  figmaSetup,
+  figmaTree,
+  figmaUndo,
+  notion480,
+  notionMove,
+  notionStorage,
+  notionSync,
+  notionWhen,
+  wikipediaLimits,
+  wikipediaPath,
+  wikipediaSwitchover,
+} from "@/data/journey-deep";
+import {
   cloudflareRing,
   discordGc,
   discordPartition,
@@ -53,6 +87,17 @@ export interface Alternative {
   href: string;
 }
 
+/**
+ * A concrete example shown as its own card after a chapter's narration: real captured
+ * HTTP, or a small piece of code. `note` always says where it came from and whether it is
+ * real, trimmed or illustrative.
+ */
+export interface ChapterExample {
+  title: string;
+  code: string;
+  note: string;
+}
+
 /** Which diagram sits beside a chapter's narration (components/journey/ChapterVisual.tsx). */
 export type VisualKind =
   | "hexagons"
@@ -94,6 +139,8 @@ export interface JourneyChapter {
   predict?: Quiz;
   /** A diagram that advances with each subtitle of this chapter. */
   visual?: VisualKind;
+  /** A concrete example (real HTTP, or code) shown as its own card after the narration. */
+  example?: ChapterExample;
 }
 
 export interface JourneyApp {
@@ -113,7 +160,6 @@ export interface JourneyApp {
 const MDN_HTTP = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview";
 const MDN_CRP = "https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Critical_rendering_path";
 const MDN_CACHE_CONTROL = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control";
-const MDN_CACHING = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching";
 const WEBDEV_RENDERING = "https://web.dev/articles/rendering-on-the-web";
 const REACT_HYDRATE = "https://react.dev/reference/react-dom/client/hydrateRoot";
 const NEXT_RSC = "https://nextjs.org/docs/app/getting-started/server-and-client-components";
@@ -158,93 +204,6 @@ const TWITTER_NOTE =
   "A 2017 case study, from when it was called Twitter Lite. The numbers are Twitter's own and describe that version.";
 
 // ---- Chapters ----
-
-const request: JourneyChapter = {
-  id: "request",
-  title: "The Request",
-  lines: [
-    "You clicked a link.",
-    "A request left your browser: a method, a path, some headers. A server answered with a status code and, optionally, a body.",
-    "The body is HTML. The browser turns the bytes into a tree, styles it, measures it, and only then paints. Some requests even stop the parsing until they finish. Browsers are not patient. They are obedient.",
-  ],
-  docs: [
-    {
-      text: "The messages sent by the client are called requests and the messages sent by the server as an answer are called responses.",
-      source: "MDN: Overview of HTTP",
-      href: MDN_HTTP,
-    },
-    {
-      text: "Some requests are blocking, which means the parsing of the rest of the HTML is halted until the imported asset is handled.",
-      source: "MDN: Critical rendering path",
-      href: MDN_CRP,
-    },
-  ],
-};
-
-const webFork: JourneyChapter = {
-  id: "fork",
-  title: "The Fork",
-  lines: [
-    "Now a question older than React: who wrote this HTML?",
-    "Client rendering: the browser builds the page itself, with JavaScript. Server rendering: the server builds it first, which takes time before the first byte arrives.",
-    "Static rendering builds every page ahead of time, and needs a file for every possible URL.",
-    "Netflix, for example, server-renders its relatively static landing pages while prefetching the JavaScript for interaction-heavy pages.",
-    "ISR keeps serving the stale page while a fresh one builds in the background. None of these is the right path. Each moves the work somewhere else, and sends you the bill.",
-  ],
-  docs: [
-    {
-      text: "generating pages on the server takes time, which can increase your page's TTFB.",
-      source: "web.dev: Rendering on the Web",
-      href: WEBDEV_RENDERING,
-    },
-    {
-      text: "One of the downsides to static rendering is that it must generate individual HTML files for every possible URL.",
-      source: "web.dev: Rendering on the Web",
-      href: WEBDEV_RENDERING,
-    },
-    {
-      text: "Netflix server-renders its relatively static landing pages, while prefetching the JavaScript for interaction-heavy pages…",
-      source: "web.dev: Rendering on the Web (about Netflix)",
-      href: WEBDEV_RENDERING,
-    },
-  ],
-  alternatives: [
-    {
-      name: "SvelteKit",
-      why: "Pick prerender, SSR or client rendering page by page, and mix them across one app.",
-      href: "https://svelte.dev/docs/kit/page-options",
-    },
-    {
-      name: "htmx",
-      why: "On the server you typically respond with HTML, not JSON, and skip most of the client framework.",
-      href: "https://htmx.org/docs/",
-    },
-  ],
-};
-
-const webMemory: JourneyChapter = {
-  id: "memory",
-  title: "The Memory",
-  lines: [
-    "A thousand people ask for the same page. Do the work a thousand times and your server dies screaming.",
-    "A reusable response means the server does not parse the request, query the database or render the template again.",
-    "Your browser keeps a private cache. A shared cache sits between the client and the server. And stale-while-revalidate serves the old copy while a new one is fetched, hiding the wait. That is what ISR does.",
-    "But a personalised page in a shared cache can leak to other users. Never let a page with your name on it be remembered for everyone.",
-  ],
-  docs: [
-    {
-      text: "The stale-while-revalidate response directive indicates that the cache could reuse a stale response while it revalidates it to a cache.",
-      source: "MDN: Cache-Control",
-      href: MDN_CACHE_CONTROL,
-    },
-    {
-      text: "On the other hand, if personalized contents are stored in a cache other than a private cache, then other users may be able to retrieve those contents — which may cause unintentional information leakage.",
-      source: "MDN: HTTP caching",
-      href: MDN_CACHING,
-    },
-  ],
-  alternatives: [PLAIN_HTTP_CACHING],
-};
 
 const airbnbFork: JourneyChapter = {
   id: "airbnb-fork",
@@ -609,6 +568,16 @@ const facebookWeight: JourneyChapter = {
   ],
   docs: [
     {
+      text: "we were loading more than 400 KB of compressed CSS (2 MB uncompressed) when loading the homepage",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "but only 10 percent of that was actually used for the initial render.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
       text: "…we knew it was the only way we’d be able to achieve our goals for performance and sustainable future growth.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
       href: FACEBOOK_REBUILD,
@@ -620,6 +589,11 @@ const facebookWeight: JourneyChapter = {
     },
     {
       text: "We addressed this by generating atomic CSS at build time. Atomic CSS has a logarithmic growth curve because it’s proportional to the number of unique style declarations rather than to the number of styles and features we write.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "the new homepage downloads less than 20 percent of the CSS the old site downloaded.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
       href: FACEBOOK_REBUILD,
     },
@@ -645,11 +619,31 @@ const facebookTiers: JourneyChapter = {
   lines: [
     "Not all JavaScript is equally urgent.",
     "Facebook split the JavaScript needed for the initial load into three tiers, using a declarative, statically analyzable API.",
-    "The idea: load what the first paint needs first, and let the rest arrive behind it.",
+    "Tier 1 is the layout for the first paint, skeletons included. Tier 2 is everything needed to fully render the part you can see. Tier 3 is what is only needed after display, like logging.",
   ],
   docs: [
     {
       text: "We split the JavaScript needed for the initial load into three tiers, using a declarative, statically analyzable API.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "Tier 1 is the basic layout needed to display the first paint for the above-the-fold content, including UI skeletons for initial loading states.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "Tier 2 includes all the JavaScript needed to fully render all above-the-fold content.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "Tier 3 includes everything that is only needed after display",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "A 500 KB JavaScript page can become 50 KB in Tier 1, 150 KB in Tier 2, and 300 KB in Tier 3.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
       href: FACEBOOK_REBUILD,
     },
@@ -664,8 +658,14 @@ const facebookStream: JourneyChapter = {
     "Slow data should not hold the whole page back.",
     "Facebook uses @defer, which enables different sections of the response to be streamed as soon as they are ready.",
     "Paired with React Suspense for loading states, the page can come in from the top down.",
+    "A feed works the same way. The number of stories is unknown, so each story is sent as soon as it is ready, one by one, with a single query.",
   ],
   docs: [
+    {
+      text: "This allows us to send each feed story as soon it’s ready, one by one, with just a single query operation.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
     {
       text: "…we use @defer, which enables different sections of the response to be streamed as soon as they’re ready.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
@@ -918,8 +918,8 @@ export const journeys: JourneyApp[] = [
       answer: 1,
       reveal: "Other users may be able to retrieve personalised contents from a shared cache, which can leak information.",
     },
-    blurb: "One click, from the request to the cache: who builds the page, and who remembers it.",
-    chapters: [request, webFork, webMemory],
+    blurb: "One click, with real HTTP examples: the request, the pixels, who builds the HTML, and who remembers the answer.",
+    chapters: [webRequest, webPath, webFork, webHandover, webMemory, webFingerprints, webWhose, webStale],
   },
   {
     id: "youtube",
@@ -952,8 +952,18 @@ export const journeys: JourneyApp[] = [
       "answer": 0,
       "reveal": "In Facebook's words, it is proportional to the number of unique style declarations rather than to the number of styles and features you write."
     },
-    blurb: "The 2020 rebuild: 80 percent less homepage CSS, JavaScript in three tiers, streamed data, and fetching before you click.",
-    chapters: [facebookWeight, facebookTiers, facebookStream, facebookNavigation],
+    blurb: "The 2020 rebuild, start to finish: less CSS, JavaScript in three tiers with budgets, data fetched before the code, and loading before you click.",
+    chapters: [
+      facebookBet,
+      facebookWeight,
+      facebookStyles,
+      facebookTiers,
+      facebookBudget,
+      facebookPreload,
+      facebookStream,
+      facebookRoutes,
+      facebookNavigation,
+    ],
   },
   {
     id: "wikipedia",
@@ -969,8 +979,8 @@ export const journeys: JourneyApp[] = [
       "answer": 1,
       "reveal": "One instance for caching in RAM and one for caching on disk."
     },
-    blurb: "Why over 90% of read requests never need a fresh page, and what stops a stampede on a cold one.",
-    chapters: [wikipediaEdge, wikipediaLayers, wikipediaHerd],
+    blurb: "A read request through the caches, why the on-disk layer got replaced, what stops a stampede, and how the whole thing switches data centers.",
+    chapters: [wikipediaEdge, wikipediaPath, wikipediaLayers, wikipediaLimits, wikipediaHerd, wikipediaSwitchover],
   },
   {
     id: "github",
@@ -1037,8 +1047,18 @@ export const journeys: JourneyApp[] = [
       "answer": 1,
       "reveal": "The format was designed to be as fast as possible for the browser to parse."
     },
-    blurb: "WebAssembly for load speed, and the simple rules that keep many people editing one file.",
-    chapters: [figmaPort, figmaLoad, figmaMultiplayer, figmaOrder],
+    blurb: "WebAssembly for load speed (and its fine print), and the rules that keep many people editing one file: values, trees, order and undo.",
+    chapters: [
+      figmaPort,
+      figmaLoad,
+      figmaCatch,
+      figmaSetup,
+      figmaMultiplayer,
+      figmaObjects,
+      figmaTree,
+      figmaOrder,
+      figmaUndo,
+    ],
   },
   {
     id: "airbnb",
@@ -1088,8 +1108,8 @@ export const journeys: JourneyApp[] = [
       answer: 1,
       reveal: "The garbage collector had less to scan, but a smaller cache meant more database loads and a worse 99th percentile.",
     },
-    blurb: "A cache the garbage collector had to scan, and one busy channel that slowed a whole database.",
-    chapters: [discordGc, discordPartition],
+    blurb: "A cache the garbage collector had to scan, one busy channel that slowed a database, the services built to shield it, and the move to a new one.",
+    chapters: [discordGc, discordRust, discordCassandra, discordPartition, discordShield, discordMove],
   },
   {
     id: "notion",
@@ -1105,8 +1125,8 @@ export const journeys: JourneyApp[] = [
       answer: 1,
       reveal: "Rows stay together with the workspace they belong to, which avoids most cross-shard joins.",
     },
-    blurb: "Which key to shard a database by, and how to track why a page is kept offline.",
-    chapters: [notionShard, notionOffline],
+    blurb: "When and how to shard a database (the key, the 480, the move), and how to keep a page offline for the right reasons.",
+    chapters: [notionWhen, notionShard, notion480, notionMove, notionStorage, notionOffline, notionSync],
   },
   {
     id: "cloudflare",

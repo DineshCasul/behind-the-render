@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Journey } from "@/components/journey/Journey";
 import { journeyMap, journeys } from "@/data/journey";
+import { siteOverviews } from "@/data/site-overviews";
 import { trickMap } from "@/data/tricks";
 
 interface JourneyPageProps {
@@ -37,5 +38,5 @@ export default async function JourneyPage({ params }: JourneyPageProps) {
   const trickTitles = Object.fromEntries(
     journey.chapters.flatMap((c) => (c.trick && trickMap[c.trick] ? [[c.trick, trickMap[c.trick].title] as const] : [])),
   );
-  return <Journey app={journey} toyTrick={toyTrick} trickTitles={trickTitles} />;
+  return <Journey app={journey} toyTrick={toyTrick} trickTitles={trickTitles} overview={siteOverviews[app]} />;
 }

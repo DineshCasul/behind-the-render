@@ -63,9 +63,15 @@ export const figmaMultiplayer: JourneyChapter = {
     "A document is a two-level map: each object has properties, and each property has one value.",
     "The server keeps the latest value any client sent for each property. Change different properties and nothing conflicts.",
     "Change the same property on the same object, and the document just ends up with the last value the server saw.",
+    "On your own screen, your change shows up immediately. If an older server value arrives for the same property, your client ignores it until the server catches up, so nothing flickers.",
     "That is why simultaneous typing in one text value does not merge. Figma is a design tool, not a text editor, and they are fine with that.",
   ],
   docs: [
+    {
+      text: "As a startup we value the ability to ship features quickly, and OTs were unnecessarily complex for our problem space.",
+      source: "Figma Blog: How Figma’s multiplayer technology works",
+      href: FIGMA_MP,
+    },
     {
       text: "A conflict happens when two clients change the same property on the same object, in which case the document will just end up with the last value that was sent to the server.",
       source: "Figma Blog: How Figma’s multiplayer technology works",
@@ -78,6 +84,16 @@ export const figmaMultiplayer: JourneyChapter = {
     },
     {
       text: "If the text value is B and someone changes it to AB at the same time as someone else changes it to BC, the end result will be either AB or BC but never ABC.",
+      source: "Figma Blog: How Figma’s multiplayer technology works",
+      href: FIGMA_MP,
+    },
+    {
+      text: "Property changes on the client are always applied immediately instead of waiting for acknowledgement from the server since we want Figma to feel as responsive as possible.",
+      source: "Figma Blog: How Figma’s multiplayer technology works",
+      href: FIGMA_MP,
+    },
+    {
+      text: "So we want to discard incoming changes from the server that conflict with unacknowledged property changes.",
       source: "Figma Blog: How Figma’s multiplayer technology works",
       href: FIGMA_MP,
     },
@@ -100,6 +116,8 @@ export const figmaOrder: JourneyChapter = {
     "Their trick is old and database-friendly: give every object a number, and sort the children by it.",
     "To insert between two objects, set the new index to the average of the two on either side.",
     "Reordering is then one edit to one value, no matter how many layers there are.",
+    "Two people inserting into the same gap at once would try to average two identical indices, which does not work. The server avoids it by giving the second insert a unique position.",
+    "And an OT system gets more complicated with every new operation, because each one must transform correctly past every other. Layers get reordered a lot, so Figma did not want that bill.",
   ],
   docs: [
     {
@@ -124,6 +142,16 @@ export const figmaOrder: JourneyChapter = {
     },
     {
       text: "Interleaving concurrently inserted elements in a design is usually fine because the new objects likely don’t overlap.",
+      source: "Figma Blog: Realtime Editing of Ordered Sequences",
+      href: FIGMA_ORDER,
+    },
+    {
+      text: "The server can avoid ever having two objects with an identical position by just generating and assigning a unique position to the second insert operation.",
+      source: "Figma Blog: Realtime Editing of Ordered Sequences",
+      href: FIGMA_ORDER,
+    },
+    {
+      text: "With an OT system, adding more operations increases implementation complexity quadratically since every operation must transform correctly past every other operation.",
       source: "Figma Blog: Realtime Editing of Ordered Sequences",
       href: FIGMA_ORDER,
     },
@@ -200,7 +228,7 @@ export const githubInstant: JourneyChapter = {
       href: GH_ISSUES,
     },
     {
-      text: "…approximately 22% of React navigations became instant…",
+      text: "…approximately 22% of React navigations became instant—up from 4% pre-launch—representing about 15% of total request volume.",
       source: "The GitHub Blog: From latency to instant",
       href: GH_ISSUES,
     },
@@ -230,6 +258,7 @@ export const facebookNavigation: JourneyChapter = {
     "A typical lazy-loaded React and Relay app needs two round trips: one for the code, then one for the data.",
     "Facebook fetches code and data in parallel, in a single round trip.",
     "And while the next page loads, the old one stays on screen instead of a blank flash. Much less jarring.",
+    "That hover trick is specific to desktop. The post says other heuristics can be used for touch devices.",
   ],
   docs: [
     {
@@ -244,6 +273,11 @@ export const facebookNavigation: JourneyChapter = {
     },
     {
       text: "Code and data are fetched in parallel, allowing us to download these in a single network round trip.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FB_REBUILD,
+    },
+    {
+      text: "This example is specific to desktop, but other heuristics can be used for touch devices.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
       href: FB_REBUILD,
     },
@@ -510,6 +544,11 @@ export const notionOffline: JourneyChapter = {
     },
     {
       text: "Our solution was to maintain a forest of offline page trees that track the reasons that each page is being kept available offline.",
+      source: "Notion Blog: How we made Notion available offline",
+      href: NOTION_OFFLINE,
+    },
+    {
+      text: "One row for each reason a page or database is available offline.",
       source: "Notion Blog: How we made Notion available offline",
       href: NOTION_OFFLINE,
     },

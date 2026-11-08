@@ -1,6 +1,6 @@
 // Checks every quote in the data files against the live page it links to, word for word.
 //
-//   npm run verify:quotes                 (checks data/journey.ts and data/journey-more.ts)
+//   npm run verify:quotes                 (checks data/journey.ts, journey-more.ts and journey-deep.ts)
 //   node scripts/verify-quotes.mjs <file> (checks one file)
 //
 // Run it after ANY edit to a quote. It finds each `{ text, source, href }` entry, fetches the
@@ -20,7 +20,7 @@ import { readFileSync } from "node:fs";
 const ELLIPSIS = String.fromCodePoint(0x2026);
 
 const files = process.argv.slice(2);
-if (files.length === 0) files.push("data/journey.ts", "data/journey-more.ts");
+if (files.length === 0) files.push("data/journey.ts", "data/journey-more.ts", "data/journey-deep.ts", "data/journey-web.ts");
 
 const HEADERS = {
   "user-agent": "Mozilla/5.0 (compatible; web-lore-quote-check)",
@@ -114,7 +114,7 @@ const cache = new Map();
 for (const file of files) {
   const src = readFileSync(file, "utf8");
   const urls = Object.fromEntries([...src.matchAll(/const (\w+) = "(https?:[^"]+)";/g)].map((m) => [m[1], m[2]]));
-  const entries = [...src.matchAll(/text: "((?:[^"\\]|\\.)*)",\s*source: "[^"]*",\s*href: (\w+),/g)];
+  const entries = [...src.matchAll(/text: "((?:[^"\\]|\\.)*)",\s*source: "[^"]*",\s*href: (\w+)\s*[,}]/g)];
 
   for (const [, raw, hrefName] of entries) {
     const text = JSON.parse('"' + raw + '"');

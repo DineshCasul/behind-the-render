@@ -11,6 +11,8 @@ import { DocQuoteList } from "@/components/tricks/DocQuoteList";
 import { Emph } from "@/components/ui/Emph";
 import { findChapter, type Alternative } from "@/data/journey";
 import { trickExtras } from "@/data/trick-extras";
+import { trickIntros } from "@/data/trick-intros";
+import { trickReading } from "@/data/trick-reading";
 import { trickMap, tricks } from "@/data/tricks";
 
 interface TrickPageProps {
@@ -49,6 +51,8 @@ export default async function TrickPage({ params }: TrickPageProps) {
   // The journey's diagrams for this trick's chapters, once each, in order.
   const visuals = Array.from(new Set(found.flatMap(({ chapter }) => (chapter.visual ? [chapter.visual] : []))));
   const extras = trickExtras[slug];
+  const intro = trickIntros[slug];
+  const reading = trickReading[slug] ?? [];
   const Toy = trick.toy ? TOYS[trick.toy] : undefined;
   // "Uber and Cloudflare": used in headings and in the notes that say what is quoted and what is not.
   const names = roads.map((r) => r.name);
@@ -89,7 +93,12 @@ export default async function TrickPage({ params }: TrickPageProps) {
         ))}
       </nav>
 
-      <div className="mt-10 flex flex-col gap-5">
+      {intro && (
+        <p className="read mt-10 border-l-2 border-[var(--color-border)] pl-4 !text-[var(--color-text-primary)]">{intro}</p>
+      )}
+
+      <div className={`${intro ? "mt-8" : "mt-10"} flex flex-col gap-5`}>
+        {intro && <p className="label">what the source says</p>}
         {trick.idea.map((p) => (
           <p key={p} className="read">
             <Emph text={p} />
@@ -152,6 +161,21 @@ export default async function TrickPage({ params }: TrickPageProps) {
               <code>{extras.code.src}</code>
             </pre>
             <p className="label mt-3">A simplified teaching sketch, not source code from {joined}.</p>
+            {reading.length > 0 && (
+              <div className="mt-6">
+                <p className="label mb-2"># read the real thing</p>
+                <ul className="flex flex-col gap-4">
+                  {reading.map((r) => (
+                    <li key={r.href} className="read !text-base">
+                      <a href={r.href} target="_blank" rel="noopener noreferrer" className="link text-[var(--state-got-it)]">
+                        {r.by}: {r.title} ↗<span className="sr-only"> (opens in a new tab)</span>
+                      </a>
+                      <span className="mt-1 block text-[var(--color-text-muted)]">{r.note}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
 
           <section id="wrong" aria-label="Where it goes wrong" className="mt-16 scroll-mt-6">

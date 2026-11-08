@@ -7,6 +7,7 @@ import { AlternativesList } from "@/components/tricks/AlternativesList";
 import { DocQuoteList } from "@/components/tricks/DocQuoteList";
 import { Emph } from "@/components/ui/Emph";
 import type { JourneyApp, Quiz } from "@/data/journey";
+import type { SiteOverview } from "@/data/site-overviews";
 
 /**
  * One site, walked chapter by chapter. The whole walk is flattened into a list
@@ -20,11 +21,21 @@ import type { JourneyApp, Quiz } from "@/data/journey";
 interface Beat {
   chapterIndex: number;
   lineIndex: number;
-  kind: "predict" | "line" | "docs" | "check";
+  kind: "overview" | "predict" | "line" | "example" | "docs" | "check";
   text: string;
 }
 
-export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTrick?: string; trickTitles?: Record<string, string> }) {
+export function Journey({
+  app,
+  toyTrick,
+  trickTitles,
+  overview,
+}: {
+  app: JourneyApp;
+  toyTrick?: string;
+  trickTitles?: Record<string, string>;
+  overview?: SiteOverview;
+}) {
   const chapters = app.chapters;
   // "Skim" drops the narration and guesses; only each chapter's source card (and the closing question) remain.
   const [skim, setSkim] = useState(false);
@@ -32,14 +43,28 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
   const beats = useMemo<Beat[]>(() => {
     const out = chapters.flatMap((c, chapterIndex) => {
       const own: Beat[] = [];
+      // The overview card comes first, ahead of chapter 1's own beats.
+      if (!skim && overview && chapterIndex === 0) own.push({ chapterIndex, lineIndex: -1, kind: "overview", text: overview.intro });
       if (!skim && c.predict) own.push({ chapterIndex, lineIndex: 0, kind: "predict", text: "" });
       if (!skim) c.lines.forEach((text, lineIndex) => own.push({ chapterIndex, lineIndex, kind: "line", text }));
+      // A concrete example (real HTTP, or code) is its own card between the narration and the sources.
+      if (!skim && c.example) own.push({ chapterIndex, lineIndex: c.lines.length, kind: "example", text: "" });
       own.push({ chapterIndex, lineIndex: c.lines.length, kind: "docs", text: "" });
       return own;
     });
     if (app.check) out.push({ chapterIndex: chapters.length - 1, lineIndex: 0, kind: "check", text: "" });
     return out;
-  }, [chapters, skim, app.check]);
+  }, [chapters, skim, app.check, overview]);
+
+  // The first beat of each chapter, so a step in a flow can jump straight to it.
+  const firstBeat = useMemo(() => {
+    const map: Record<string, number> = {};
+    beats.forEach((b, i) => {
+      const id = chapters[b.chapterIndex]?.id;
+      if (id && map[id] === undefined) map[id] = i;
+    });
+    return map;
+  }, [beats, chapters]);
 
   const trickList = Object.entries(trickTitles ?? {});
   const sources = Array.from(new Map(chapters.flatMap((c) => c.docs).map((d) => [d.href, d])).values());
@@ -56,7 +81,7 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
   const visual = chapter.visual;
   // A guess-first question must not have its answer drawn next to it: wait until it is answered.
   const hideForGuess = line.kind === "predict" && picks[quizKey] === undefined;
-  const showDiagram = !ended && Boolean(visual) && line.kind !== "check" && !hideForGuess;
+  const showDiagram = !ended && Boolean(visual) && line.kind !== "check" && line.kind !== "overview" && !hideForGuess;
   const visualStep = line.kind === "predict" ? 0 : line.kind === "line" ? line.lineIndex : 99;
 
   const goTo = useCallback((next: number) => setBeat(Math.max(0, Math.min(beats.length, next))), [beats.length]);
@@ -64,7 +89,11 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
 
   // New beat: scroll the text area back to the top.
   const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => scrollRef.current?.scrollTo({ top: 0 }), [beat]);
+  // Braces matter: a recent Chromium returns a Promise from scrollTo(), and an effect that returns
+  // something other than a function makes React crash on the next step (it treats it as a cleanup).
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [beat]);
 
   // Keyboard: space, enter and the arrow keys. Focused buttons and links keep their own keys.
   useEffect(() => {
@@ -84,7 +113,7 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
   }, [step]);
 
   return (
-    <main aria-label={`Walkthrough: ${app.name}`} className="flex h-[calc(100svh-3rem)] flex-col">
+    <main aria-label={`Walkthrough: ${app.name}`} className="fixed inset-x-0 bottom-0 top-12 flex flex-col">
       <h1 className="sr-only">{app.name}</h1>
 
       {/* Top bar: back, the chapters as a row of steps, skim. */}
@@ -116,13 +145,34 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
         onGo={goTo}
       />
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className={`mx-auto grid w-full gap-x-12 gap-y-6 px-5 py-8 lg:px-10 lg:py-12 ${showDiagram ? "max-w-[1400px] lg:grid-cols-2 lg:items-start" : "max-w-3xl lg:py-20"}`}>
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className={`mx-auto grid w-full grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-6 px-5 py-8 lg:px-10 lg:py-12 ${showDiagram ? "max-w-[1400px] lg:grid-cols-2 lg:items-start" : "max-w-3xl lg:py-20"}`}>
           {/* Narration, quiz or sources */}
-          <div aria-live="polite" aria-atomic="true" className="min-h-[12rem]">
+          <div aria-live="polite" aria-atomic="true" className="min-h-[12rem] min-w-0">
             {ended ? (
               <div className="fade-in flex flex-col gap-4">
                 <p className="text-[var(--state-got-it)]">$ done</p>
+                {overview?.flows?.map((flow) => (
+                  <div key={flow.title}>
+                    <p className="label mb-1"># how it fits together: {flow.title.toLowerCase()}</p>
+                    {flow.note && <p className="label mb-2 max-w-[65ch]">{flow.note}</p>}
+                    <ol className="flex flex-col gap-2">
+                      {flow.steps.map((s, i) => (
+                        <li key={s.text} className="grid grid-cols-[2rem_1fr] text-base">
+                          <span className="pt-0.5 tabular-nums text-[var(--state-learning)]">{i + 1}</span>
+                          <span className="read !text-base">
+                            {s.text}{" "}
+                            {firstBeat[s.chapter] !== undefined && (
+                              <button type="button" className="link whitespace-nowrap text-sm" onClick={() => goTo(firstBeat[s.chapter])}>
+                                [{chapters.find((c) => c.id === s.chapter)?.title.toLowerCase()}]
+                              </button>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ))}
                 {trickList.length > 0 && (
                   <div>
                     <p className="label mb-2"># tricks from this site</p>
@@ -168,13 +218,34 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
               </div>
             ) : (
               <div key={beat} className="fade-in flex flex-col gap-4">
-                {line.kind !== "check" && (
-                  <p className="label">
-                    # {chapterIndex + 1}. {chapter.title.toLowerCase()}
-                    {chapter.trick && trickTitles?.[chapter.trick] ? ` · trick: ${trickTitles[chapter.trick].toLowerCase()}` : ""}
-                  </p>
+                {line.kind === "overview" ? (
+                  <p className="label"># {app.name.toLowerCase()}: what this road is about</p>
+                ) : (
+                  line.kind !== "check" && (
+                    <p className="label">
+                      # {chapterIndex + 1}. {chapter.title.toLowerCase()}
+                      {chapter.trick && trickTitles?.[chapter.trick] ? ` · trick: ${trickTitles[chapter.trick].toLowerCase()}` : ""}
+                    </p>
+                  )
                 )}
-                {quiz ? (
+                {line.kind === "overview" ? (
+                  <>
+                    <p className="read-lg text-pretty font-[family-name:var(--font-read)] lg:!text-[1.5rem] lg:!leading-[1.5]">{line.text}</p>
+                    {trickList.length > 0 && (
+                      <p className="label max-w-[65ch]">
+                        tricks on this road: {trickList.map(([, title]) => title.toLowerCase()).join(", ")}
+                      </p>
+                    )}
+                  </>
+                ) : line.kind === "example" && chapter.example ? (
+                  <>
+                    <p className="label"># example: {chapter.example.title.toLowerCase()}</p>
+                    <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-sm leading-relaxed">
+                      <code>{chapter.example.code}</code>
+                    </pre>
+                    <p className="label max-w-[65ch]">{chapter.example.note}</p>
+                  </>
+                ) : quiz ? (
                   <QuizBody label={line.kind === "predict" ? "guess first" : "check yourself"} quiz={quiz} picked={picks[quizKey]} onPick={(i) => setPicks((p) => ({ ...p, [quizKey]: i }))} />
                 ) : line.kind === "docs" ? (
                   <>
@@ -222,6 +293,17 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
 
       {/* The whole narration as plain text, for screen readers. */}
       <section className="sr-only" aria-label="Full transcript">
+        {overview && <p>{overview.intro}</p>}
+        {overview?.flows?.map((f) => (
+          <div key={f.title}>
+            <h2>{f.title}</h2>
+            <ol>
+              {f.steps.map((s) => (
+                <li key={s.text}>{s.text}</li>
+              ))}
+            </ol>
+          </div>
+        ))}
         {chapters.map((c) => (
           <div key={c.id}>
             <h2>{c.title}</h2>
@@ -233,6 +315,13 @@ export function Journey({ app, toyTrick, trickTitles }: { app: JourneyApp; toyTr
             {c.lines.map((l) => (
               <p key={l}>{l}</p>
             ))}
+            {c.example && (
+              <>
+                <p>Example: {c.example.title}</p>
+                <pre>{c.example.code}</pre>
+                <p>{c.example.note}</p>
+              </>
+            )}
             {c.docs.map((d) => (
               <p key={d.text}>
                 From the docs: &ldquo;{d.text}&rdquo; ({d.source})
@@ -290,7 +379,7 @@ function Progress({
                 {own.map(({ b, i }) => {
                   const done = ended || i < current;
                   const now = !ended && i === current;
-                  const kind = b.kind === "docs" ? "sources" : b.kind === "predict" ? "guess" : b.kind === "check" ? "check" : `line ${b.lineIndex + 1}`;
+                  const kind = b.kind === "docs" ? "sources" : b.kind === "predict" ? "guess" : b.kind === "check" ? "check" : b.kind === "overview" ? "overview" : b.kind === "example" ? "example" : `line ${b.lineIndex + 1}`;
                   return (
                     <li key={i} className="flex-1">
                       <button
