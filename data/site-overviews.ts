@@ -177,6 +177,11 @@ export const siteOverviews: Record<string, SiteOverview> = {
     ],
   },
 
+  stripe: {
+    intro:
+      "Stripe wrote two posts about keeping an API dependable: how to make a retry safe, so a failed call never charges someone twice, and how to stop one noisy user from taking the whole API down. Both are about what happens when things go wrong, which is the only time anyone remembers them.",
+  },
+
   cloudflare: {
     intro:
       "Cloudflare's post is about cold starts: the expensive first run of a Worker. Instead of making cold starts faster, it asked how to have fewer of them, and the answer is a consistent hash ring.",

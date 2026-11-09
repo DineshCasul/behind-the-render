@@ -28,5 +28,8 @@ export const trickKeywords: Record<string, string[]> = {
   "cache-vs-gc": ["garbage collection", "gc", "go", "golang", "rust", "latency spikes", "p99", "memory", "lru", "pause"],
   "hot-partition": ["hot key", "hotspot", "cassandra", "scylladb", "sharding", "partitioning", "database", "skew", "partition key"],
   "partition-key": ["sharding", "postgres", "multi-tenant", "shard key", "partitioning", "logical shards", "database", "scaling", "workspace"],
+  "idempotency-keys": ["idempotent", "idempotency", "retry", "retries", "exactly once", "payments", "backoff", "jitter", "thundering herd", "duplicate", "stripe"],
+  "rate-limiting": ["rate limit", "rate limiter", "token bucket", "load shedding", "throttle", "throttling", "429", "503", "redis", "api", "abuse", "stripe"],
+  "ngram-index": ["trigram", "ngram", "inverted index", "search", "full text search", "grep", "ripgrep", "elasticsearch", "posting list", "code search", "blackbird"],
   "ownership-reasons": ["reference counting", "refcount", "garbage collection", "cache eviction", "offline", "sqlite", "ownership", "lifecycle", "sync"],
 };

@@ -905,4 +905,140 @@ if (release("japan-guide", "user-saved")) evictFromDisk("japan-guide"); // not y
       },
     ],
   },
+
+  "idempotency-keys": {
+    how: {
+      name: "Idempotency keys with a saved result",
+      steps: [
+        "The client makes up a unique key for one logical operation, such as one charge, and sends it with the request.",
+        "The server looks the key up. If it is new, it records the key, does the work, and saves the response next to the key.",
+        "If the key is already there and finished, the server returns the saved response without doing the work again.",
+        "On a network error the client retries with the same key, waiting longer each time (exponential backoff) with a little randomness (jitter).",
+      ],
+      cost: "One extra lookup and write per request, and storage for the saved responses for as long as you accept retries.",
+      versus: { name: "an idempotent verb like PUT", difference: "PUT says \"make the thing look like this\", so repeating it changes nothing. A charge is an action, not a state, so repeating it has to be detected. The key is how the server tells a retry from a new request." },
+    },
+    code: {
+      title: "A retry-safe handler and a polite client",
+      src: `// server: one saved result per key
+const saved = new Map<string, { status: number; body: unknown }>();
+
+async function charge(key: string, req: ChargeRequest) {
+  const done = saved.get(key);
+  if (done) return done; // a retry: replay the first answer
+  const result = await chargeCard(req); // the side effect, once
+  saved.set(key, result);
+  return result;
+}
+
+// client: one key per operation, reused on every retry
+async function chargeWithRetry(req: ChargeRequest) {
+  const key = crypto.randomUUID();
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await post("/charges", req, { "Idempotency-Key": key });
+    } catch (err) {
+      if (attempt === 5) throw err;
+      const wait = 2 ** attempt * 200 * (0.5 + Math.random() / 2); // backoff + jitter
+      await new Promise((r) => setTimeout(r, wait));
+    }
+  }
+}`,
+    },
+    pitfalls: [
+      { text: "Two requests with the same key arrive at the same moment. Both see no saved result and both do the work.", fix: "Claim the key atomically first, for example with a unique constraint, and make the second request wait or fail." },
+      { text: "The key is saved but the server dies before the work finishes, leaving a key that is stuck.", fix: "Store the key and the side effect in one transaction where you can, or record a state so a retry can resume or roll back." },
+      { text: "A retry reuses a key with a different body, and the server quietly replays the old answer.", fix: "Save a fingerprint of the request with the key and reject a mismatch." },
+      { text: "Generating a new key on each retry defeats the whole thing.", fix: "Make the key once per operation, outside the retry loop." },
+      { text: "Retrying without backoff turns a short blip into an outage.", fix: "Back off exponentially and add jitter, and cap the number of attempts." },
+    ],
+    inspect: "Open the Network tab on a site that takes payments and look for an Idempotency-Key request header on a POST. Many payment APIs use that name.",
+  },
+
+  "rate-limiting": {
+    how: {
+      name: "Token bucket, plus a load shedder",
+      steps: [
+        "Each user has a bucket that holds up to a fixed number of tokens, and tokens drip in at a steady rate.",
+        "Every request takes one token. If the bucket is empty, reject the request (HTTP 429).",
+        "A full bucket lets a short burst through at once, then the steady rate takes over.",
+        "Separately, a load shedder watches the health of the whole system and, when it is struggling, drops the lowest-priority traffic first.",
+      ],
+      cost: "A counter per user in a fast shared store, and one lookup on every request. The limiter must never become the thing that takes you down.",
+      versus: { name: "a load shedder", difference: "A rate limiter looks at one user and asks \"have you had your share?\". A load shedder looks at the whole system and asks \"can we afford this kind of request right now?\". The first is routine, the second is for incidents." },
+    },
+    code: {
+      title: "A token bucket in 15 lines",
+      src: `type Bucket = { tokens: number; last: number };
+const buckets = new Map<string, Bucket>();
+
+const CAPACITY = 20; // the burst size
+const REFILL_PER_SEC = 10; // the steady rate
+
+export function allow(user: string, now = Date.now()): boolean {
+  const b = buckets.get(user) ?? { tokens: CAPACITY, last: now };
+  // drip in the tokens earned since the last request, up to the cap
+  b.tokens = Math.min(CAPACITY, b.tokens + ((now - b.last) / 1000) * REFILL_PER_SEC);
+  b.last = now;
+  const ok = b.tokens >= 1;
+  if (ok) b.tokens -= 1;
+  buckets.set(user, b);
+  return ok; // false: answer 429 and say when to retry
+}`,
+    },
+    pitfalls: [
+      { text: "The limiter's store goes down and every request starts failing.", fix: "Fail open: catch errors at every level so a broken limiter lets traffic through." },
+      { text: "A new limit rejects customers who were behaving normally.", fix: "Dark launch first: log what it would block, tune the threshold, then switch it on. Keep a kill switch." },
+      { text: "A shedder that turns traffic off and on quickly makes the system flap.", fix: "Shed and restore slowly, and tune the rate against real incidents." },
+      { text: "Limits per instance, not per user, let a user get many times their share when you have many instances.", fix: "Keep the buckets in a shared store, or divide the limit by the instance count and accept the error." },
+      { text: "A bare 429 gives the client nothing to act on.", fix: "Say what was limited and when to retry, for example with a Retry-After header." },
+    ],
+  },
+
+  "ngram-index": {
+    how: {
+      name: "An ngram (trigram) inverted index",
+      steps: [
+        "Slice every document into overlapping runs of n characters. With n = 3, \"limits\" gives lim, imi, mit, its.",
+        "Build a map from each slice to the sorted list of document ids that contain it (a posting list).",
+        "To search for a string, slice it the same way, fetch those lists, and intersect them.",
+        "Check only the surviving documents for a real match, for example with the regular expression itself.",
+      ],
+      cost: "A big index, built once and updated as the content changes, in return for queries that touch only a few lists instead of every document.",
+      versus: { name: "a word-based search index", difference: "A word index splits text on spaces and punctuation, usually with stemming and stop words. That is fine for prose and wrong for code, where you search for a bracket or half an identifier. An ngram index keeps every character." },
+    },
+    code: {
+      title: "A toy trigram index",
+      src: `const docs = ["def lim", "fn limits() {", "function mits() {"];
+
+// slice -> set of document ids
+const index = new Map<string, Set<number>>();
+docs.forEach((text, id) => {
+  for (let i = 0; i + 3 <= text.length; i++) {
+    const gram = text.slice(i, i + 3);
+    if (!index.has(gram)) index.set(gram, new Set());
+    index.get(gram)!.add(id);
+  }
+});
+
+function search(query: string): number[] {
+  const grams = Array.from({ length: query.length - 2 }, (_, i) => query.slice(i, i + 3));
+  let hits: Set<number> | undefined;
+  for (const g of grams) {
+    const ids = index.get(g) ?? new Set<number>();
+    hits = hits ? new Set([...hits].filter((id) => ids.has(id))) : ids; // intersect
+  }
+  // the grams only narrow it down: confirm each candidate really contains the string
+  return [...(hits ?? [])].filter((id) => docs[id].includes(query));
+}
+
+search("limits"); // [1]`,
+    },
+    pitfalls: [
+      { text: "The grams all match but the string is not really there, for example the slices appear in separate places in a document.", fix: "Treat the index as a filter and confirm each candidate against the actual text." },
+      { text: "A query shorter than n has no slices to look up.", fix: "Fall back to a slower scan, or index shorter grams as well, and accept the larger index." },
+      { text: "A very common slice has a huge posting list.", fix: "Start from the rarest slices when intersecting, and read the lists lazily." },
+      { text: "Documents change all the time, so the index goes stale.", fix: "Update it from change events, and decide what a reader should see while an update is half done." },
+    ],
+  },
 };

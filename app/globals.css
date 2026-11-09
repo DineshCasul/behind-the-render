@@ -98,6 +98,201 @@ body {
 .fade-in { animation: fade-in 0.35s ease-out backwards; }
 @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } }
 
+/* The home page's opening: each piece rises in once, one after another (--i is its place in the line). */
+.rise { animation: fade-in 0.5s ease-out backwards; animation-delay: calc(var(--i, 0) * 90ms); }
+
+/* The green bar beside the big number draws itself downward once, when the number is chosen and fades in.
+   Its own pseudo-element, so only a transform moves. Without motion it is simply there. */
+.featured-bar { position: relative; }
+.featured-bar::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: var(--state-got-it); transform-origin: top center; }
+.featured-bar[data-ready="true"]::before { animation: bar-grow 0.7s ease-out backwards; }
+
 @media (prefers-reduced-motion: reduce) {
-  .caret, .fade-in { animation: none; }
+  .caret, .fade-in, .rise, .featured-bar[data-ready="true"]::before { animation: none; }
+}
+
+/* ---- Scroll drawings ---------------------------------------------------------------------------
+   Two quiet things that follow the scroll position, in CSS only (no JavaScript, nothing runs while you
+   are still):
+   1. a brighter line draws itself left to right along the rule above a section as it scrolls into view
+      (`.draw-rule`, also every `.section-title`);
+   2. small outline shapes sit in the margins of a long page, each at a different height. Each one draws
+      itself as it scrolls into view and turns a little as it passes (`.margin-shape`).
+   Shapes only show from 1280px wide, where the margins have room. Where the browser has no scroll-driven
+   animations, or the reader asks for reduced motion, the rules are plain hairlines and the shapes are
+   fully drawn and still. */
+.draw-rule, .section-title { position: relative; }
+
+/* Section marks: the small-screen version of the margin shapes, at the right end of a heading. */
+.section-mark { display: none; }
+@media (max-width: 1279px) {
+  .section-title { padding-right: 3rem; }
+  .section-mark {
+    --s: 30;
+    display: block;
+    position: absolute;
+    top: 0.85rem;
+    right: 0;
+    width: calc(var(--s) * 1px);
+    height: calc(var(--s) * 1px);
+    pointer-events: none;
+    view-timeline: --mark block;
+  }
+}
+.section-mark svg { width: 100%; height: 100%; overflow: visible; }
+.section-mark path { fill: none; stroke: var(--color-text-muted); stroke-width: calc(100 / var(--s)); stroke-linejoin: round; opacity: 0.75; }
+
+/* The reading-progress line: a 2px line along the top edge that fills as you scroll. Informational, like a
+   scrollbar, so it also shows with reduced motion. Hidden where scroll timelines are unsupported. */
+.read-progress { display: none; }
+@supports (animation-timeline: scroll()) {
+  .read-progress {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 50;
+    pointer-events: none;
+    background: var(--color-text-primary);
+    opacity: 0.8;
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: progress-grow linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+.margin-shapes { display: none; }
+@media (min-width: 1280px) {
+  .margin-shapes { display: block; position: absolute; inset: 0; pointer-events: none; }
+}
+.margin-shape {
+  position: absolute;
+  width: calc(var(--s) * 1px);
+  height: calc(var(--s) * 1px);
+  view-timeline: --shape block;
+}
+.margin-shape.is-right { left: 100%; margin-left: 1.5rem; }
+.margin-shape.is-left { right: 100%; margin-right: 1.5rem; }
+.margin-shape svg { width: 100%; height: 100%; overflow: visible; }
+/* --s is the shape's size in pixels, unitless, so the stroke width (in the SVG's 100-unit box) stays about 1px. */
+.margin-shape path { fill: none; stroke: var(--color-text-muted); stroke-width: calc(100 / var(--s)); stroke-linejoin: round; opacity: 0.6; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .draw-rule::after,
+    .section-title::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--color-text-muted);
+      transform-origin: left center;
+      animation: rule-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+    /* A quoted passage's blue bar grows from top to bottom as it scrolls in. The border is the fallback. */
+    .quote-bar { position: relative; border-left-color: transparent; }
+    .quote-bar::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -2px;
+      width: 2px;
+      background: rgb(91 157 255 / 0.6);
+      transform-origin: top center;
+      animation: bar-grow linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+    /* Reading focus: prose eases up to full brightness as it rises into view and eases down as it leaves the
+       top. Nothing sitting in the upper part of the screen is ever dimmed, and the dimmest it gets is 60%. */
+    .focus-dim .read {
+      animation: focus-fade linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .section-mark svg {
+      animation: shape-turn linear both;
+      animation-timeline: --mark;
+      animation-range: cover 0% cover 100%;
+    }
+    .section-mark path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: shape-draw linear both;
+      animation-timeline: --mark;
+      animation-range: entry 0% cover 40%;
+    }
+    /* Both animations follow the wrapper's own view timeline, so turning the shape does not change its progress. */
+    .margin-shape svg {
+      animation: shape-turn linear both, shape-drift linear both;
+      animation-timeline: --shape, --shape;
+      animation-range: cover 0% cover 100%, cover 0% cover 100%;
+    }
+    .margin-shape path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: shape-draw linear both;
+      animation-timeline: --shape;
+      animation-range: entry 0% cover 40%;
+    }
+  }
+}
+@keyframes rule-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes shape-draw { to { stroke-dashoffset: 0; } }
+@keyframes shape-turn { to { transform: rotate(180deg); } }
+
+/* "back to top": always there where scroll timelines are unsupported; elsewhere it fades in after the first fifth of the page. */
+.to-top { position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 10; background: var(--color-bg); }
+@supports (animation-timeline: scroll()) {
+  .to-top { animation: to-top-in linear both; animation-timeline: scroll(root); animation-range: 12% 22%; }
+}
+@keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes shape-drift { from { translate: 0 -28px; } to { translate: 0 28px; } }
+@keyframes to-top-in { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
+@keyframes focus-fade { 0% { opacity: 0.6; } 14% { opacity: 1; } 86% { opacity: 1; } 100% { opacity: 0.6; } }
+@keyframes progress-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* The walk's "next" button is hidden on small screens, where tapping the right side of the screen does the same
+   job. It stays in the page for keyboard and screen-reader users, and shows again while it has keyboard focus.
+   (Written here, not as a Tailwind class, because the .btn rule above would override a utility.) */
+@media (max-width: 1023px) {
+  .walk-next:not(:focus-visible) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* In the site walks on small screens the diagram stays on screen above the text, so the text is set smaller to
+   leave room and cut the scrolling. Narration, questions and quotes all shrink; from 1024px up nothing changes. */
+@media (max-width: 1023px) {
+  .walk-compact .read-lg { font-size: 1.075rem; line-height: 1.45; }
+  .walk-compact .read { font-size: 0.875rem; line-height: 1.55; }
+  /* The green source link under each quote is the longest line in a source card, so it gets smaller too. */
+  .walk-compact blockquote + a { font-size: 0.75rem; }
+}
+
+/* Smaller type on phones, on every page. Reading text goes from 19px to 16px, the page body from 16px to 15px and
+   labels from 13px to 12px; headings and big numbers are stepped down with `sm:` variants where they are used.
+   The stories set their own, smaller, sizes (.walk-compact above) and win because they are more specific. */
+@media (max-width: 767px) {
+  body { font-size: 15px; }
+  .read { font-size: 1rem; line-height: 1.65; }
+  .read-lg { font-size: 1.25rem; }
+  .label { font-size: 12px; }
+  .section-title { font-size: 0.9375rem; }
 }

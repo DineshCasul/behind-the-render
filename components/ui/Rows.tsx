@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPending } from "@/components/ui/LinkPending";
 
 export interface Row {
   href: string;
@@ -24,6 +25,7 @@ export function Rows({ rows }: { rows: Row[] }) {
             </span>
             <span className="font-[family-name:var(--font-read)] text-[var(--color-text-body)]">{r.desc}</span>
             <span className="text-[var(--color-text-muted)] sm:text-right">{r.meta}</span>
+            <LinkPending />
           </Link>
         </li>
       ))}

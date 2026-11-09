@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { ChapterVisual } from "@/components/journey/ChapterVisual";
 import { AlternativesList } from "@/components/tricks/AlternativesList";
 import { DocQuoteList } from "@/components/tricks/DocQuoteList";
@@ -10,7 +10,7 @@ import type { JourneyApp, Quiz } from "@/data/journey";
 import type { SiteOverview } from "@/data/site-overviews";
 
 /**
- * One site, walked chapter by chapter. The whole walk is flattened into a list
+ * One story, walked chapter by chapter. The whole walk is flattened into a list
  * of "beats" (a guess-first question, a narration line, the chapter's source
  * card, the closing question), so "next" is just beat + 1. The only state is
  * which beat you are on. Narration on the left, the chapter's diagram on the
@@ -87,6 +87,17 @@ export function Journey({
   const goTo = useCallback((next: number) => setBeat(Math.max(0, Math.min(beats.length, next))), [beats.length]);
   const step = useCallback((delta: number) => setBeat((b) => Math.max(0, Math.min(beats.length, b + delta))), [beats.length]);
 
+  // On small screens, tapping the left third goes back and tapping the rest goes forward, like a story.
+  // Taps on anything interactive (links, buttons, answers, code you can scroll, open/close controls) or while
+  // text is selected are left alone, so nothing that already does something is hijacked.
+  const onTap = (e: MouseEvent<HTMLDivElement>) => {
+    if (!window.matchMedia("(max-width: 1023px)").matches) return;
+    if ((e.target as HTMLElement).closest("a, button, summary, input, textarea, pre, details, label, [role=group]")) return;
+    if (window.getSelection()?.toString()) return;
+    const box = e.currentTarget.getBoundingClientRect();
+    step(e.clientX - box.left < box.width / 3 ? -1 : 1);
+  };
+
   // New beat: scroll the text area back to the top.
   const scrollRef = useRef<HTMLDivElement>(null);
   // Braces matter: a recent Chromium returns a Promise from scrollTo(), and an effect that returns
@@ -119,7 +130,7 @@ export function Journey({
       {/* Top bar: back, the chapters as a row of steps, skim. */}
       <div className="flex items-center gap-4 border-b border-[var(--color-border)] px-5 py-2 text-sm lg:px-10">
         <Link href="/journey" className="label shrink-0 hover:text-[var(--color-text-primary)]">
-          ← sites
+          ← stories
         </Link>
         <span className="shrink-0 text-[var(--color-text-primary)]">{app.name}</span>
         <span className="flex-1" />
@@ -145,7 +156,7 @@ export function Journey({
         onGo={goTo}
       />
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div ref={scrollRef} onClick={onTap} className="walk-compact min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className={`mx-auto grid w-full grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-6 px-5 py-8 lg:px-10 lg:py-12 ${showDiagram ? "max-w-[1400px] lg:grid-cols-2 lg:items-start" : "max-w-3xl lg:py-20"}`}>
           {/* Narration, quiz or sources */}
           <div aria-live="polite" aria-atomic="true" className="min-h-[12rem] min-w-0">
@@ -175,7 +186,7 @@ export function Journey({
                 ))}
                 {trickList.length > 0 && (
                   <div>
-                    <p className="label mb-2"># tricks from this site</p>
+                    <p className="label mb-2"># tricks from this story</p>
                     <ul className="flex flex-col gap-1 text-lg">
                       {trickList.map(([slug, title]) => (
                         <li key={slug}>
@@ -209,7 +220,7 @@ export function Journey({
                     again
                   </button>
                   <Link href="/journey" className="btn">
-                    other sites
+                    other stories
                   </Link>
                   <Link href="/trick" className="btn">
                     tricks
@@ -240,7 +251,7 @@ export function Journey({
                 ) : line.kind === "example" && chapter.example ? (
                   <>
                     <p className="label"># example: {chapter.example.title.toLowerCase()}</p>
-                    <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-sm leading-relaxed">
+                    <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-xs sm:text-sm leading-relaxed">
                       <code>{chapter.example.code}</code>
                     </pre>
                     <p className="label max-w-[65ch]">{chapter.example.note}</p>
@@ -268,7 +279,7 @@ export function Journey({
           </div>
 
           {showDiagram && visual && (
-            <div className="sticky top-0 z-10 mx-auto w-full max-w-md bg-[var(--color-bg)] lg:top-6 lg:max-w-none lg:self-start">
+            <div className="sticky top-0 z-10 order-first mx-auto w-full max-w-md bg-[var(--color-bg)] lg:top-6 lg:order-none lg:max-w-none lg:self-start">
               <ChapterVisual kind={visual} step={visualStep} />
             </div>
           )}
@@ -281,13 +292,14 @@ export function Journey({
           <button type="button" className="btn" onClick={() => step(-1)} disabled={beat === 0} aria-label="Back">
             ←
           </button>
-          <button type="button" className="btn" onClick={() => step(1)}>
+          <button type="button" className="btn walk-next" onClick={() => step(1)}>
             {beat === beats.length - 1 ? "finish" : "next"} →
           </button>
           <span className="label" aria-hidden>
             {beat + 1}/{beats.length}
           </span>
           <span className="label ml-auto hidden lg:block">space or → for next, ← for back</span>
+          <span className="label ml-auto text-right lg:hidden">tap left / right</span>
         </div>
       )}
 
@@ -409,7 +421,7 @@ function QuizBody({ label, quiz, picked, onPick }: { label: string; quiz: Quiz; 
   return (
     <>
       <p className="label"># {label}</p>
-      <p className="read !text-[1.35rem] !text-[var(--color-text-primary)]">{quiz.question}</p>
+      <p className="read !text-[0.975rem] !text-[var(--color-text-primary)] lg:!text-[1.35rem]">{quiz.question}</p>
       <div className="flex flex-col items-start gap-2" role="group" aria-label="Choices">
         {quiz.options.map((option, i) => {
           const isAnswer = i === quiz.answer;
@@ -420,7 +432,7 @@ function QuizBody({ label, quiz, picked, onPick }: { label: string; quiz: Quiz; 
               type="button"
               disabled={answered}
               onClick={() => onPick(i)}
-              className="border px-4 py-2 text-left font-[family-name:var(--font-read)] text-lg transition-colors enabled:hover:border-[var(--state-learning)] disabled:cursor-default"
+              className="border px-4 py-2 text-left font-[family-name:var(--font-read)] text-sm transition-colors lg:text-lg enabled:hover:border-[var(--state-learning)] disabled:cursor-default"
               style={{ borderColor: color, opacity: answered && !isAnswer && i !== picked ? 0.4 : 1 }}
             >
               {option}

@@ -11,10 +11,10 @@ export function Frame({ title, caption, children }: { title: string; caption: st
   return (
     <div role="img" aria-label={`${title}. ${caption}`} className="border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-3 lg:p-5">
       <p className="label"># {title.toLowerCase()}</p>
-      <svg viewBox="0 0 340 220" className="mx-auto mt-2 block max-h-[24svh] w-full lg:max-h-[380px]" aria-hidden>
+      <svg viewBox="0 0 340 220" className="mx-auto mt-2 block max-h-[21svh] w-full lg:max-h-[380px]" aria-hidden>
         {children}
       </svg>
-      <p className="mt-3 min-h-[3.2em] text-[var(--color-text-primary)]">{caption}</p>
+      <p className="mt-2 min-h-[3em] text-[13px] text-[var(--color-text-primary)] lg:mt-3 lg:min-h-[3.2em] lg:text-base">{caption}</p>
     </div>
   );
 }

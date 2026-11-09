@@ -348,7 +348,7 @@ export const webWhose: JourneyChapter = {
     "In the example: the home page of GitHub, captured logged out, says max-age=0, private, must-revalidate.",
     "A separate problem: the same URL can give different responses depending on a request header. Vary tells a cache which header to key on. MDN's example is Vary: Accept-Language, so the English and Japanese copies of one URL are cached separately.",
     "A cookie is not a Vary header. For personalised content, the docs say to use private instead of varying on the cookie.",
-    "And when many identical requests reach a shared cache at the same moment, it forwards a single request to the origin and reuses the answer for all of them. MDN calls that request collapse. It is the stampede protection from the Wikipedia site.",
+    "And when many identical requests reach a shared cache at the same moment, it forwards a single request to the origin and reuses the answer for all of them. MDN calls that request collapse. It is the stampede protection from the Wikipedia story.",
   ],
   example: {
     title: "Private, and Vary",
@@ -387,7 +387,7 @@ export const webStale: JourneyChapter = {
     "Take Cache-Control: max-age=604800, stale-while-revalidate=86400. The response is fresh for 7 days. For the following day it is stale, but the cache may still serve it, as long as it revalidates in the background.",
     "That hides the cost of revalidation from the client: it appears that the response was always fresh during that period. If nobody asked in that window, the next request simply revalidates normally.",
     "Next.js's Incremental Static Regeneration is the same idea for pages: after the revalidate time the next visitor gets the cached, stale page at once while a fresh one is generated in the background. Its docs call that background regeneration stale-while-revalidate.",
-    "The GitHub site shows the same trade in the browser: render from local data now, check with the server after.",
+    "The GitHub story shows the same trade in the browser: render from local data now, check with the server after.",
   ],
   example: {
     title: "MDN's example, as a timeline",

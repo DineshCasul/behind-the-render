@@ -9,6 +9,10 @@ import { VisualStepper } from "@/components/tricks/VisualStepper";
 import { AlternativesList } from "@/components/tricks/AlternativesList";
 import { DocQuoteList } from "@/components/tricks/DocQuoteList";
 import { Emph } from "@/components/ui/Emph";
+import { LinkPending } from "@/components/ui/LinkPending";
+import { SectionMark } from "@/components/ui/SectionMark";
+import { BackToTop } from "@/components/ui/BackToTop";
+import { MarginShapes } from "@/components/ui/MarginShapes";
 import { findChapter, type Alternative } from "@/data/journey";
 import { trickExtras } from "@/data/trick-extras";
 import { trickIntros } from "@/data/trick-intros";
@@ -70,17 +74,18 @@ export default async function TrickPage({ params }: TrickPageProps) {
   ].filter(Boolean) as [string, string][];
 
   return (
-    <main className="fade-in mx-auto w-full max-w-4xl flex-1 px-5 py-10 lg:px-8">
+    <main className="relative focus-dim fade-in mx-auto w-full max-w-4xl flex-1 px-5 py-10 lg:px-8">
+      <MarginShapes seed={slug} count={9} />
       <Link href="/trick" className="label hover:text-[var(--color-text-primary)]">
         ← tricks
       </Link>
 
-      <h1 className="mt-6 text-3xl leading-tight text-[var(--color-text-primary)]">{trick.title}</h1>
-      <p className="read mt-3 !text-xl !text-[var(--color-text-primary)]">{trick.hook}</p>
+      <h1 className="mt-6 text-2xl leading-tight sm:text-3xl text-[var(--color-text-primary)]">{trick.title}</h1>
+      <p className="read mt-3 !text-lg !text-[var(--color-text-primary)] sm:!text-xl">{trick.hook}</p>
 
       {trick.stat && (
         <p className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-l-2 border-[var(--state-got-it)] pl-4">
-          <span className="text-3xl tabular-nums text-[var(--state-got-it)] sm:text-4xl">{trick.stat.value}</span>
+          <span className="text-2xl tabular-nums text-[var(--state-got-it)] sm:text-4xl">{trick.stat.value}</span>
           <span className="read !text-base !text-[var(--color-text-muted)]">{trick.stat.label}</span>
         </p>
       )}
@@ -108,7 +113,8 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
       {visuals.length > 0 && (
         <section id="see-it" aria-label="See it" className="mt-16 scroll-mt-6">
-          <h2 className="section-title">see it</h2>
+          <h2 className="section-title">
+<SectionMark seed="trick-1" />see it</h2>
           <div className="flex flex-col gap-10">
             {visuals.map((kind) => (
               <VisualStepper key={kind} kind={kind} />
@@ -119,7 +125,8 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
       {Toy && (
         <section id="try-it" aria-label="Try it" className="mt-16 scroll-mt-6">
-          <h2 className="section-title">try it</h2>
+          <h2 className="section-title">
+<SectionMark seed="trick-2" />try it</h2>
           <Toy />
         </section>
       )}
@@ -128,6 +135,7 @@ export default async function TrickPage({ params }: TrickPageProps) {
         <>
           <section id="how" aria-label="How it works" className="mt-16 scroll-mt-6">
             <h2 className="section-title">
+<SectionMark seed="trick-3" />
               how it works <small>{extras.how.name}</small>
             </h2>
             <ol className="flex flex-col gap-4">
@@ -155,9 +163,10 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
           <section id="build" aria-label="Build it" className="mt-16 scroll-mt-6">
             <h2 className="section-title">
+<SectionMark seed="trick-4" />
               build it <small>{extras.code.title}</small>
             </h2>
-            <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-sm leading-relaxed">
+            <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-xs leading-relaxed sm:text-sm">
               <code>{extras.code.src}</code>
             </pre>
             <p className="label mt-3">A simplified teaching sketch, not source code from {joined}.</p>
@@ -179,7 +188,8 @@ export default async function TrickPage({ params }: TrickPageProps) {
           </section>
 
           <section id="wrong" aria-label="Where it goes wrong" className="mt-16 scroll-mt-6">
-            <h2 className="section-title">where it goes wrong</h2>
+            <h2 className="section-title">
+<SectionMark seed="trick-5" />where it goes wrong</h2>
             <ul className="flex flex-col gap-4">
               {extras.pitfalls.map((x) => (
                 <li key={x.text} className="grid grid-cols-[2.25rem_1fr]">
@@ -200,7 +210,8 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
           {extras.inspect && (
             <section aria-label="See it yourself" className="mt-16">
-              <h2 className="section-title">see it yourself</h2>
+              <h2 className="section-title">
+<SectionMark seed="trick-6" />see it yourself</h2>
               <p className="read grid grid-cols-[2.25rem_1fr]">
                 <span className="font-mono text-[var(--state-learning)]">$</span>
                 <span>{extras.inspect}</span>
@@ -212,6 +223,7 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
       <section id="sources" aria-label="Sources" className="mt-16 scroll-mt-6">
         <h2 className="section-title">
+<SectionMark seed="trick-7" />
           what {joined} {names.length > 1 ? "say" : "says"} <small>copied word for word, with the link</small>
         </h2>
         <ul className="flex flex-col gap-10">
@@ -220,7 +232,7 @@ export default async function TrickPage({ params }: TrickPageProps) {
               <p className="mb-3 text-[var(--color-text-primary)]">
                 {road.name} <span className="text-[var(--color-text-muted)]">/ {chapter.title}</span>
               </p>
-              <DocQuoteList quotes={chapter.docs} />
+              <DocQuoteList quotes={chapter.docs} grow />
               {chapter.note && <p className="label mt-3 max-w-[65ch]">{chapter.note}</p>}
             </li>
           ))}
@@ -228,7 +240,7 @@ export default async function TrickPage({ params }: TrickPageProps) {
         <p className="mt-6 flex flex-wrap gap-3">
           {roads.map((r) => (
             <Link key={r.id} href={`/journey/${r.id}`} className="btn">
-              walk through {r.name} →
+              walk through {r.name} →<LinkPending />
             </Link>
           ))}
         </p>
@@ -236,16 +248,18 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
       {alternatives.length > 0 && (
         <section aria-label="Alternatives" className="mt-16">
-          <h2 className="section-title">alternatives</h2>
+          <h2 className="section-title">
+<SectionMark seed="trick-8" />alternatives</h2>
           <AlternativesList alternatives={alternatives} />
         </section>
       )}
 
       <section id="interview" aria-label="Interview challenge" className="mt-16 scroll-mt-6">
         <h2 className="section-title">
+<SectionMark seed="trick-9" />
           interview challenge <small>say your answer out loud first, then compare</small>
         </h2>
-        <p className="read !text-xl !text-[var(--color-text-primary)]">{trick.question.q}</p>
+        <p className="read !text-lg !text-[var(--color-text-primary)] sm:!text-xl">{trick.question.q}</p>
         <details className="group mt-4">
           <summary className="btn inline-flex list-none [&::-webkit-details-marker]:hidden">
             <span className="group-open:hidden">show a model answer</span>
@@ -271,12 +285,13 @@ export default async function TrickPage({ params }: TrickPageProps) {
 
       {trick.related.length > 0 && (
         <section aria-label="Related" className="mt-16">
-          <h2 className="section-title">next</h2>
+          <h2 className="section-title">
+<SectionMark seed="trick-10" />next</h2>
           <ul className="flex flex-col gap-1">
             {trick.related.map((s) => (
               <li key={s}>
                 <Link href={`/trick/${s}`} className="link text-[var(--color-text-primary)]">
-                  {trickMap[s].title} →
+                  {trickMap[s].title} →<LinkPending />
                 </Link>{" "}
                 <span className="text-[var(--color-text-muted)]">{trickMap[s].hook}</span>
               </li>
@@ -284,6 +299,7 @@ export default async function TrickPage({ params }: TrickPageProps) {
           </ul>
         </section>
       )}
+      <BackToTop />
     </main>
   );
 }

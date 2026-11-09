@@ -248,6 +248,39 @@ export const trickReading: Record<string, Reading[]> = {
     },
   ],
 
+  "idempotency-keys": [
+    {
+      title: "Idempotent requests",
+      by: "Stripe API reference",
+      href: "https://docs.stripe.com/api/idempotent_requests",
+      note: "Stripe's reference for the Idempotency-Key header: what it is for and how to use it on a request.",
+    },
+    {
+      title: "Exponential Backoff And Jitter",
+      by: "AWS Architecture Blog",
+      href: "https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/",
+      note: "Why retries need random jitter as well as backoff. It is Amazon's own advice, not Stripe's.",
+    },
+  ],
+
+  "rate-limiting": [
+    {
+      title: "Token bucket",
+      by: "Wikipedia",
+      href: "https://en.wikipedia.org/wiki/Token_bucket",
+      note: "The algorithm behind the sketch: a bucket that fills at a steady rate and is emptied by each request, with the burst behaviour it allows.",
+    },
+  ],
+
+  "ngram-index": [
+    {
+      title: "Regular Expression Matching with a Trigram Index",
+      by: "Russ Cox",
+      href: "https://swtch.com/~rsc/regexp/regexp4.html",
+      note: "How a trigram index narrows the files a regular expression has to be checked against, as used in Google Code Search. A general write-up, not GitHub's.",
+    },
+  ],
+
   "ownership-reasons": [
     {
       title: "Rc<T>, the reference counted smart pointer",

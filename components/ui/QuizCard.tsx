@@ -5,7 +5,7 @@ import type { Quiz } from "@/data/journey";
 
 /**
  * A guess-first question. Picking an option locks it, marks the right answer green (a wrong pick red)
- * and shows why. The same behaviour as the questions in the site walks.
+ * and shows why. The same behaviour as the questions in the story walks.
  */
 export function QuizCard({ label, quiz }: { label: string; quiz: Quiz }) {
   const [picked, setPicked] = useState<number | undefined>(undefined);
@@ -14,7 +14,7 @@ export function QuizCard({ label, quiz }: { label: string; quiz: Quiz }) {
   return (
     <div className="mt-8">
       <p className="label"># {label}</p>
-      <p className="read mt-1 !text-xl !text-[var(--color-text-primary)]">{quiz.question}</p>
+      <p className="read mt-1 !text-lg !text-[var(--color-text-primary)] sm:!text-xl">{quiz.question}</p>
       <div className="mt-3 flex flex-col items-start gap-2" role="group" aria-label="Choices">
         {quiz.options.map((option, i) => {
           const isAnswer = i === quiz.answer;

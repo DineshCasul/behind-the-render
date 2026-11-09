@@ -583,6 +583,80 @@ export const tricks: Trick[] = [
       ],
     },
   },
+  {
+    slug: "idempotency-keys",
+    group: "scale",
+    title: "Charge It Only Once",
+    hook: "A retry should never charge a customer twice.",
+    idea: [
+      "A call between two machines can fail before it starts, halfway through, or after the work is done but before the reply gets back. Stripe's post says any one of these leaves the client in an uncertain situation.",
+      "Its answer is idempotency: an endpoint that can be called any number of times while guaranteeing that side effects only occur once. For something like a charge, the client generates a unique ID for the operation and sends it with the request. If it fails, the client retries with the same ID. If the work already happened, the server replies with a cached result of the successful operation.",
+      "The retrying should be polite too. Stripe recommends exponential backoff, so clients are not hammering a downed server, plus random jitter so they do not all retry at once, which it calls the thundering herd problem.",
+    ],
+    chapters: ["stripe-idempotency"],
+    related: ["rate-limiting", "migrate-live"],
+    question: {
+      q: "A client calls your payment API, the connection drops, and it does not know if the charge happened. How do you make retrying safe?",
+      a: "Idempotency keys. The client generates a unique ID for the operation and sends it with the request, and it reuses the same ID on every retry. The server stores the outcome against that ID. If the work already happened, a retry just gets the saved result back instead of charging again. Stripe takes the key in an Idempotency-Key header on its mutating endpoints. I would also have the client back off exponentially with some random jitter, so a crowd of retries does not hit a struggling server all at once.",
+      followUps: [
+        "What do you do if two requests with the same key arrive at the same time?",
+        "How long would you keep a key, and what does it cost to store them?",
+        "What if a retry arrives with the same key but a different body?",
+        "Which HTTP methods are already idempotent, and why does a charge still need a key?",
+        "Why add jitter, and not only exponential backoff?",
+      ],
+    },
+  },
+  {
+    slug: "rate-limiting",
+    group: "scale",
+    title: "Say No Politely",
+    hook: "One noisy user should not take the API down for everyone.",
+    stat: { value: "4", label: "kinds of limiter Stripe runs in production" },
+    idea: [
+      "Stripe separates two things. A rate limiter looks at the user who is making the request. A load shedder makes its decisions based on the whole state of the system, and drops low-priority traffic so the core keeps working.",
+      "It runs four: a request rate limiter (each user gets N requests per second, with room to burst), a concurrent requests limiter (only so many requests in progress at once), a fleet usage load shedder (a share of the fleet is always kept for critical requests), and a worker utilization load shedder (the last line of defense, which sheds lower-priority traffic when workers back up).",
+      "The mechanism is a token bucket kept in Redis. It also says how to launch one safely: fail open if the limiter itself breaks, keep a kill switch, and dark launch to watch the traffic it would block.",
+    ],
+    chapters: ["stripe-limits"],
+    related: ["idempotency-keys", "request-coalescing"],
+    question: {
+      q: "How would you stop one customer from overwhelming your API?",
+      a: "A rate limiter per customer, usually a token bucket: every request takes a token, tokens drip back in at a steady rate, and an empty bucket means the request is rejected with a 429. Allow a burst so a flash sale does not trip it. Then a second layer for emergencies, a load shedder that looks at the health of the whole system rather than one user, and drops low-priority traffic first so critical requests like charges keep working. I would build the per-user limiter first, put it behind a feature flag, make it fail open if the limiter breaks, and dark launch it so I can see who it would block before it blocks anyone.",
+      followUps: [
+        "Why fail open and not closed when the limiter breaks?",
+        "Where would you keep the token buckets, and what happens when that store is slow?",
+        "When would you return 429 and when 503?",
+        "How is a rate limiter different from a load shedder?",
+        "Why also limit concurrent requests, and not only requests per second?",
+      ],
+    },
+  },
+  {
+    slug: "ngram-index",
+    group: "scale",
+    title: "Index the Substrings",
+    hook: "Why not just grep? GitHub did the napkin math.",
+    stat: { value: "96 s", label: "of 2,048 CPU cores to grep GitHub's code once, in GitHub's own napkin math" },
+    idea: [
+      "GitHub tried to answer \"why not just use grep?\" with numbers. Ripgrep manages about 0.6 GB per second per core, so even with all the code in memory and perfect parallelism it would saturate 2,048 CPU cores for 96 seconds to serve a single query.",
+      "So it built an index: an ngram index, a special type of inverted index that is useful for looking up substrings of content. To search, it intersects the results of multiple lookups to find the documents where the string appears.",
+      "Code search has its own needs: punctuation, no stemming, no stop words stripped, regular expressions. GitHub's post says that is why general text search products did not fit, and why it built its own engine, in Rust.",
+    ],
+    chapters: ["github-search"],
+    related: ["partition-key", "request-coalescing"],
+    question: {
+      q: "How would you build a search that finds any substring in a huge pile of code, without scanning all of it?",
+      a: "Pre-compute an index. Split every document into overlapping chunks of a few characters, say three, and map each chunk to the sorted list of documents that contain it. To search for a string, break it into the same chunks, look each one up, and intersect the lists. Only the documents that survive need a real check, for example against a regular expression. Scanning everything on each query does not scale: GitHub's napkin math for grep over its code came out at 96 seconds of 2,048 cores for one query. The lists can be bigger than memory, so I would read them lazily and stop once I have enough results.",
+      followUps: [
+        "Why trigrams and not single characters or whole words?",
+        "How do you handle a query shorter than the chunk size?",
+        "How would you spread the index across machines?",
+        "How do you keep results consistent while new code is being indexed?",
+        "Why not stem words or remove stop words for code?",
+      ],
+    },
+  },
 ];
 
 export const trickMap: Record<string, Trick> = Object.fromEntries(tricks.map((t) => [t.slug, t]));

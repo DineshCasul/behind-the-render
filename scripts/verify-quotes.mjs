@@ -20,7 +20,7 @@ import { readFileSync } from "node:fs";
 const ELLIPSIS = String.fromCodePoint(0x2026);
 
 const files = process.argv.slice(2);
-if (files.length === 0) files.push("data/journey.ts", "data/journey-more.ts", "data/journey-deep.ts", "data/journey-web.ts");
+if (files.length === 0) files.push("data/journey.ts", "data/journey-more.ts", "data/journey-deep.ts", "data/journey-api.ts", "data/journey-web.ts");
 
 const HEADERS = {
   "user-agent": "Mozilla/5.0 (compatible; web-lore-quote-check)",

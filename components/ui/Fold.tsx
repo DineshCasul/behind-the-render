@@ -42,7 +42,7 @@ export function Fold({
   }, [id]);
 
   return (
-    <details ref={ref} id={id} open={defaultOpen} className="group/fold scroll-mt-6 border-t border-[var(--color-border)]">
+    <details ref={ref} id={id} open={defaultOpen} className="draw-rule group/fold scroll-mt-6 border-t border-[var(--color-border)]">
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 py-5 [&::-webkit-details-marker]:hidden">
         <span className="min-w-0">
           <span className="block text-[var(--color-text-primary)] group-hover/fold:text-[var(--state-learning)]">

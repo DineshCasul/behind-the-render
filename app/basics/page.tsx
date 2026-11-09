@@ -3,9 +3,12 @@ import Link from "next/link";
 import { AlternativesList } from "@/components/tricks/AlternativesList";
 import { DocQuoteList } from "@/components/tricks/DocQuoteList";
 import { BlockingToy } from "@/components/ui/BlockingToy";
+import { BackToTop } from "@/components/ui/BackToTop";
 import { CacheToy } from "@/components/ui/CacheToy";
 import { Fold } from "@/components/ui/Fold";
+import { SectionMark } from "@/components/ui/SectionMark";
 import { QuizCard } from "@/components/ui/QuizCard";
+import { MarginShapes } from "@/components/ui/MarginShapes";
 import { basics } from "@/data/journey-web";
 
 export const metadata: Metadata = {
@@ -23,15 +26,17 @@ export default function BasicsPage() {
   const titleOf = Object.fromEntries(basics.chapters.map((c) => [c.id, c.title.toLowerCase()]));
 
   return (
-    <main className="fade-in mx-auto w-full max-w-3xl flex-1 px-5 py-12 lg:px-10">
+    <main className="relative focus-dim fade-in mx-auto w-full max-w-3xl flex-1 px-5 py-12 lg:px-10">
+      <MarginShapes seed="basics" count={8} />
       <Link href="/" className="label hover:text-[var(--color-text-primary)]">
         ← home
       </Link>
-      <h1 className="mt-6 text-3xl leading-tight text-[var(--color-text-primary)]">{basics.name}</h1>
+      <h1 className="mt-6 text-2xl leading-tight sm:text-3xl text-[var(--color-text-primary)]">{basics.name}</h1>
       <p className="read mt-3">{basics.intro}</p>
 
       <section aria-label="The short version" className="mt-12">
-        <h2 className="section-title">the short version</h2>
+        <h2 className="section-title">
+<SectionMark seed="basics-1" />the short version</h2>
         <ol className="flex flex-col gap-3">
           {basics.steps.map((s, i) => (
             <li key={s.text} className="grid grid-cols-[2rem_1fr]">
@@ -65,7 +70,7 @@ export default function BasicsPage() {
               {c.example && (
                 <div className="mt-8">
                   <p className="label mb-2"># example: {c.example.title.toLowerCase()}</p>
-                  <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-sm leading-relaxed">
+                  <pre className="overflow-x-auto border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-4 text-xs leading-relaxed sm:text-sm">
                     <code>{c.example.code}</code>
                   </pre>
                   <p className="label mt-3 max-w-[65ch]">{c.example.note}</p>
@@ -82,7 +87,7 @@ export default function BasicsPage() {
                   <span className="hidden group-open/docs:inline">hide the docs&apos; words</span>
                 </summary>
                 <div className="mt-4">
-                  <DocQuoteList quotes={c.docs} />
+                  <DocQuoteList quotes={c.docs} grow />
                   {c.note && <p className="label mt-3 max-w-[65ch]">{c.note}</p>}
                 </div>
               </details>
@@ -110,9 +115,10 @@ export default function BasicsPage() {
           tricks →
         </Link>
         <Link href="/journey" className="btn">
-          sites →
+          stories →
         </Link>
       </p>
+      <BackToTop />
     </main>
   );
 }

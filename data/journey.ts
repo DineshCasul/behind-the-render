@@ -23,6 +23,7 @@ import {
   wikipediaPath,
   wikipediaSwitchover,
 } from "@/data/journey-deep";
+import { githubSearch, stripeIdempotency, stripeLimits } from "@/data/journey-api";
 import {
   cloudflareRing,
   discordGc,
@@ -39,9 +40,9 @@ import {
 } from "@/data/journey-more";
 
 /**
- * The journeys, shown on the site as "sites": one company's engineering, told as
+ * The journeys, shown on the website as "stories": one company's engineering, told as
  * a short narrated walk of a few chapters. (The code says "road" and "journey";
- * the page says "site".)
+ * the page says "story".)
  *
  * Voice: dry and a little playful. The jokes never get to change a fact. Every chapter ends with a "From the docs" card: sentences
  * copied word for word from the official source (checked 2026-11-07; the later chapters in journey-more.ts, 2026-11-08), each
@@ -969,8 +970,8 @@ export const journeys: JourneyApp[] = [
       "answer": 2,
       "reveal": "An ESLint plugin that would fail CI checks if anyone tried to use jQuery features."
     },
-    blurb: "Removing a library without a rewrite, a code view that only draws what you see, and Issues that open from local data.",
-    chapters: [githubLibrary, githubSlowBurn, githubVirtual, githubInstant],
+    blurb: "Removing a library without a rewrite, a code view that only draws what you see, Issues that open from local data, and a search engine for code.",
+    chapters: [githubLibrary, githubSlowBurn, githubVirtual, githubInstant, githubSearch],
   },
   {
     id: "google-docs",
@@ -1117,6 +1118,19 @@ export const journeys: JourneyApp[] = [
     },
     blurb: "Fewer cold starts, by sending each request to a server that already has the code.",
     chapters: [cloudflareRing],
+  },
+  {
+    id: "stripe",
+    kind: "backend",
+    name: "Stripe",
+    check: {
+      question: "Which of Stripe's four limiters does it recommend building first?",
+      options: ["The request rate limiter", "The worker utilization load shedder", "The fleet usage load shedder"],
+      answer: 0,
+      reveal: "The request rate limiter, which restricts each user to N requests per second. Stripe says to start there.",
+    },
+    blurb: "Retry a charge without charging twice, and keep one noisy user from taking the API down.",
+    chapters: [stripeIdempotency, stripeLimits],
   },
 ];
 

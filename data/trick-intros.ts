@@ -78,6 +78,15 @@ export const trickIntros: Record<string, string> = {
   "partition-key":
     "Notion is a notes app where every page is built from small pieces called blocks. At some point it had to split its data across many databases. The question sounds boring: which rows go on which machine? Get it wrong and every page you open has to ask every machine for its pieces. Notion's answer is simple, and it only works because of one fact about how people use the app.",
 
+  "idempotency-keys":
+    "You click Pay. The spinner spins, the Wi-Fi blinks, and the page says it failed. Did the card get charged? Neither you nor the code knows. Stripe's answer is that the client should be allowed to just try again, and the server should make sure trying again changes nothing. That takes one made-up ID and some manners.",
+
+  "rate-limiting":
+    "If you run an API, someone will eventually send it far too many requests, usually by accident, with a script that got out of hand. Stripe's answer is not one limiter but four, and the last one only wakes up when things are already going wrong. Two of them look at the user. The other two look at the health of the whole system.",
+
+  "ngram-index":
+    "Why not just use grep? GitHub gets asked this a lot, so it did the napkin math, and the answer is a number of cores and a number of seconds that nobody wants to put on an infrastructure bill. The fix is a classic: do the work ahead of time. The twist is that the thing you index is not words. It is every three-letter slice of every file.",
+
   "ownership-reasons":
     "Notion lets you keep pages available offline. That is simple until a page can be offline for more than one reason: you switched it on, it was downloaded automatically, or its parent page is offline. Notion's first design, a plain set of pages to keep, broke right there. Switch off one reason and the page gets removed, even though something else still needs it.",
 };

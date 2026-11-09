@@ -2,6 +2,57 @@
 
 Newest first. Each entry says what changed and what to understand after it.
 
+## Stripe story, three new tricks, home opening (2026-11-09)
+
+Added a Stripe story (`stripe-idempotency`, `stripe-limits`) and a GitHub chapter (`github-search`), all in `data/journey-api.ts`, and three tricks with one interview question each: `idempotency-keys`, `rate-limiting`, `ngram-index`. Now 27 tricks, 13 stories, 317 verified quotes (`verify:quotes`: 0 not found, 0 punctuation mismatches). The verifier's file list includes the new file. The tricks also got entries in `trick-extras.ts` (how, code, pitfalls), `trick-intros.ts`, `trick-keywords.ts`, `trick-reading.ts` (3 reading links, all fetched) and a Stripe intro in `site-overviews.ts`.
+
+The home page now opens with a one-time rise: heading, line, and four rows fade up in order (`.rise`, `--i` sets the order), then the green bar by the big number draws downward once when the number is chosen (`.featured-bar`). Only opacity and transform move, and reduced motion turns both off. Nothing loops.
+
+Checked: tsc, lint, build, screenshots of home, two trick pages and the Stripe story at 1280 and 390 wide, no sideways scroll. Not checked: the animation frame by frame (only that the end state renders).
+
+Learning checkpoint: why an idempotency key is a made-up ID the server stores a result against, why a rate limiter and a load shedder are different (one looks at a user, one at the whole system), and why a trigram index is a filter that still needs a real check afterwards. Possible note: `learning-notes/` on idempotency keys.
+
+---
+
+## Scroll drawings (2026-11-09)
+
+Two quiet effects that follow the scroll position, in CSS only (`app/globals.css`, section "Scroll drawings"; markup in `components/ui/ScrollShape.tsx`):
+
+1. A brighter line draws itself left to right along the rule above each section as it scrolls into view (`.section-title`, and `.draw-rule` on the folded basics sections). It uses `animation-timeline: view()`.
+2. Small outline shapes (cube, ring, diamond, triangle, square, plus) sit in the left and right margins of the long pages, each at a different height (`components/ui/MarginShapes.tsx`). Each one draws itself as it scrolls into view and turns a little as it passes, driven by its own view timeline (`view-timeline: --shape`, referenced by the path and the svg). Pages get 4 to 6 of them, in an order picked from the page's slug; hexagon-grid starts with the cube and consistent-hashing with the ring. Earlier versions were one small shape in the margin and then one huge faint one behind the text; the huge one looked bad, and scattered small ones work better.
+
+They only show from 1280px wide, where the margins have room (checked: no sideways scroll and no overlap with the text at 1280 and 1440px). Where the browser has no scroll-driven animations, or the reader has asked for reduced motion, the rules are plain hairlines and the shapes are fully drawn and still. Nothing runs while you are not scrolling.
+
+Three small touches were added to the same system. Quoted passages' blue bars grow from top to bottom as they scroll in (`.quote-bar`, opted into with `<DocQuoteList grow />` on the trick and basics pages only, because inside the site walks nothing scrolls and a bar could be stuck half-drawn). The margin shapes also drift, moving a little slower than the page, using the separate `translate` property so it does not fight their turning. And a "back to top" link (`components/ui/BackToTop.tsx`) fades in after the first fifth of the page, using opacity only; it works on phones too, and where scroll timelines are unsupported it simply stays visible.
+
+Testing tip: a scroll-driven animation's value is only right after the browser has painted a frame, so a test that reads computed styles straight after `scrollTo` sees stale numbers. Wait for two animation frames first.
+
+More shapes, reading focus and story taps. There are now 13 shape kinds (added hexagon, spiral, waves, chevrons, grid, asterisk, brackets) and a page gets 6 to 9 of them, spread evenly down its height and alternating sides, with the order picked from the page's slug and stepped by 5 so neighbours differ. Reading focus (`.focus-dim .read`, on the trick and basics pages): prose eases up to full brightness as it rises into view and eases down as it leaves the top; text in the upper part of the screen is never dimmed, and the floor is 60% so contrast stays above 4.5:1. And in the site walks on screens under 1024px, tapping the left third goes back and tapping the rest goes forward (`onTap` in `Journey.tsx`), but never when the tap lands on a link, button, answer, scrollable code, `summary` or `details`, or while text is selected, so nothing that already does something is hijacked. The bottom bar says "tap left / right" on small screens.
+
+Phones and tablets (under 1280px, where the margin shapes do not fit) got their own versions. A small shape sits at the right end of each section heading (`components/ui/SectionMark.tsx`, `.section-mark`), drawing and turning as the heading scrolls in, with room reserved in the heading so it never touches the text. A 2px reading-progress line runs along the top edge and fills as you scroll (`.read-progress`, in the root layout; informational, so it also shows with reduced motion). In the site walks on small screens the "next" button is hidden, since tapping the right side does the same job, but it is kept in the page for keyboard and screen-reader users and shows again while focused (`.walk-next`). And the diagram now sits above the narration on small screens (`order-first lg:order-none`): every step scrolls the walk back to the top, so with the diagram below the text you had to scroll down after each tap to see what changed.
+
+A cascade gotcha: custom CSS written outside any `@layer` (like `.btn`) beats Tailwind utilities, which live in a layer. `max-lg:sr-only` on a `.btn` therefore did nothing; the hiding rule had to be written as custom CSS with a higher-or-equal specificity selector.
+
+Smaller text in the site walks on small screens, to cut scrolling now that the diagram stays on screen above the text. Under 1024px the narration is 1.2rem (it was 1.5rem), quote and body text 1rem, question text 1.1rem, and the diagram frame has a shorter drawing (21% of the screen height, was 24%) and a 14px caption; from 1024px up nothing changes (`.walk-compact` in `app/globals.css`, `visual-frame.tsx`). Measured by walking eight sites in headless Edge at 390x844: steps that needed scrolling went from 59 of 281 (21%) to 40 (14%); at 360x740 from 88 (31%) to 76 (27%). Every narration, question and diagram step now fits without scrolling at 390x844. What is left is the source cards, which list every quote word for word (the worst overflowed by about 1,180px).
+
+Another cascade gotcha: a Tailwind `!important` utility (like `!text-[1.35rem]`) beats an unlayered `!important` rule, because important declarations reverse the layer order. To change such a size, change the utility (add `lg:` variants), not a custom override.
+
+A slow first tap on a phone. Report: on the deployed site, in a new browser, tapping a site highlighted it and nothing happened for about 4 seconds. The server is not slow (production pages are about 310 KB cold, 0.1 s on a normal connection); the delay is the navigation. Next only switches pages after the next page's data has arrived, and then loads the walk's code as a second request, one after the other. Measured with an empty cache on a throttled phone: on slow 3G a tap right after load took 1.9 s to open the walk; once the page had had time to prefetch, 0.2 s. Three changes: a `loading…` indicator next to any link while its page is fetched (`components/ui/LinkPending.tsx`, using `useLinkStatus`; it appeared about 110 ms after the tap in tests; on list rows, home doors and the trick page links); a quiet warm-up that downloads the walk's code when the home and sites pages are idle (`components/ui/WarmWalk.tsx`), which dropped the tap-at-once case on slow 3G to 0.87 s in one test; and the walk text 2px smaller on small screens again (narration 1.075rem, body 0.875rem, question 0.975rem, answers and diagram captions smaller, the green source link under each quote 0.75rem). Steady scroll counts on a phone: 12% of steps at 390x844 (35 of 281 before the source-link change, 34 after), 24% at 360x740.
+
+Test tip: in Git Bash, an argument starting with `/` (like `/trick/x`) is rewritten into a Windows path before node sees it. Set `MSYS_NO_PATHCONV=1` or the test silently loads nothing.
+
+**One deliberate exception to the motion rule in CLAUDE.md** ("only opacity and transform"): drawing a line in SVG animates `stroke-dashoffset`, which is neither. The turning and the rule scaling are transform only.
+
+How it was checked: in headless Edge, scrolling a trick page and reading the computed values: dash offset 1 at the top, 0.57 at 15%, 0 from 35%; rotation 0, 54, 126, about 216 and 360 degrees at the bottom; with reduced motion the shape stays at rotation 0, fully drawn.
+
+### 🧠 Learning checkpoint
+
+1. What a scroll timeline is: an animation whose progress is the scroll position instead of the clock, so it stops when you stop.
+2. Why `pathLength="1"` makes a path easy to draw: dash length 1 is the whole path, whatever its real length.
+3. Why a heading's own `view()` range was too short (about 40px) and had to be stretched with `cover 25%`.
+
+---
+
 ## Basics page, tricks filter, caching toy (2026-11-09)
 
 "The web, in general" left the sites list and became its own page, `/basics`, so the sites are all companies. A first version was one long scroll with only hidden answers, which was a wall of text. It now has clickable guess-first questions (`QuizCard`), a caching toy (`CacheToy`: pick a Cache-Control value and which cache holds the copy, drag the age, see what the cache does), and each section's quotes folded behind a button.
@@ -19,6 +70,18 @@ The tricks page has a one-line filter (`$ grep`). It matches every word you type
 3. How a caching toy can stay honest: it models only what MDN states and says so in its note.
 
 ---
+
+## Stories, links page, faster first tap (2026-11-09)
+
+"Sites" is now **stories** everywhere a reader sees it: header, home row, the list page's title and heading, the back and "other stories" links in the walks, and the buttons on the basics, links and trick pages. "Sites" was ambiguous (the whole thing is a website about websites) and "stories" matches how the walk works: you tap through one company's chapters. The URL is still `/journey`, so no links break; a later move to `/stories` would need a permanent redirect in `next.config.ts`. Mentions of "the site" that mean this website, or a company's own site, were left alone. Tricks keep their name. The "links" item moved from the header to the fourth row on the home page.
+
+Random big number on the home page (`components/ui/FeaturedTrick.tsx`, `featuredPool()` in `app/featured.ts`). The home page is pre-built, so the server cannot choose per visit; the browser picks a trick with a number once the page loads, and the block stays invisible until then (it keeps its place, so nothing jumps) and fades in once. The trick of the day is the server's choice and the fallback with JavaScript off (a `<noscript>` rule reveals it). It never shows the same trick twice in a row in a tab (sessionStorage). Tested in headless Edge: 24 fresh visits gave 14 different tricks, 20 reloads gave 0 immediate repeats, and the layout moved 4px while the block was still invisible. First version waited for `requestAnimationFrame` and never revealed in headless Edge; frames are also not delivered to background tabs, so a `setTimeout(0)` is used instead.
+
+Smaller type on phones, on every page (under 768px, `app/globals.css` plus `sm:` variants where sizes are set): reading text 19px to 16px, page body 16px to 15px, labels 13px to 12px, code 14px to 12px, page headings 30px to 24px, the home stat and hooks one step down. Measured at 390px: the trick page went from 7,585px to 6,533px tall, the basics page from 4,948px to 4,469px, the links page from 4,923px to 4,550px; the home page now fits one screen. From 640px up and on desktop nothing changed. The stories keep their own, smaller sizes because `.walk-compact` is more specific. "links" is back in the header as well as on the home page.
+
+New `/links` page (`data/links.ts`): company engineering blogs, browser and framework blogs, and reading lists, all checked to load, with each blog's feed read to see how often it posts. First-party blogs and third-party lists are kept in separate groups, and the page says the lists are for finding more, not sources.
+
+Slow first tap on a phone: a `loading…` indicator next to a link while its page is fetched (`LinkPending`, using `useLinkStatus`), a quiet warm-up of the story code when the home and list pages are idle (`WarmWalk`), and the story text 2px smaller on small screens. A cold load of a production page is about 310 KB; the dev server sends about three times as much, which is why "stuck on first load" is mostly a dev-server effect.
 
 ## Minimal home page (2026-11-09)
 
