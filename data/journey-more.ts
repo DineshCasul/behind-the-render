@@ -93,6 +93,16 @@ export const figmaMultiplayer: JourneyChapter = {
       href: FIGMA_MP,
     },
     {
+      text: "conflicting changes will sometimes “flicker” when older acknowledged values temporarily overwrite newer unacknowledged ones.",
+      source: "Figma Blog: How Figma’s multiplayer technology works",
+      href: FIGMA_MP,
+    },
+    {
+      text: "Since Figma isn't a text editor, we didn't need the power of OTs and could get away with something less complicated.",
+      source: "Figma Blog: How Figma’s multiplayer technology works",
+      href: FIGMA_MP,
+    },
+    {
       text: "So we want to discard incoming changes from the server that conflict with unacknowledged property changes.",
       source: "Figma Blog: How Figma’s multiplayer technology works",
       href: FIGMA_MP,
@@ -185,6 +195,11 @@ export const githubVirtual: JourneyChapter = {
       href: GH_CODE,
     },
     {
+      text: "our performance scaled badly with the number of lines in the file.",
+      source: "The GitHub Blog: Crafting a better, faster code view",
+      href: GH_CODE,
+    },
+    {
       text: "Remember that 27 second initial render? Virtualizing the file content gets that time down to under a second, and that number does not increase substantially even if we artificially remove our file size limit and pull in hundreds of megabytes of text.",
       source: "The GitHub Blog: Crafting a better, faster code view",
       href: GH_CODE,
@@ -233,7 +248,22 @@ export const githubInstant: JourneyChapter = {
       href: GH_ISSUES,
     },
     {
+      text: "we built a client-side caching layer backed by IndexedDB",
+      source: "The GitHub Blog: From latency to instant",
+      href: GH_ISSUES,
+    },
+    {
+      text: "Observed cache-hit ratio landed around one-third (~33%)",
+      source: "The GitHub Blog: From latency to instant",
+      href: GH_ISSUES,
+    },
+    {
       text: "The main tradeoff is controlled staleness.",
+      source: "The GitHub Blog: From latency to instant",
+      href: GH_ISSUES,
+    },
+    {
+      text: "We measured server/cache divergence at about 4.7% and treated that as an explicit operating envelope",
       source: "The GitHub Blog: From latency to instant",
       href: GH_ISSUES,
     },
@@ -278,6 +308,11 @@ export const facebookNavigation: JourneyChapter = {
     },
     {
       text: "This example is specific to desktop, but other heuristics can be used for touch devices.",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FB_REBUILD,
+    },
+    {
+      text: "This is much less jarring, and it mimics standard browser behavior.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
       href: FB_REBUILD,
     },
@@ -392,6 +427,26 @@ export const cloudflareRing: JourneyChapter = {
       href: CF_SHARD,
     },
     {
+      text: "They can crash, get rebooted, taken out for maintenance, or decommissioned.",
+      source: "Cloudflare Blog: Eliminating Cold Starts 2: shard and conquer",
+      href: CF_SHARD,
+    },
+    {
+      text: "When these events occur, the size of the hash table would change, necessitating a re-hashing of the whole table.",
+      source: "Cloudflare Blog: Eliminating Cold Starts 2: shard and conquer",
+      href: CF_SHARD,
+    },
+    {
+      text: "Instead of establishing a direct correspondence between script IDs and server addresses, we map them both to a number line whose end wraps around to its beginning, also known as a ring.",
+      source: "Cloudflare Blog: Eliminating Cold Starts 2: shard and conquer",
+      href: CF_SHARD,
+    },
+    {
+      text: "Next, we take the server address which comes directly on or after that position on the ring, and consider that the Worker’s home.",
+      source: "Cloudflare Blog: Eliminating Cold Starts 2: shard and conquer",
+      href: CF_SHARD,
+    },
+    {
       text: "Conversely, this means that the cold start rate went from 0.1% to 0.01% of requests, a 10x decrease.",
       source: "Cloudflare Blog: Eliminating Cold Starts 2: shard and conquer",
       href: CF_SHARD,
@@ -428,6 +483,11 @@ export const discordGc: JourneyChapter = {
     },
     {
       text: "…the spikes were huge not because of a massive amount of ready-to-free memory, but because the garbage collector needed to scan the entire LRU cache in order to determine if the memory was truly free from references.",
+      source: "Discord Blog: Why Discord is switching from Go to Rust",
+      href: DISCORD_RUST,
+    },
+    {
+      text: "…Go will force a garbage collection run every 2 minutes at minimum.",
       source: "Discord Blog: Why Discord is switching from Go to Rust",
       href: DISCORD_RUST,
     },

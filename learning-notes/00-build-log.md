@@ -2,6 +2,14 @@
 
 Newest first. Each entry says what changed and what to understand after it.
 
+## Accuracy review of all 27 tricks (2026-11-09)
+
+Each trick was read against the verified quotes of its chapters, and every claim that no quote covered was checked against the live source page. Result: no quote was wrong (335 verified, 0 not found, 0 mismatches) but several sentences of narration went past what the quotes said. Fixed: 18 quotes added for true-but-unquoted claims (jQuery usage metrics, the 2-minute Go GC, Cloudflare's ring lookup, Notion's dark reads, Figma's flicker, GitHub's IndexedDB and 4.7% divergence, Facebook's "much less jarring", and others); a wrong "two tricks" line in the GitHub search chapter (the source's second decision is the delta-encoded tree, consistency is a separate promise); the 76% figure no longer presented as the result of batching alone; two stats that were not numbers in a quote (`many -> 1`, `N -> 1`) replaced; a provenance note removed from the canvas answer; several answers given the caveat or cost their source names (Wikimedia's 1% on-disk hit rate, Hypernova's TTFB cost).
+
+Learning checkpoint: a quote proves a sentence exists, it does not prove the sentence next to it. The check that matters is "which quote supports this clause?"
+
+---
+
 ## Stripe story, three new tricks, home opening (2026-11-09)
 
 Added a Stripe story (`stripe-idempotency`, `stripe-limits`) and a GitHub chapter (`github-search`), all in `data/journey-api.ts`, and three tricks with one interview question each: `idempotency-keys`, `rate-limiting`, `ngram-index`. Now 27 tricks, 13 stories, 317 verified quotes (`verify:quotes`: 0 not found, 0 punctuation mismatches). The verifier's file list includes the new file. The tricks also got entries in `trick-extras.ts` (how, code, pitfalls), `trick-intros.ts`, `trick-keywords.ts`, `trick-reading.ts` (3 reading links, all fetched) and a Stripe intro in `site-overviews.ts`.

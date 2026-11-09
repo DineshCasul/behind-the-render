@@ -308,7 +308,7 @@ const youtubeWaterfall: JourneyChapter = {
     "A waterfall is requests that wait on each other: one finishes, the next starts, and the user waits through all of them.",
     "To cut them, the team determined the minimal set of components needed in a view and batched them in a single network request.",
     "They also moved the player to one top-level component that passes data down to its children.",
-    "The result: 76% of YouTube's mobile website URLs now passing Core Web Vitals thresholds, in the field. On real phones, not on a developer's laptop.",
+    "The case study's overall result, for all of YouTube's performance work and not for this fix alone: 76% of mobile website URLs now passing Core Web Vitals thresholds, in the field.",
   ],
   docs: [
     {
@@ -514,7 +514,7 @@ const twitterMemory: JourneyChapter = {
   lines: [
     "A service worker script caches additional resources, enabling fast navigation to other screens.",
     "The numbers Twitter reported: a 65% increase in pages per session, and a 75% increase in Tweets sent.",
-    "Faster screens, more of them, more Tweets. That is the whole argument for caring about this stuff.",
+    "Those are the results for Twitter Lite as a whole, not for the service worker alone. Still, it is the sort of thing a fast app buys you.",
   ],
   docs: [
     {
@@ -630,6 +630,11 @@ const facebookTiers: JourneyChapter = {
     },
     {
       text: "Tier 3 includes everything that is only needed after display",
+      source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
+      href: FACEBOOK_REBUILD,
+    },
+    {
+      text: "everything that is only needed after display that doesn’t affect the current pixels on the screen, including logging code and subscriptions for live-updating data.",
       source: "Engineering at Meta: Rebuilding our tech stack for the new Facebook.com",
       href: FACEBOOK_REBUILD,
     },
@@ -789,6 +794,11 @@ const githubSlowBurn: JourneyChapter = {
   docs: [
     {
       text: "…eslint-plugin-jquery which would fail CI checks if anyone tried to use jQuery features…",
+      source: "The GitHub Blog: Removing jQuery from GitHub.com frontend",
+      href: GITHUB_JQUERY,
+    },
+    {
+      text: "Set up metrics that tracked ratio of jQuery calls used per overall line of code and monitored that graph over time to make sure that it’s either staying constant or going down, not up.",
       source: "The GitHub Blog: Removing jQuery from GitHub.com frontend",
       href: GITHUB_JQUERY,
     },

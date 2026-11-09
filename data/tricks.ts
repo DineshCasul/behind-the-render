@@ -41,7 +41,7 @@ export const tricks: Trick[] = [
     group: "faster",
     title: "Batch the Requests",
     hook: "Ten requests that wait on each other are ten waits.",
-    stat: { value: "many → 1", label: "network requests for one view, once they are batched" },
+    stat: { value: "1 request", label: "a single network request for the minimal set of components a view needs" },
     idea: [
       "A waterfall is requests that wait on each other: one finishes, the next starts, and the user waits through all of them.",
       "YouTube's web team cut them by working out the minimal set of components a view needs, and batching them in a single network request.",
@@ -117,7 +117,7 @@ export const tricks: Trick[] = [
     related: ["webassembly"],
     question: {
       q: "What do you give up when you render your UI to a canvas instead of HTML elements?",
-      a: "Anything that relied on the page's structure. A canvas is a drawing surface, so there is no tree of elements for the browser, extensions or assistive technology to read unless you provide one (that part is general web knowledge, not from Google's post). Google said extensions relying on how a Google Doc is structured might stop working as intended after the move, and that screen reader compatibility would not be impacted. Accessibility on a canvas is work you do on purpose.",
+      a: "Anything that relied on the page's structure. A canvas is a drawing surface, so there is no tree of elements for the browser, extensions or assistive technology to read unless you provide one. Google said extensions relying on how a Google Doc is structured might stop working as intended after the move, and that screen reader compatibility would not be impacted. Accessibility on a canvas is work you do on purpose.",
       followUps: [
         "How would you make a canvas app accessible?",
         "How do you know which shape the user clicked?",
@@ -139,7 +139,7 @@ export const tricks: Trick[] = [
     related: ["canvas-rendering"],
     question: {
       q: "Why was Figma's load time better with WebAssembly than with asm.js?",
-      a: "Figma's post says the format was designed to be as fast as possible for the browser to parse, and reports a load time more than 3x better after the switch, regardless of document size. A takeaway for an interview: measure load time separately from steady-state speed, because a format can win at startup.",
+      a: "Figma's post says the format was designed to be as fast as possible for the browser to parse, that WebAssembly parses around 20x faster than asm.js, and that it is trivial for browsers to cache the translation to native code. It reports a load time more than 3x better after the switch, regardless of document size. A takeaway for an interview: measure load time separately from steady-state speed, because a format can win at startup.",
       followUps: [
         "What kind of work benefits from WebAssembly, and what does not?",
         "What does a call between JavaScript and the module cost?",
@@ -160,7 +160,7 @@ export const tricks: Trick[] = [
     related: [],
     question: {
       q: "What's the trade-off of putting server rendering in its own service?",
-      a: "The web app makes an extra HTTP request to the renderer for every server-rendered page, and you now run and scale one more service. In exchange, rendering is separated from the main app. The request and response shape is what Hypernova describes: your server submits an HTTP request to a Hypernova server, which sends back HTML.",
+      a: "The web app makes an extra HTTP request to the renderer for every server-rendered page, and you now run and scale one more service. The README names the cost that matters most: generating pages on the server takes time, which can increase your page's TTFB. In exchange, rendering is separated from the main app. The request and response shape is what Hypernova describes: your server submits an HTTP request to a Hypernova server, which sends back HTML.",
       followUps: [
         "What is a hydration mismatch, and how would you cause one?",
         "What does server rendering cost on every request, and how would you reduce it?",
@@ -176,7 +176,7 @@ export const tricks: Trick[] = [
     stat: { value: "600KB vs 23.5MB", label: "the web app against the Android install" },
     idea: [
       "Twitter described its PWA as only 600KB over the wire, against 23.5MB of downloaded data needed to install the native Android app. A service worker script caches additional resources, enabling fast navigation to other screens.",
-      "It reported a 65% increase in pages per session and a 75% increase in Tweets sent.",
+      "For the app as a whole, it reported a 65% increase in pages per session and a 75% increase in Tweets sent.",
     ],
     chapters: ["twitter-weight", "twitter-memory"],
     related: ["request-batching", "field-data"],
@@ -248,7 +248,7 @@ export const tricks: Trick[] = [
     related: ["service-worker-cache"],
     question: {
       q: "Why would a cache have both a RAM layer and a disk layer?",
-      a: "RAM is fast but small, and disk is slower but holds much more, so a request that misses the fast layer can still be answered by the big one instead of reaching the origin. Wikimedia's post describes each cache node running one in-memory and one on-disk Varnish instance.",
+      a: "RAM is fast but small, and disk is slower but holds much more, so a request that misses the fast layer can still be answered by the big one instead of reaching the origin. Wikimedia's post describes each cache node running one in-memory and one on-disk Varnish instance. A later post in the series is a useful caveat: it says the hit rate on the remote on-disk Varnish instances was very low, around 1%, and that it moved to Apache Traffic Server for on-disk caching.",
       followUps: [
         "How do you invalidate a copy that sits in several layers?",
         "Why not one big cache?",
@@ -445,7 +445,7 @@ export const tricks: Trick[] = [
     group: "scale",
     title: "Stop the Stampede",
     hook: "A thousand requests for one cold page should cost one request.",
-    stat: { value: "N → 1", label: "origin requests for one cold object" },
+    stat: { value: "1 request", label: "sent to the application while every other client is put on hold" },
     idea: [
       "When many clients ask for the same page at the same moment and it isn't cached yet, a naive cache treats each request independently and sends them all to the application servers. For popular content the load can overwhelm the application.",
       "The better approach, as Wikimedia describes it: notice they are the same object, send one request to the application while putting all clients on hold, cache the object, and send the same response to everyone.",
@@ -481,7 +481,7 @@ export const tricks: Trick[] = [
     related: ["hexagon-grid", "partition-key"],
     question: {
       q: "Why use consistent hashing instead of hash(key) % number_of_servers?",
-      a: "With a plain modulo, changing the number of servers changes the answer for almost every key, so almost everything moves. Cloudflare's post describes the ring: when a server is added, only the Workers lying before it get re-homed.",
+      a: "With a plain modulo, changing the number of servers changes the answer for almost every key, so almost everything moves. Cloudflare describes the same trouble with a hash table from script IDs to server addresses: servers crash, get rebooted and decommissioned, the table changes size, and the whole table has to be re-hashed. On its ring, when a server is added, only the Workers lying before it get re-homed.",
       followUps: [
         "What happens to the keys on a server that fails?",
         "Why do real rings give each server many points?",

@@ -110,9 +110,10 @@ export const githubSearch: JourneyChapter = {
     "GitHub built its own search engine for code, from scratch, in Rust. It is called Blackbird. The general text search products it tried were a poor experience, slow to index and expensive to host.",
     "Code is not prose. People search for punctuation, they do not want stemming, they do not want stop words stripped, and they want regular expressions.",
     "The obvious answer is to just use grep. Ripgrep manages about 0.6 GB per second per core. On 115 TB, even with perfect parallelism, 2,048 cores would be busy for 96 seconds. One query at a time.",
-    "So: build an index. A trigram index, the kind of inverted index that looks up substrings. Every three-character slice of every document points to a sorted list of the documents that contain it.",
+    "So: build an index. An ngram index, the kind of inverted index that looks up substrings. GitHub's example uses n=3, trigrams: every three-character slice of a document points to a sorted list of the documents that contain it.",
     "To search, look up the slices of your query and intersect the lists. The lists are too big for memory, so they are read lazily, only far enough to produce the requested number of results.",
-    "Indexing it all needed two tricks. Shard by Git blob object ID, which spreads documents evenly and avoids duplicates. And keep results consistent per commit, so a push in progress never shows up half done.",
+    "Building the index fast leaned on two facts: Git hashes content, and a lot of content on GitHub is duplicated. So it shards by Git blob object ID, which spreads documents evenly and avoids duplicates, and models the index as a tree with delta encoding.",
+    "One more promise: results are consistent per commit, so a push in progress never shows up half done.",
   ],
   docs: [
     { text: "The short answer is that we built our own search engine from scratch, in Rust, specifically for the domain of code search.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
@@ -124,7 +125,9 @@ export const githubSearch: JourneyChapter = {
     { text: "For code search, we need a special type of inverted index called an ngram index, which is useful for looking up substrings of content.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
     { text: "To perform a search, we intersect the results of multiple lookups to give us the list of documents where the string appears.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
     { text: "That way we never have to keep entire posting lists in memory.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
+    { text: "Git’s use of content addressable hashing and the fact that there’s actually quite a lot of duplicate content on GitHub.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
     { text: "Shard by Git blob object ID which gives us a nice way of evenly distributing documents between the shards while avoiding any duplication.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
+    { text: "Model the index as a tree and use delta encoding to reduce the amount of crawling and to optimize the metadata in our index.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
     { text: "If you search a repository while your teammate is pushing code, your results shouldn’t include documents from the new commit until it has been fully processed by the system.", source: "GitHub Blog: The technology behind GitHub’s new code search", href: GITHUB_SEARCH },
   ],
 };

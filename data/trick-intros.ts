@@ -16,7 +16,7 @@ export const trickIntros: Record<string, string> = {
     "Your Lighthouse score says 98. Your users say the page loads like it is being delivered by pigeon. Both can be true, because one is a test on your fast laptop and the other is real people on real phones. YouTube's web team went and looked at the real numbers, and found some watch pages taking 4 to 6 seconds to show their biggest thing.",
 
   "adaptive-bitrate":
-    "A video player is supposed to pick the best quality your internet can handle. But your internet is not the only thing that can choke. A phone can also be too weak to play a high resolution smoothly. YouTube noticed its player would cheerfully pick a resolution a device could not handle, and then fixed that. The result is a rare win: fewer stalls, almost no loss in sharpness.",
+    "A video player is supposed to pick the best quality your internet can handle. But your internet is not the only thing that can choke. A device can also be too weak to play a high resolution smoothly. YouTube noticed its player would cheerfully pick a resolution a device could not handle, and then fixed that. The result is a rare win: fewer stalls, almost no loss in sharpness.",
 
   "canvas-rendering":
     "Almost every web page you have ever seen is built from HTML elements. Google Docs looked at that and moved to painting the document onto a canvas instead, which is closer to drawing a page than building one. Google said the goal was performance and consistency across platforms. It also came with a bill, and the bill is the interesting bit.",
@@ -70,7 +70,7 @@ export const trickIntros: Record<string, string> = {
     "Say you have a bunch of servers and a pile of work, and each piece of work should always go to the same server. The obvious way breaks the moment a server joins or dies, because suddenly almost everything has to move. Uber, Cloudflare and Wikimedia all use hashing like this to avoid that. Cloudflare used a ring to send each request to a server that already had the code loaded, and its cold start rate went from 0.1% to 0.01%.",
 
   "cache-vs-gc":
-    "Discord had a Go service that was fast most of the time, and then every few minutes, bang, a latency spike. The culprit was not what you would guess. It was the cache, or more exactly the garbage collector having to scan the whole thing. Discord's eventual fix was rewriting the service in Rust, which is the nuclear option, and it worked.",
+    "Discord had a Go service that was fast most of the time, and then roughly every two minutes, bang, a latency spike. The culprit was not what you would guess. It was the cache, or more exactly the garbage collector having to scan the whole thing. Discord's eventual fix was rewriting the service in Rust, which is the nuclear option, and it worked.",
 
   "hot-partition":
     "Discord splits its messages up by channel. Sounds fine, until you remember that a small group of friends and a server with hundreds of thousands of people are not remotely the same size. Discord found that one very busy channel could slow down its whole database cluster, and moving to a new database did not make the problem go away.",
@@ -85,7 +85,7 @@ export const trickIntros: Record<string, string> = {
     "If you run an API, someone will eventually send it far too many requests, usually by accident, with a script that got out of hand. Stripe's answer is not one limiter but four, and the last one only wakes up when things are already going wrong. Two of them look at the user. The other two look at the health of the whole system.",
 
   "ngram-index":
-    "Why not just use grep? GitHub gets asked this a lot, so it did the napkin math, and the answer is a number of cores and a number of seconds that nobody wants to put on an infrastructure bill. The fix is a classic: do the work ahead of time. The twist is that the thing you index is not words. It is every three-letter slice of every file.",
+    "Why not just use grep? GitHub gets asked this a lot, so it did the napkin math, and the answer is a number of cores and a number of seconds that nobody wants to put on an infrastructure bill. The fix is a classic: do the work ahead of time. The twist is that the thing you index is not words. It is every short slice of every file, three letters long in GitHub's example.",
 
   "ownership-reasons":
     "Notion lets you keep pages available offline. That is simple until a page can be offline for more than one reason: you switched it on, it was downloaded automatically, or its parent page is offline. Notion's first design, a plain set of pages to keep, broke right there. Switch off one reason and the page gets removed, even though something else still needs it.",
